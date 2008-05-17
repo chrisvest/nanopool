@@ -7,6 +7,8 @@ import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.DataSourceSupport;
 import net.nanopool.Log;
+import net.nanopool2.cas.CasArray;
+import net.nanopool2.cas.StrongAtomicCasArray;
 
 public abstract class PoolingDataSourceSupport extends DataSourceSupport {
     protected final ConnectionPoolDataSource source;
@@ -35,5 +37,14 @@ public abstract class PoolingDataSourceSupport extends DataSourceSupport {
 
     public void setLoginTimeout(int seconds) throws SQLException {
         source.setLoginTimeout(seconds);
+    }
+    
+    protected void handleContention() throws SQLException {
+        log.warn("Contention warning for the %s connection pool.", this);
+        Thread.yield();
+    }
+
+    protected CasArray<Connector> newCasArray(int poolSize) {
+        return new StrongAtomicCasArray<Connector>(poolSize);
     }
 }

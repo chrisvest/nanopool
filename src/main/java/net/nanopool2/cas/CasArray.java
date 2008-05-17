@@ -1,4 +1,4 @@
-package net.nanopool2;
+package net.nanopool2.cas;
 
 public interface CasArray<T> {
     boolean cas(int idx, T newValue, T oldValue);

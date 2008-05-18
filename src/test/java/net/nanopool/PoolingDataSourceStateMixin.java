@@ -2,17 +2,17 @@ package net.nanopool;
 
 import javax.sql.DataSource;
 
+import net.nanopool2.NanoPoolDataSource;
+
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 
 public class PoolingDataSourceStateMixin implements DataSourceState {
 	protected int totalSize;
 	protected long timeout;
-	protected Log log;
 
-	public PoolingDataSourceStateMixin(int totalSize, long timeout, Log log) {
+	public PoolingDataSourceStateMixin(int totalSize, long timeout) {
 		this.totalSize = totalSize;
 		this.timeout = timeout;
-		this.log = log;
 	}
 	
 	public DataSource createSource() {
@@ -21,7 +21,7 @@ public class PoolingDataSourceStateMixin implements DataSourceState {
 		cpds.setUser("root");
 		cpds.setPassword("");
 		cpds.setServerName("localhost");
-		return new PoolingDataSource(cpds, totalSize , timeout, log);
+		return new NanoPoolDataSource(cpds, totalSize , timeout);
 	}
 
 }

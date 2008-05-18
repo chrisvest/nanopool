@@ -2,7 +2,7 @@ package net.nanopool;
 
 import javax.sql.DataSource;
 
-import net.nanopool2.NanoPoolDataSource;
+import net.nanopool.NanoPoolDataSource;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 

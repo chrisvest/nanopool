@@ -1,4 +1,4 @@
-package net.nanopool2;
+package net.nanopool;
 
 public class DefaultContentionHandler implements ContentionHandler {
     

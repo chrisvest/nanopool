@@ -1,4 +1,4 @@
-package net.nanopool2;
+package net.nanopool;
 
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
-import net.nanopool2.cas.CasArray;
+import net.nanopool.cas.CasArray;
 
 public abstract class PoolingDataSourceSupport implements DataSource {
     protected final ConnectionPoolDataSource source;

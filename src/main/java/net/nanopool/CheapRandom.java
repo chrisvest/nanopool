@@ -1,4 +1,4 @@
-package net.nanopool2;
+package net.nanopool;
 
 public final class CheapRandom {
 	private int prevRandom;

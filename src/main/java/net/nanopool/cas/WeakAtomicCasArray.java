@@ -1,4 +1,4 @@
-package net.nanopool2.cas;
+package net.nanopool.cas;
 
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
@@ -12,5 +12,4 @@ public class WeakAtomicCasArray<T> extends AtomicCasArraySupport<T> {
             T oldValue) {
         return array.weakCompareAndSet(idx, oldValue, newValue);
     }
-    
 }

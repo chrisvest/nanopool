@@ -1,4 +1,4 @@
-package net.nanopool2;
+package net.nanopool;
 
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;

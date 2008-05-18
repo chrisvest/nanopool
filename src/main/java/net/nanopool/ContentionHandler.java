@@ -1,4 +1,4 @@
-package net.nanopool2;
+package net.nanopool;
 
 public interface ContentionHandler {
     void handleContention();

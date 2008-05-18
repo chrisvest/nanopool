@@ -1,12 +1,12 @@
-package net.nanopool2;
+package net.nanopool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.ConnectionPoolDataSource;
 
-import net.nanopool2.cas.CasArray;
-import net.nanopool2.cas.StrongAtomicCasArray;
+import net.nanopool.cas.CasArray;
+import net.nanopool.cas.StrongAtomicCasArray;
 
 public class NanoPoolDataSource extends PoolingDataSourceSupport {
     private final CheapRandom rand;

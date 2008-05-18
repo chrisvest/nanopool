@@ -18,6 +18,10 @@ public abstract class AtomicCasArraySupport<T> implements CasArray<T> {
         return array.get(idx);
     }
     
+    public int length() {
+        return array.length();
+    }
+    
     protected abstract boolean doCas(AtomicReferenceArray<T> array, int idx,
             T newValue, T oldValue);
 }

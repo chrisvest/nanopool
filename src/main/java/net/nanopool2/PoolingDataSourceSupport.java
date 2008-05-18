@@ -4,23 +4,27 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
 
-import net.nanopool.DataSourceSupport;
-import net.nanopool.Log;
 import net.nanopool2.cas.CasArray;
-import net.nanopool2.cas.StrongAtomicCasArray;
 
-public abstract class PoolingDataSourceSupport extends DataSourceSupport {
+public abstract class PoolingDataSourceSupport implements DataSource {
     protected final ConnectionPoolDataSource source;
     protected final int poolSize;
     protected final long timeToLive;
+    protected final Connector ticket;
+    protected final CasArray<Connector> connectors;
+    protected final ContentionHandler contentionHandler;
 
     public PoolingDataSourceSupport(ConnectionPoolDataSource source,
-            int poolSize, long timeToLive, Log log) {
-        super(log);
+            CasArray<Connector> connectors, long timeToLive, 
+            ContentionHandler contentionHandler) {
         this.source = source;
-        this.poolSize = poolSize;
+        this.poolSize = connectors.length();
         this.timeToLive = timeToLive;
+        this.ticket = new Connector();
+        this.connectors = connectors;
+        this.contentionHandler = contentionHandler;
     }
 
     public PrintWriter getLogWriter() throws SQLException {
@@ -37,14 +41,5 @@ public abstract class PoolingDataSourceSupport extends DataSourceSupport {
 
     public void setLoginTimeout(int seconds) throws SQLException {
         source.setLoginTimeout(seconds);
-    }
-    
-    protected void handleContention() throws SQLException {
-        log.warn("Contention warning for the %s connection pool.", this);
-        Thread.yield();
-    }
-
-    protected CasArray<Connector> newCasArray(int poolSize) {
-        return new StrongAtomicCasArray<Connector>(poolSize);
     }
 }

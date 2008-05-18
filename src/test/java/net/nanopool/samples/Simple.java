@@ -7,8 +7,7 @@ import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import net.nanopool.SysErrLog;
-import net.nanopool2.PoolingDataSource;
+import net.nanopool2.NanoPoolDataSource;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 
@@ -23,14 +22,18 @@ public class Simple {
         source.setPassword("");
         
         System.out.println("Creating connection pool");
-        DataSource pds = new PoolingDataSource(source, 10, 300000, new SysErrLog());
+        DataSource pds = new NanoPoolDataSource(source, 10, 300000);
+        
         System.out.println("Getting new connection");
         Connection con = pds.getConnection();
+        
         try {
             System.out.println("Creating statement");
             Statement st = con.createStatement();
+            
             System.out.println("Executing query");
             ResultSet rs = st.executeQuery("select now()");
+            
             if (rs.next()) {
                 System.out.println(rs.getString(1));
             }
@@ -39,5 +42,4 @@ public class Simple {
             con.close();
         }
     }
-    
 }

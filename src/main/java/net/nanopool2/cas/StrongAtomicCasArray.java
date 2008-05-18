@@ -12,5 +12,4 @@ public class StrongAtomicCasArray<T> extends AtomicCasArraySupport<T> {
             T oldValue) {
         return array.compareAndSet(idx, oldValue, newValue);
     }
-    
 }

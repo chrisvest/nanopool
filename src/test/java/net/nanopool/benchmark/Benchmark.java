@@ -31,10 +31,10 @@ public class Benchmark {
         try {
             runTestSet(50, 20);
         System.out.println("------Warmup's over-------------");
-            runTestSet(50, 20);
-            runTestSet(50, 30);
-            runTestSet(50, 40);
-            runTestSet(50, 50);
+            for (int connections = 20; connections < 50; connections++) {
+                runTestSet(50, connections);
+                System.out.println(" --+--");
+            }
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
@@ -87,7 +87,7 @@ public class Benchmark {
         int poolSize = casArray.length();
         String casArrayImplName = casArray.getClass().getSimpleName();
         double throughput = (double)totalThroughPut / 60.0;
-        System.out.printf("%s (%s threads, %s connections) : %s con/sec.",
+        System.out.printf("%s (%s threads, %s connections) : %s con/sec.\n",
                 casArrayImplName, threads, poolSize, throughput);
     }
     

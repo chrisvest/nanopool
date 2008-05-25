@@ -10,15 +10,15 @@ public abstract class AtomicCasArraySupport<T> implements CasArray<T> {
         array = new AtomicReferenceArray<T>(size);
     }
     
-    public boolean cas(int idx, T newValue, T oldValue) {
+    public final boolean cas(int idx, T newValue, T oldValue) {
         return doCas(array, idx, newValue, oldValue);
     }
 
-    public T get(int idx) {
+    public final T get(int idx) {
         return array.get(idx);
     }
     
-    public int length() {
+    public final int length() {
         return array.length();
     }
     

@@ -30,11 +30,8 @@ public class Connector {
     
     public Connection getConnection() throws SQLException {
         long now = System.currentTimeMillis();
-        if (deadTime < now) {
-            PooledConnection con = connection;
-            connection = null;
-            con.close();
-        }
+        if (deadTime < now)
+            connection = toClosed(connection);
         if (connection == null) {
             connection = source.getPooledConnection();
             connection.addConnectionEventListener(new ConnectionListener(this));
@@ -50,5 +47,11 @@ public class Connector {
     
     public void invalidate() {
         connection = null;
+    }
+
+    private PooledConnection toClosed(PooledConnection con) throws SQLException {
+        if (con != null)
+            con.close();
+        return null;
     }
 }

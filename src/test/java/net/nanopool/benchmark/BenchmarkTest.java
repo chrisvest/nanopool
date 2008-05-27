@@ -28,12 +28,20 @@ public class BenchmarkTest {
     
     public static void main(String[] args) {
         System.out.println("--------------------------------");
+        System.out.println("  thr = thread");
+        System.out.println("  con = connection");
+        System.out.println("  cyc = connect-query-close cycle");
+        System.out.println("  tot = total");
+        System.out.println("  sec = a second");
+        System.out.println("--------------------------------");
         try {
             runTestSet(50, 20);
+            runTestSet(2, 1);
         System.out.println("------Warmup's over-------------");
-            for (int connections = 10; connections <= 20; connections++) {
-                runTestSet(connections * 2, connections);
-                System.out.println(" --+--");
+            for (int connections = 1; connections <= 10; connections++) {
+                runTestSet(connections, connections);
+//                runTestSet(connections * 2, connections);
+//                System.out.println(" --+--");
             }
         } catch (InterruptedException ex) {
             ex.printStackTrace();
@@ -89,8 +97,8 @@ public class BenchmarkTest {
         double totalThroughput = sumThroughPut / 60.0;
         double throughputPerThread = totalThroughput / threads;
         double throughputPerConnection = totalThroughput / poolSize;
-        System.out.printf("%s th, %s con: " +
-        		"%s cyc/sec total, %s cyc/sec/th, %s cyc/sec/con == %s\n",
+        System.out.printf("%s thrs, %s cons: " +
+        		"%.2f cyc/sec/tot, %.2f cyc/sec/thr, %.2f cyc/sec/con | %s\n",
                 threads, poolSize, totalThroughput,
                 throughputPerThread, throughputPerConnection,
                 casArrayImplName);

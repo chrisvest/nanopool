@@ -23,7 +23,7 @@ public class FsmMixin {
             if (idx == poolSize)
                 idx = 0;
             Connector con = connectors.get(idx);
-            if (con != ticket) {
+            while (con != ticket) {
                 // we might have gotten one
                 if (connectors.cas(idx, ticket, con)) { // reserve it
                     if (con == null) {
@@ -31,6 +31,7 @@ public class FsmMixin {
                     }
                     return con.getConnection();
                 }
+                con = connectors.get(idx);
             }
             ++idx;
             if (idx == start)

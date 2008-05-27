@@ -29,29 +29,30 @@ public class Connector {
     }
     
     public Connection getConnection() throws SQLException {
-        long now = System.currentTimeMillis();
-        if (deadTime < now)
-            connection = toClosed(connection);
+        if (deadTime < System.currentTimeMillis())
+            invalidate();
         if (connection == null) {
             connection = source.getPooledConnection();
             connection.addConnectionEventListener(new ConnectionListener(this));
-            deadTime = now + timeToLive;
+            deadTime = System.currentTimeMillis() + timeToLive;
         }
         return connection.getConnection();
     }
     
-    public void returnToPool() {
+    public void returnToPool() throws SQLException {
+        if (deadTime < System.currentTimeMillis())
+            invalidate();
         Connector ticket = connectors.get(idx);
         connectors.cas(idx, this, ticket);
     }
     
-    public void invalidate() {
-        connection = null;
-    }
-
-    private PooledConnection toClosed(PooledConnection con) throws SQLException {
-        if (con != null)
-            con.close();
-        return null;
+    public void invalidate() throws SQLException {
+        if (connection == null)
+            return;
+        try {
+            connection.close();
+        } finally {
+            connection = null;
+        }
     }
 }

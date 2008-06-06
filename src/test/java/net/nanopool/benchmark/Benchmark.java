@@ -20,7 +20,7 @@ import net.nanopool.cas.WeakAtomicCasArray;
 import net.nanopool.cas.WeakStripedAtomicCasArray;
 import org.junit.Test;
 
-public class BenchmarkTest {
+public class Benchmark {
     @Test
     public void executeBenchmark() {
         main(null);

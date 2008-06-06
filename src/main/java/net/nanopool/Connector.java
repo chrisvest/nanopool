@@ -2,6 +2,7 @@ package net.nanopool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
@@ -15,6 +16,12 @@ public class Connector {
     private final long timeToLive;
     private PooledConnection connection;
     private long deadTime;
+    
+    /**
+     * Used for asserting that we're not producing multiple leases for the
+     * same connection.
+     */
+    private final AtomicInteger leaseCount = new AtomicInteger();
     
     public Connector(ConnectionPoolDataSource source,
             CasArray<Connector> connectors, int idx, long timeToLive) {
@@ -36,6 +43,7 @@ public class Connector {
             connection.addConnectionEventListener(new ConnectionListener(this));
             deadTime = System.currentTimeMillis() + timeToLive;
         }
+        assert leaseCount.incrementAndGet() == 1;
         return connection.getConnection();
     }
     
@@ -43,6 +51,7 @@ public class Connector {
         if (deadTime < System.currentTimeMillis())
             invalidate();
         Connector ticket = connectors.get(idx);
+        assert leaseCount.decrementAndGet() == 0;
         connectors.cas(idx, this, ticket);
     }
     

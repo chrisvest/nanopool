@@ -28,12 +28,20 @@ public class Benchmark {
     
     public static void main(String[] args) {
         System.out.println("--------------------------------");
+        System.out.println("  thr = thread");
+        System.out.println("  con = connection");
+        System.out.println("  cyc = connect-query-close cycle");
+        System.out.println("  tot = total");
+        System.out.println("  sec = a second");
+        System.out.println("--------------------------------");
         try {
             runTestSet(50, 20);
+            runTestSet(2, 1);
         System.out.println("------Warmup's over-------------");
-            for (int connections = 20; connections < 50; connections++) {
-                runTestSet(50, connections);
-                System.out.println(" --+--");
+            for (int connections = 1; connections <= 10; connections++) {
+                runTestSet(connections, connections);
+//                runTestSet(connections * 2, connections);
+//                System.out.println(" --+--");
             }
         } catch (InterruptedException ex) {
             ex.printStackTrace();
@@ -42,10 +50,10 @@ public class Benchmark {
     }
     
     private static void runTestSet(int threads, int poolSize) throws InterruptedException {
-        benchmark(threads, new StrongAtomicCasArray(poolSize));
-        benchmark(threads, new WeakAtomicCasArray(poolSize));
+//        benchmark(threads, new StrongAtomicCasArray(poolSize));
+//        benchmark(threads, new WeakAtomicCasArray(poolSize));
         benchmark(threads, new StrongStripedAtomicCasArray(poolSize));
-        benchmark(threads, new WeakStripedAtomicCasArray(poolSize));
+//        benchmark(threads, new WeakStripedAtomicCasArray(poolSize));
     }
 
     private static ConnectionPoolDataSource newCpds() {
@@ -80,15 +88,20 @@ public class Benchmark {
         }
         executor.shutdownNow();
         executor.awaitTermination(60, TimeUnit.SECONDS);
-        long totalThroughPut = 0;
+        long sumThroughPut = 0;
         for (Worker worker : workers) {
-            totalThroughPut += worker.hits;
+            sumThroughPut += worker.hits;
         }
         int poolSize = casArray.length();
         String casArrayImplName = casArray.getClass().getSimpleName();
-        double throughput = (double)totalThroughPut / 60.0;
-        System.out.printf("%s (%s threads, %s connections) : %s con/sec.\n",
-                casArrayImplName, threads, poolSize, throughput);
+        double totalThroughput = sumThroughPut / 60.0;
+        double throughputPerThread = totalThroughput / threads;
+        double throughputPerConnection = totalThroughput / poolSize;
+        System.out.printf("%s thrs, %s cons: " +
+        		"%.2f cyc/sec/tot, %.2f cyc/sec/thr, %.2f cyc/sec/con | %s\n",
+                threads, poolSize, totalThroughput,
+                throughputPerThread, throughputPerConnection,
+                casArrayImplName);
     }
     
     private static class Worker implements Runnable {

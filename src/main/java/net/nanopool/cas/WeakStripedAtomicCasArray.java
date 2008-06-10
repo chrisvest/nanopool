@@ -6,19 +6,18 @@
 package net.nanopool.cas;
 
 import java.util.concurrent.atomic.AtomicReference;
-import net.nanopool.Connector;
 
 /**
  *
  * @author vest
  */
-public class WeakStripedAtomicCasArray extends StripedAtomicCasArraySupport {
+public class WeakStripedAtomicCasArray<T> extends StripedAtomicCasArraySupport<T> {
     public WeakStripedAtomicCasArray(int size) {
         super(size);
     }
     
     @Override
-    protected boolean doCas(AtomicReference<Connector> atomic, Connector newValue, Connector oldValue) {
+    protected boolean doCas(AtomicReference<T> atomic, T newValue, T oldValue) {
         return atomic.weakCompareAndSet(oldValue, newValue);
     }
 }

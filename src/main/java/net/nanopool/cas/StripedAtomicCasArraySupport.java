@@ -6,27 +6,26 @@
 package net.nanopool.cas;
 
 import java.util.concurrent.atomic.AtomicReference;
-import net.nanopool.Connector;
 
 /**
  *
  * @author vest
  */
-public abstract class StripedAtomicCasArraySupport implements CasArray<Connector> {
-    private final AtomicReference<Connector>[] array;
+public abstract class StripedAtomicCasArraySupport<T> implements CasArray<T> {
+    private final AtomicReference<T>[] array;
     
     public StripedAtomicCasArraySupport(int size) {
         array = new AtomicReference[size];
         for (int i = 0; i < size; i++) {
-            array[i] = new AtomicReference<Connector>();
+            array[i] = new AtomicReference<T>();
         }
     }
 
-    public final boolean cas(int idx, Connector newValue, Connector oldValue) {
+    public final boolean cas(int idx, T newValue, T oldValue) {
         return doCas(array[idx], newValue, oldValue);
     }
 
-    public final Connector get(int idx) {
+    public final T get(int idx) {
         return array[idx].get();
     }
 
@@ -34,6 +33,6 @@ public abstract class StripedAtomicCasArraySupport implements CasArray<Connector
         return array.length;
     }
 
-    protected abstract boolean doCas(AtomicReference<Connector> atomic,
-            Connector newValue, Connector oldValue);
+    protected abstract boolean doCas(AtomicReference<T> atomic,
+            T newValue, T oldValue);
 }

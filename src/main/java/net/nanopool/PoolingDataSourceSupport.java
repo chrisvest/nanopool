@@ -12,7 +12,6 @@ public abstract class PoolingDataSourceSupport implements DataSource {
     protected final ConnectionPoolDataSource source;
     protected final int poolSize;
     protected final long timeToLive;
-    protected final Connector ticket;
     protected final CasArray<Connector> connectors;
     protected final ContentionHandler contentionHandler;
 
@@ -22,7 +21,6 @@ public abstract class PoolingDataSourceSupport implements DataSource {
         this.source = source;
         this.poolSize = connectors.length();
         this.timeToLive = timeToLive;
-        this.ticket = new Connector();
         this.connectors = connectors;
         this.contentionHandler = contentionHandler;
     }

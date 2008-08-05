@@ -66,11 +66,11 @@
       <version>4.4</version>
       <scope>test</scope>
     </dependency>
+    <!--
+      Grap and install manually from here:
+      http://code.google.com/p/multithreadedtc/
+    -->
     <dependency>
-      <!--
-        Grap and install manually from here:
-        http://code.google.com/p/multithreadedtc/
-      -->
       <groupId>cs.umd.edu</groupId>
       <artifactId>multithreadedtc</artifactId>
       <version>1.01</version>

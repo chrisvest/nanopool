@@ -8,9 +8,10 @@ import javax.sql.ConnectionPoolDataSource;
 import net.nanopool.cas.CasArray;
 
 public class FsmMixin {
+    protected final Connector reservationTicket = new Connector();;
+    protected final Connector shutdownMarker = new Connector();;
 
     public Connection getConnection(
-            final Connector ticket,
             final CasArray<Connector> connectors,
             final ConnectionPoolDataSource source,
             final CheapRandom rand,
@@ -23,9 +24,11 @@ public class FsmMixin {
             if (idx == poolSize)
                 idx = 0;
             Connector con = connectors.get(idx);
-            while (con != ticket) {
+            while (con != reservationTicket) {
+                if (con == shutdownMarker)
+                    throw new IllegalStateException("Connection pool is shut down.");
                 // we might have gotten one
-                if (connectors.cas(idx, ticket, con)) { // reserve it
+                if (connectors.cas(idx, reservationTicket, con)) { // reserve it
                     if (con == null) {
                         con = new Connector(source, connectors, idx, timeToLive);
                     }

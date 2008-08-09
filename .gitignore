@@ -6,3 +6,4 @@ target
 nbactions.xml
 nbproject
 .DS_Store
+.settings

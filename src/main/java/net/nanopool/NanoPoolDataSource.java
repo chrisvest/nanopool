@@ -2,6 +2,7 @@ package net.nanopool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.sql.ConnectionPoolDataSource;
 
@@ -30,7 +31,19 @@ public class NanoPoolDataSource extends PoolingDataSourceSupport {
         return fsm.getConnection(connectors, source, rand,
                 poolSize, timeToLive, contentionHandler);
     }
-
+    
+    public List<SQLException> shutdown() {
+        return fsm.shutdown(connectors, poolSize);
+    }
+    
+    /**
+     * This method will always throw UnsupportedOperationException.
+     * @param username not used
+     * @param password not used
+     * @return never returns
+     * @throws SQLException never throws SQLException
+     * @throws UnsupportedOperationException always.
+     */
     public Connection getConnection(String username, String password)
             throws SQLException {
         throw new UnsupportedOperationException();

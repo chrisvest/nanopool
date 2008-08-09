@@ -20,6 +20,8 @@ public class Connector {
     /**
      * Used for asserting that we're not producing multiple leases for the
      * same connection.
+     * Does not put contention on the memory bus unless we have assertions
+     * enabled.
      */
     private final AtomicInteger leaseCount = new AtomicInteger();
     
@@ -43,16 +45,25 @@ public class Connector {
             connection.addConnectionEventListener(new ConnectionListener(this));
             deadTime = System.currentTimeMillis() + timeToLive;
         }
-        assert leaseCount.incrementAndGet() == 1;
+        assert leaseCount.incrementAndGet() == 1:
+            "Connector is used by more than one thread at a time";
         return connection.getConnection();
     }
     
     public void returnToPool() throws SQLException {
         if (deadTime < System.currentTimeMillis())
             invalidate();
-        Connector ticket = connectors.get(idx);
-        assert leaseCount.decrementAndGet() == 0;
-        connectors.cas(idx, this, ticket);
+        Connector marker = connectors.get(idx);
+        assert leaseCount.decrementAndGet() == 0:
+            "Connector was used by more than one thread at a time";
+        if (marker != FsmMixin.shutdownMarker) {
+            assert marker == FsmMixin.reservationMarker:
+                "Invalid state of CasArray<Connector> on index " + idx;
+            connectors.cas(idx, this, marker);
+        } else {
+            // we've been shut down, so let's clean up.
+            invalidate();
+        }
     }
     
     public void invalidate() throws SQLException {

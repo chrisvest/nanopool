@@ -2,14 +2,16 @@ package net.nanopool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
 
-public class FsmMixin {
-    protected final Connector reservationTicket = new Connector();;
-    protected final Connector shutdownMarker = new Connector();;
+public final class FsmMixin {
+    static final Connector reservationMarker = new Connector();
+    static final Connector shutdownMarker = new Connector();
 
     public Connection getConnection(
             final CasArray<Connector> connectors,
@@ -24,11 +26,11 @@ public class FsmMixin {
             if (idx == poolSize)
                 idx = 0;
             Connector con = connectors.get(idx);
-            while (con != reservationTicket) {
+            while (con != reservationMarker) {
                 if (con == shutdownMarker)
                     throw new IllegalStateException("Connection pool is shut down.");
                 // we might have gotten one
-                if (connectors.cas(idx, reservationTicket, con)) { // reserve it
+                if (connectors.cas(idx, reservationMarker, con)) { // reserve it
                     if (con == null) {
                         con = new Connector(source, connectors, idx, timeToLive);
                     }
@@ -40,5 +42,29 @@ public class FsmMixin {
             if (idx == start)
                 contentionHandler.handleContention();
         }
+    }
+
+    public List<SQLException> shutdown(
+            final CasArray<Connector> connectors,
+            final int poolSize) {
+        List<SQLException> caughtExceptions = new ArrayList<SQLException>();
+        
+        iterate_connectors: for (int i = 0; i < poolSize; i++) {
+            Connector con = null;
+            do { // try snatching it and eagerly mark it as shut down.
+                con = connectors.get(i);
+                // avoid CAS if already shut down:
+                if (con == shutdownMarker) continue iterate_connectors;
+            } while(!connectors.cas(i, shutdownMarker, con));
+            if (con != reservationMarker) {
+                try {
+                    con.invalidate();
+                } catch (SQLException e) {
+                    caughtExceptions.add(e);
+                }
+            }
+        }
+        
+        return caughtExceptions;
     }
 }

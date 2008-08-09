@@ -1,6 +1,7 @@
 *~
 .classpath
 .project
+.settings
 target
 nbactions.xml
 nbproject

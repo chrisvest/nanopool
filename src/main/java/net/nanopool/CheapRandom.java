@@ -13,7 +13,7 @@ public final class CheapRandom {
     }
     
     public int nextAbs(int min, int max) {
-        assert min <= max;
+        assert min < max;
         final int x = nextInt();
         final int mask = x >> 32 * 1073741824 - 1; // Twiddle-twiddle,
         return ((x + mask) ^ mask) % (max - min) + min; // magic-fiddle! :)

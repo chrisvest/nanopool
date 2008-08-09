@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -41,5 +42,16 @@ public class Simple {
             System.out.println("Closing connection");
             con.close();
         }
+        
+        System.out.println("Shutting down pool");
+        List<SQLException> exceptions = ((NanoPoolDataSource)pds).shutdown();
+        
+        if (!exceptions.isEmpty()) {
+            System.out.println("Caught these SQLExceptions in shutdown:");
+            for (SQLException ex : exceptions)
+                ex.printStackTrace(System.out);
+        }
+        
+        System.out.println("All done.");
     }
 }

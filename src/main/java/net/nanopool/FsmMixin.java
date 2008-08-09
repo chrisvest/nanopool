@@ -56,7 +56,7 @@ public final class FsmMixin {
                 // avoid CAS if already shut down:
                 if (con == shutdownMarker) continue iterate_connectors;
             } while(!connectors.cas(i, shutdownMarker, con));
-            if (con != reservationMarker) {
+            if (con != reservationMarker && con != null) {
                 try {
                     con.invalidate();
                 } catch (SQLException e) {

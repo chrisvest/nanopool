@@ -5,7 +5,7 @@ package net.nanopool;
  * The waiting is implemented with {@link Thread#yield()} and by default
  * also prints a warning, though this can be turned off.
  * @author vest
- *
+ * @since 1.0
  */
 public final class DefaultContentionHandler implements ContentionHandler {
     private final boolean printWarning;

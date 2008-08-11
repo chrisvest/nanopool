@@ -43,6 +43,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * @return never returns
      * @throws SQLException never throws SQLException
      * @throws UnsupportedOperationException always.
+     * @since 1.0
      */
     public Connection getConnection(String username, String password)
             throws SQLException {

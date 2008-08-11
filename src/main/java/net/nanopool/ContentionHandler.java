@@ -12,7 +12,7 @@ package net.nanopool;
  * The {@link NanoPoolDataSource} instances get their ContentionHandlers
  * through their constructors when they are created.
  * @author vest
- *
+ * @since 1.0
  */
 public interface ContentionHandler {
     /**
@@ -21,6 +21,7 @@ public interface ContentionHandler {
      * {@link Thread#yield()}, but you could also throw a form of
      * {@link RuntimeException} if you'd rather give up on getting a connection
      * for this particular thread - just be sure to catch it in your own code!
+     * @since 1.0
      */
     void handleContention();
 }

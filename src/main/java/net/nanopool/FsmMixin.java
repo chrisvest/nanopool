@@ -9,7 +9,7 @@ import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
 
-public final class FsmMixin {
+final class FsmMixin {
     static final Connector reservationMarker = new Connector();
     static final Connector shutdownMarker = new Connector();
 

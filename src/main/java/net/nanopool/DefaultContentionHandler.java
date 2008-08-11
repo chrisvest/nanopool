@@ -1,6 +1,13 @@
 package net.nanopool;
 
-public class DefaultContentionHandler implements ContentionHandler {
+/**
+ * The default {@link ContentionHandler} implementation.
+ * The waiting is implemented with {@link Thread#yield()} and by default
+ * also prints a warning, though this can be turned off.
+ * @author vest
+ *
+ */
+public final class DefaultContentionHandler implements ContentionHandler {
     private final boolean printWarning;
     
     public DefaultContentionHandler() {

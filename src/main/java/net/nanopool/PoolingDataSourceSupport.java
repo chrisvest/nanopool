@@ -8,7 +8,7 @@ import javax.sql.DataSource;
 
 import net.nanopool.cas.CasArray;
 
-public abstract class PoolingDataSourceSupport implements DataSource {
+abstract class PoolingDataSourceSupport implements DataSource {
     protected final ConnectionPoolDataSource source;
     protected final int poolSize;
     protected final long timeToLive;

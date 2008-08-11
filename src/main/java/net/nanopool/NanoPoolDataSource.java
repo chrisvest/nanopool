@@ -9,7 +9,7 @@ import javax.sql.ConnectionPoolDataSource;
 import net.nanopool.cas.CasArray;
 import net.nanopool.cas.StrongAtomicCasArray;
 
-public class NanoPoolDataSource extends PoolingDataSourceSupport {
+public final class NanoPoolDataSource extends PoolingDataSourceSupport {
     private final CheapRandom rand;
     private final FsmMixin fsm;
     

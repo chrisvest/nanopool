@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
 
-public class ConnectionListener implements ConnectionEventListener {
+final class ConnectionListener implements ConnectionEventListener {
     private final Connector connector;
     
     public ConnectionListener(Connector connector) {
@@ -16,7 +16,7 @@ public class ConnectionListener implements ConnectionEventListener {
         try {
             connector.returnToPool();
         } catch (SQLException e) {
-            throw new RuntimeException(
+            throw new NanoPoolRuntimeException(
                     "Failed at returning the connection to the pool", e);
         }
     }
@@ -25,15 +25,14 @@ public class ConnectionListener implements ConnectionEventListener {
         try {
             connector.invalidate();
         } catch (SQLException e) {
-            throw new RuntimeException(
+            throw new NanoPoolRuntimeException(
                     "Failed at invalidating the connection", e);
         }
         try {
             connector.returnToPool();
         } catch (SQLException e) {
-            throw new RuntimeException(
+            throw new NanoPoolRuntimeException(
                     "Failed at returning the connection to the pool", e);
         }
     }
-    
 }

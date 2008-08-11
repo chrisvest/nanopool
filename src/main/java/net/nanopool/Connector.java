@@ -9,7 +9,7 @@ import javax.sql.PooledConnection;
 
 import net.nanopool.cas.CasArray;
 
-public class Connector {
+final class Connector {
     private final ConnectionPoolDataSource source;
     private final CasArray<Connector> connectors;
     private final int idx;

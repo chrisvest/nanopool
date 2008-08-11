@@ -1,3 +1,5 @@
+NanoPool
+========
 
 NanoPool (NP) is a lightweight and highly scalable JDBC2 connection pool.
 
@@ -8,4 +10,7 @@ This means that thread contention will be on the *size* of the pool (or the
 JDBC driver, or the database, or..) as oppose to the internal implementation
 of the connection pool.
 
-License: Apache 2.0 (I think...)
+License
+-------
+
+Apache 2.0 (I think...)

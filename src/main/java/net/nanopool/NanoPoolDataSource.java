@@ -19,14 +19,21 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * time-to-live.
      * The pool will use a {@link DefaultContentionHandler} and create its own
      * {@link CasArray} that isn't shared with anyone else.
+     * Merely constructing a pool does not open any connections. The connections
+     * themselves are created lazily when they are requested.
      * @param source the {@link ConnectionPoolDataSource} instance that will
      * provide the raw connections to this pool. You usually get these instances
      * from your JDBC driver. If your driver of choice does not have an
      * implementation for this interface, then you either have to write it
      * yourself or give up and cry in a corner. Thankfully, most modern JDBC
      * drivers support this feature of the JDBC specification.
-     * @param poolSize
-     * @param timeToLive
+     * @param poolSize The total number of connections this pool can contain.
+     * The size of the pool cannot be changed once set.
+     * @param timeToLive The maximum allowed age of connections, specified in
+     * milliseconds. A connection will be closed if it return to the pool older
+     * than this, and connections will be reopened if they are older than this
+     * when acquired. A connection that grows older than this while in use, will
+     * not be closed from under you.
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source, int poolSize,
             long timeToLive) {

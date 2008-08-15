@@ -1,30 +1,26 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package net.nanopool.cas;
 
 import java.lang.reflect.Field;
-import net.nanopool.Connector;
+
+import net.nanopool.CheapRandom;
 import sun.misc.Unsafe;
 
 /**
  *
  * @author vest
  */
-public class UnsafeCasArray implements CasArray<Connector> {
+public class UnsafeCasArray<T> implements CasArray<T> {
     private final Unsafe theUnsafe;
     private final int offset;
     private final int scale;
-    private final Connector[] array;
+    private final T[] array;
     
-    public UnsafeCasArray(int poolSize) {
-        if (poolSize == 0)
+    public UnsafeCasArray(int size) {
+        if (size == 0)
             throw new IllegalArgumentException(
                     "Pool size must be greater than 0.");
         try {
-            array = new Connector[poolSize];
+            array = (T[]) new Object[size];
             Class<Unsafe> unsafeClass = Unsafe.class;
             Field unsafeField = unsafeClass.getDeclaredField("theUnsafe");
             unsafeField.setAccessible(true);
@@ -51,11 +47,11 @@ public class UnsafeCasArray implements CasArray<Connector> {
         return offset + i * scale;
     }
 
-    public boolean cas(int idx, Connector newValue, Connector oldValue) {
+    public boolean cas(int idx, T newValue, T oldValue) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public Connector get(int idx) {
+    public T get(int idx) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -64,8 +60,25 @@ public class UnsafeCasArray implements CasArray<Connector> {
     }
     
     public static void main(String[] args) {
-        UnsafeCasArray uca = new UnsafeCasArray(5);
-        System.out.println("array base offset: " + uca.theUnsafe.arrayBaseOffset(Object[].class));
-        System.out.println("array index scale: " + uca.theUnsafe.arrayIndexScale(Object[].class));
+//        UnsafeCasArray uca = new UnsafeCasArray(5);
+//        System.out.println("array base offset: " + uca.theUnsafe.arrayBaseOffset(Object[].class));
+//        System.out.println("array index scale: " + uca.theUnsafe.arrayIndexScale(Object[].class));
+        
+        CheapRandom r = new CheapRandom();
+        int keep = 1234567890;
+        long start = System.nanoTime();
+        for (int i = 0; i < 1000000000; i++) {
+            keep ^= abs(r.nextInt());
+//            keep ^= Math.abs(r.nextInt());
+        }
+        long end = System.nanoTime();
+        long elapsed = end - start;
+        System.out.printf("Time used: %s ms. keep = %s\n", elapsed / 1000000.0, keep);
+        
+    }
+    
+    private static int abs(int x) {
+        final int mask = x >> 32 * 1073741824 - 1;
+        return (x + mask) ^ mask;
     }
 }

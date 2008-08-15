@@ -13,6 +13,21 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
     private final CheapRandom rand;
     private final FsmMixin fsm;
     
+    /**
+     * Create a new {@link NanoPoolDataSource} based on the specified
+     * {@link ConnectionPoolDataSource}, and with the specified pool size and
+     * time-to-live.
+     * The pool will use a {@link DefaultContentionHandler} and create its own
+     * {@link CasArray} that isn't shared with anyone else.
+     * @param source the {@link ConnectionPoolDataSource} instance that will
+     * provide the raw connections to this pool. You usually get these instances
+     * from your JDBC driver. If your driver of choice does not have an
+     * implementation for this interface, then you either have to write it
+     * yourself or give up and cry in a corner. Thankfully, most modern JDBC
+     * drivers support this feature of the JDBC specification.
+     * @param poolSize
+     * @param timeToLive
+     */
     public NanoPoolDataSource(ConnectionPoolDataSource source, int poolSize,
             long timeToLive) {
         this(source, new StrongAtomicCasArray<Connector>(poolSize), timeToLive,
@@ -27,6 +42,28 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
         fsm = new FsmMixin();
     }
 
+    /**
+     * Lease a new {@link Connection} from the pool.
+     * This method will attempt to reserve one of the connections that is
+     * available from the pool. If the pool have not been completely saturated
+     * with connections, then a new connection will be created at an available
+     * slot and immediately leased.
+     * If there are no connections available to lease, then we will sit down
+     * around the camp fire and wait until one <em>becomes</em> available, and
+     * the exact procedure of how this happens is dictated by this pools
+     * configured {@link ContentionHandler} (which does a {@link Thread#yield()}
+     * by default).
+     * @return A new/old {@link Connection} from the pool. This object is
+     * guaranteed to only be available to a single thread <em>provided</em>
+     * that you yourself do not share it amongst more than one thread (and I
+     * will spank you if you do -- hard) <em>and</em> you are not keeping
+     * connection objects around after you close them. And be sure that you
+     * close your connection when you're done with it - it will not return to
+     * the pool if you forget this!
+     * @throws SQLException Thrown if we tried to establish a sparkly-new
+     * connection with the configured {@link ConnectionPoolDataSource} and it
+     * <em>fails!</em>
+     */
     public Connection getConnection() throws SQLException {
         return fsm.getConnection(connectors, source, rand,
                 poolSize, timeToLive, contentionHandler);

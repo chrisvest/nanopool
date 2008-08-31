@@ -1,5 +1,8 @@
 package net.nanopool;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
 import junit.framework.TestSuite;
 import net.nanopool.cas.CasArray;
 import net.nanopool.cas.StrongAtomicCasArray;
@@ -7,6 +10,8 @@ import net.nanopool.cas.StrongStripedAtomicCasArray;
 import net.nanopool.cas.UnsafeCasArray;
 import net.nanopool.cas.WeakAtomicCasArray;
 import net.nanopool.cas.WeakStripedAtomicCasArray;
+
+import org.junit.Test;
 
 public class FunctionalTest extends TestSuite {
     protected static final int CA_SIZE = 10;
@@ -48,9 +53,14 @@ public class FunctionalTest extends TestSuite {
             },
             new Factory<CasArray<Connector>>() {
                 public CasArray<Connector> create() {
-                    return new UnsafeCasArray(CA_SIZE);
+                    return new UnsafeCasArray<Connector>(CA_SIZE);
                 }
             },
         };
+    }
+    
+    @Test
+    public void metaTest() {
+        assertThat(true, is(true));
     }
 }

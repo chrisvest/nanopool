@@ -21,7 +21,8 @@ public final class Connector {
      * Used for asserting that we're not producing multiple leases for the
      * same connection.
      * Does not put contention on the memory bus unless we have assertions
-     * enabled.
+     * enabled. However, enabling assertions will now introduce memory barriers
+     * and that might mask visibility bugs, so take care!
      */
     private final AtomicInteger leaseCount = new AtomicInteger();
     

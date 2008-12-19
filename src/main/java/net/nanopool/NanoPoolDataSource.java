@@ -4,14 +4,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+import javax.management.DynamicMBean;
 import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
 import net.nanopool.cas.StrongAtomicCasArray;
 
 public final class NanoPoolDataSource extends PoolingDataSourceSupport {
-    private final CheapRandom rand;
-    private final FsmMixin fsm;
+    final CheapRandom rand;
+    final FsmMixin fsm;
     
     /**
      * Create a new {@link NanoPoolDataSource} based on the specified
@@ -114,5 +115,15 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
     public Connection getConnection(String username, String password)
             throws SQLException {
         throw new UnsupportedOperationException("Not supported.");
+    }
+
+    /**
+     * Create a {@link DynamicMBean} representation of this NanoPoolDataSource
+     * instance.
+     * @return
+     * @since 1.0
+     */
+    public DynamicMBean asMBean() {
+        return new DynamicNanoPoolMBean(this);
     }
 }

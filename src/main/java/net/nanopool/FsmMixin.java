@@ -67,4 +67,17 @@ final class FsmMixin {
         
         return caughtExceptions;
     }
+
+    public int countOpenConnections(CasArray<Connector> connectors) {
+        int openCount = 0;
+        for (int i = 0, n = connectors.length(); i < n; i++) {
+            Object obj = connectors.get(i);
+            if (obj != null
+                && obj != reservationMarker
+                && obj != shutdownMarker) {
+                openCount++;
+            }
+        }
+        return openCount;
+    }
 }

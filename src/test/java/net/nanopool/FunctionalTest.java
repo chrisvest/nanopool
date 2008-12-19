@@ -7,7 +7,6 @@ import junit.framework.TestSuite;
 import net.nanopool.cas.CasArray;
 import net.nanopool.cas.StrongAtomicCasArray;
 import net.nanopool.cas.StrongStripedAtomicCasArray;
-import net.nanopool.cas.UnsafeCasArray;
 import net.nanopool.cas.WeakAtomicCasArray;
 import net.nanopool.cas.WeakStripedAtomicCasArray;
 
@@ -49,11 +48,6 @@ public class FunctionalTest extends TestSuite {
             new Factory<CasArray<Connector>>() {
                 public CasArray<Connector> create() {
                     return new WeakStripedAtomicCasArray<Connector>(CA_SIZE);
-                }
-            },
-            new Factory<CasArray<Connector>>() {
-                public CasArray<Connector> create() {
-                    return new UnsafeCasArray<Connector>(CA_SIZE);
                 }
             },
         };

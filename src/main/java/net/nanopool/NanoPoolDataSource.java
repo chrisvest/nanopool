@@ -113,6 +113,27 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      */
     public Connection getConnection(String username, String password)
             throws SQLException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    /**
+     * This method will always throw UnsupportedOperationException.
+     * @param <T>
+     * @param iface
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    /**
+     * This method will always throw UnsupportedOperationException.
+     * @param iface
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported.");
     }
 }

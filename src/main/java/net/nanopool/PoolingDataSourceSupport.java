@@ -8,15 +8,15 @@ import javax.sql.DataSource;
 
 import net.nanopool.cas.CasArray;
 
-abstract class PoolingDataSourceSupport implements DataSource {
+public abstract class PoolingDataSourceSupport implements DataSource {
     protected final ConnectionPoolDataSource source;
     protected final int poolSize;
     protected final long timeToLive;
-    protected final CasArray<Connector> connectors;
+    protected final CasArray connectors;
     protected final ContentionHandler contentionHandler;
 
-    public PoolingDataSourceSupport(ConnectionPoolDataSource source,
-            CasArray<Connector> connectors, long timeToLive, 
+    PoolingDataSourceSupport(ConnectionPoolDataSource source,
+            CasArray connectors, long timeToLive, 
             ContentionHandler contentionHandler) {
         this.source = source;
         this.poolSize = connectors.length();
@@ -39,5 +39,26 @@ abstract class PoolingDataSourceSupport implements DataSource {
 
     public void setLoginTimeout(int seconds) throws SQLException {
         source.setLoginTimeout(seconds);
+    }
+
+    /**
+     * This method will always throw UnsupportedOperationException.
+     * @param <T>
+     * @param iface
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    /**
+     * This method will always throw UnsupportedOperationException.
+     * @param iface
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not supported.");
     }
 }

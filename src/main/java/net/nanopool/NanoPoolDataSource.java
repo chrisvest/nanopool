@@ -37,12 +37,12 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source, int poolSize,
             long timeToLive) {
-        this(source, new StrongAtomicCasArray<Connector>(poolSize), timeToLive,
+        this(source, new StrongAtomicCasArray(poolSize), timeToLive,
                 new DefaultContentionHandler());
     }
     
     public NanoPoolDataSource(ConnectionPoolDataSource source,
-            CasArray<Connector> connectors, long timeToLive,
+            CasArray connectors, long timeToLive,
             ContentionHandler contentionHandler) {
         super(source, connectors, timeToLive, contentionHandler);
         rand = new CheapRandom();
@@ -113,27 +113,6 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      */
     public Connection getConnection(String username, String password)
             throws SQLException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    /**
-     * This method will always throw UnsupportedOperationException.
-     * @param <T>
-     * @param iface
-     * @return
-     * @throws java.sql.SQLException
-     */
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    /**
-     * This method will always throw UnsupportedOperationException.
-     * @param iface
-     * @return
-     * @throws java.sql.SQLException
-     */
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported.");
     }
 }

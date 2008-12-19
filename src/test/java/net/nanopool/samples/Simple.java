@@ -22,6 +22,11 @@ public class Simple {
         source.setUser("root");
         source.setPassword("");
         
+        // timeouts:
+        source.setLoginTimeout(5 /*seconds*/);
+        source.setConnectTimeout(5000 /*milliseconds*/);
+        source.setSocketTimeout(5000 /*milliseconds*/);
+        
         System.out.println("Creating connection pool");
         DataSource pds = new NanoPoolDataSource(source, 10, 300000);
         

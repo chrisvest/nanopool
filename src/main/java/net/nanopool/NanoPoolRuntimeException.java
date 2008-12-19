@@ -7,6 +7,8 @@ package net.nanopool;
  * @since 1.0
  */
 public class NanoPoolRuntimeException extends RuntimeException {
+    private static final long serialVersionUID = -2359233167832636507L;
+
     /**
      * @see RuntimeException#RuntimeException()
      * @since 1.0
@@ -17,29 +19,29 @@ public class NanoPoolRuntimeException extends RuntimeException {
 
     /**
      * @see RuntimeException#RuntimeException(String, Throwable)
-     * @param arg0
-     * @param arg1
+     * @param msg
+     * @param th
      * @since 1.0
      */
-    public NanoPoolRuntimeException(String arg0, Throwable arg1) {
-        super(arg0, arg1);
+    public NanoPoolRuntimeException(String msg, Throwable th) {
+        super(msg, th);
     }
 
     /**
      * @see RuntimeException#RuntimeException(String)
-     * @param arg0
+     * @param msg
      * @since 1.0
      */
-    public NanoPoolRuntimeException(String arg0) {
-        super(arg0);
+    public NanoPoolRuntimeException(String msg) {
+        super(msg);
     }
 
     /**
      * @see RuntimeException#RuntimeException(Throwable)
-     * @param arg0
+     * @param th
      * @since 1.0
      */
-    public NanoPoolRuntimeException(Throwable arg0) {
-        super(arg0);
+    public NanoPoolRuntimeException(Throwable th) {
+        super(th);
     }
 }

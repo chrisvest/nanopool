@@ -9,7 +9,7 @@ import javax.sql.PooledConnection;
 
 import net.nanopool.cas.CasArray;
 
-final class Connector {
+public final class Connector {
     private final ConnectionPoolDataSource source;
     private final CasArray<Connector> connectors;
     private final int idx;
@@ -21,11 +21,12 @@ final class Connector {
      * Used for asserting that we're not producing multiple leases for the
      * same connection.
      * Does not put contention on the memory bus unless we have assertions
-     * enabled.
+     * enabled. However, enabling assertions will now introduce memory barriers
+     * and that might mask visibility bugs, so take care!
      */
     private final AtomicInteger leaseCount = new AtomicInteger();
     
-    public Connector(ConnectionPoolDataSource source,
+    Connector(ConnectionPoolDataSource source,
             CasArray<Connector> connectors, int idx, long timeToLive) {
         this.source = source;
         this.connectors = connectors;
@@ -37,7 +38,7 @@ final class Connector {
         this(null, null, 0, 0);
     }
     
-    public Connection getConnection() throws SQLException {
+    Connection getConnection() throws SQLException {
         if (deadTime < System.currentTimeMillis())
             invalidate();
         if (connection == null) {
@@ -50,7 +51,7 @@ final class Connector {
         return connection.getConnection();
     }
     
-    public void returnToPool() throws SQLException {
+    void returnToPool() throws SQLException {
         if (deadTime < System.currentTimeMillis())
             invalidate();
         Connector marker = connectors.get(idx);
@@ -66,7 +67,7 @@ final class Connector {
         }
     }
     
-    public void invalidate() throws SQLException {
+    void invalidate() throws SQLException {
         if (connection == null)
             return;
         try {

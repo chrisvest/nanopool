@@ -11,8 +11,8 @@ import org.junit.Test;
 public class CheapRandomTestCase {
     // PRNG qualities
     // I'm no expert in PRNGs, but I think this sounds about right...
-    static final double LOW_QUALITY = 8.0;
-    static final double MEDIUM_QUALITY = 4.0;
+    static final double LOW_QUALITY = 9.0;
+    static final double MEDIUM_QUALITY = 4.5;
     static final double HIGH_QUALITY = 2.0;
     
     private CheapRandom cr;

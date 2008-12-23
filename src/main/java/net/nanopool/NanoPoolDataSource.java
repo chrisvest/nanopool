@@ -34,6 +34,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * than this, and connections will be reopened if they are older than this
      * when acquired. A connection that grows older than this while in use, will
      * not be closed from under you.
+     * @since 1.0
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source, int poolSize,
             long timeToLive) {
@@ -70,6 +71,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * @throws SQLException Thrown if we tried to establish a sparkly-new
      * connection with the configured {@link ConnectionPoolDataSource} and it
      * <em>fails!</em>
+     * @since 1.0
      */
     public Connection getConnection() throws SQLException {
         return fsm.getConnection(connectors, source, rand,

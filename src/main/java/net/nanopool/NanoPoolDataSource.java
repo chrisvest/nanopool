@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.management.DynamicMBean;
 import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
@@ -118,12 +117,12 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
     }
 
     /**
-     * Create a {@link DynamicMBean} representation of this NanoPoolDataSource
+     * Create a {@link NanoPoolManager} instance for this NanoPoolDataSource
      * instance.
      * @return
      * @since 1.0
      */
-    public DynamicMBean asMBean() {
-        return new DynamicNanoPoolMBean(this);
+    public NanoPoolManager getManager() {
+        return new NanoPoolManager(this);
     }
 }

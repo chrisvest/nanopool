@@ -14,6 +14,9 @@ public class NanoPoolManager implements NanoPoolManagerMBean {
     private final NanoPoolDataSource np;
 
     public NanoPoolManager(DataSource np) {
+        if (np == null) throw new NullPointerException(
+                "DataSource parameter must be non-null and of type " +
+                "net.nanopool.NanoPoolDataSource.");
         this.np = (NanoPoolDataSource)np;
     }
 
@@ -30,11 +33,15 @@ public class NanoPoolManager implements NanoPoolManagerMBean {
     }
 
     public String getContentionHandlerClassName() {
-        return np.contentionHandler.getClass().getName();
+        try {
+            return np.contentionHandler.getClass().getName();
+        } catch (NullPointerException npe) {
+            return "null";
+        }
     }
 
     public String getContentionHandler() {
-        return np.contentionHandler.toString();
+        return String.valueOf(np.contentionHandler);
     }
 
     public boolean isShutDown() {
@@ -54,5 +61,17 @@ public class NanoPoolManager implements NanoPoolManagerMBean {
             return sos.toString();
         }
         return "Shutdown completed successfully.";
+    }
+
+    public String getSourceConnectionClassName() {
+        try {
+            return np.source.getClass().getName();
+        } catch (NullPointerException npe) {
+            return "null";
+        }
+    }
+
+    public String getSourceConnection() {
+        return String.valueOf(np.source);
     }
 }

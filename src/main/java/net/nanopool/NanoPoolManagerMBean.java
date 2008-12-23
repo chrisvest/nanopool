@@ -12,6 +12,8 @@ public interface NanoPoolManagerMBean {
     String getContentionHandlerClassName();
     String getContentionHandler();
     boolean isShutDown();
+    String getSourceConnectionClassName();
+    String getSourceConnection();
 
     // operations
     String shutDown();

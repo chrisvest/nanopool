@@ -4,7 +4,7 @@ package net.nanopool;
  *
  * @author cvh
  */
-public interface NanoPoolManagerMBean {
+public interface NanoPoolManagementMBean {
     // attributes
     int getCurrentOpenConnectionsCount();
     int getPoolSize();

@@ -122,7 +122,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * @return
      * @since 1.0
      */
-    public NanoPoolManager getManager() {
-        return new NanoPoolManager(this);
+    public NanoPoolManagementMBean getMXBean() {
+        return new NanoPoolManagement(this);
     }
 }

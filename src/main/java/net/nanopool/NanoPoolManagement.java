@@ -10,10 +10,10 @@ import javax.sql.DataSource;
  *
  * @author cvh
  */
-public class NanoPoolManager implements NanoPoolManagerMBean {
+public class NanoPoolManagement implements NanoPoolManagementMBean {
     private final NanoPoolDataSource np;
 
-    public NanoPoolManager(DataSource np) {
+    public NanoPoolManagement(DataSource np) {
         if (np == null) throw new NullPointerException(
                 "DataSource parameter must be non-null and of type " +
                 "net.nanopool.NanoPoolDataSource.");

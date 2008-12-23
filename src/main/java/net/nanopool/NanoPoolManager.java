@@ -1,5 +1,9 @@
 package net.nanopool;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.SQLException;
+import java.util.List;
 import javax.sql.DataSource;
 
 /**
@@ -31,5 +35,24 @@ public class NanoPoolManager implements NanoPoolManagerMBean {
 
     public String getContentionHandler() {
         return np.contentionHandler.toString();
+    }
+
+    public boolean isShutDown() {
+        // this is what I'm going to call "best effort" :-p
+        return np.connectors.get(0) == FsmMixin.shutdownMarker;
+    }
+
+    public String shutDown() {
+        List<SQLException> faults = np.shutdown();
+        if (faults.size() > 0) {
+            StringWriter sos = new StringWriter();
+            PrintWriter pout = new PrintWriter(sos);
+            for (SQLException ex : faults) {
+                ex.printStackTrace(pout);
+            }
+            pout.close();
+            return sos.toString();
+        }
+        return "Shutdown completed successfully.";
     }
 }

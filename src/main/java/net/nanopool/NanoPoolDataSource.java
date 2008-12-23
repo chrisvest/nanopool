@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+import java.util.concurrent.locks.ReentrantLock;
 import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
@@ -143,14 +144,23 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
             throws SQLException {
         throw new UnsupportedOperationException("Not supported.");
     }
-
+    
     /**
-     * Create a {@link NanoPoolManager} instance for this NanoPoolDataSource
-     * instance.
-     * @return
+     * Get the {@link NanoPoolManager} instance for this NanoPoolDataSource.
+     * @return Always the same instance.
      * @since 1.0
      */
     public NanoPoolManagementMBean getMXBean() {
-        return new NanoPoolManagement(this);
+        try {
+            poolManagementLock.lock();
+            if (poolManagement == null) {
+                poolManagement = new NanoPoolManagement(this);
+            }
+        } finally {
+            poolManagementLock.unlock();
+        }
+        return poolManagement;
     }
+    private NanoPoolManagement poolManagement;
+    private final ReentrantLock poolManagementLock = new ReentrantLock();
 }

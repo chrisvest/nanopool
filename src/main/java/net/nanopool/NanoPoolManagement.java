@@ -45,8 +45,10 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public boolean isShutDown() {
-        // this is what I'm going to call "best effort" :-p
-        return np.connectors.get(0) == FsmMixin.shutdownMarker;
+        for (Connector cn : np.allConnectors) {
+            if (cn == FsmMixin.shutdownMarker) return true;
+        }
+        return false;
     }
 
     public String shutDown() {

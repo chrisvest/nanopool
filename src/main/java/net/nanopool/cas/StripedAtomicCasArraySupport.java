@@ -11,7 +11,8 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author vest
  */
-public abstract class StripedAtomicCasArraySupport<T> implements CasArray<T> {
+public abstract class StripedAtomicCasArraySupport<T>
+        extends CasArraySupport<T> implements CasArray<T> {
     private final AtomicReference<T>[] array;
     
     public StripedAtomicCasArraySupport(int size) {

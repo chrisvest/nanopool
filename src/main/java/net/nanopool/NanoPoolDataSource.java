@@ -105,7 +105,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      */
     public Connection getConnection() throws SQLException {
         return fsm.getConnection(connectors, source, rand,
-                poolSize, timeToLive, contentionHandler);
+                poolSize, timeToLive, contentionHandler, allConnectors);
     }
     
     /**

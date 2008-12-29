@@ -19,7 +19,8 @@ final class FsmMixin {
             final CheapRandom rand,
             final int poolSize,
             final long timeToLive,
-            final ContentionHandler contentionHandler) throws SQLException {
+            final ContentionHandler contentionHandler,
+            final Connector[] allConnectors) throws SQLException {
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
         int idx = start;
         while (true) {
@@ -33,6 +34,7 @@ final class FsmMixin {
                 if (connectors.cas(idx, reservationMarker, con)) { // reserve it
                     if (con == null) {
                         con = new Connector(source, connectors, idx, timeToLive);
+                        allConnectors[idx] = con;
                     }
                     return con.getConnection();
                 }

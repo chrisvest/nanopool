@@ -13,6 +13,7 @@ public abstract class PoolingDataSourceSupport implements DataSource {
     final int poolSize;
     final long timeToLive;
     final CasArray<Connector> connectors;
+    final Connector[] allConnectors;
     final ContentionHandler contentionHandler;
 
     PoolingDataSourceSupport(ConnectionPoolDataSource source,
@@ -22,6 +23,7 @@ public abstract class PoolingDataSourceSupport implements DataSource {
         this.poolSize = connectors.length();
         this.timeToLive = timeToLive;
         this.connectors = connectors;
+        this.allConnectors = new Connector[poolSize];
         this.contentionHandler = contentionHandler;
     }
 

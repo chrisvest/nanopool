@@ -77,23 +77,23 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public int getConnectionsCreated() {
         int createdCount = 0;
-        for (Connector cn : np.connectors) {
-            createdCount += cn.getRealConnectionsCreated();
+        for (Connector cn : np.allConnectors) {
+            if (cn != null) createdCount += cn.getRealConnectionsCreated();
         }
         return createdCount;
     }
 
     public int getConnectionsLeased() {
         int leasedCount = 0;
-        for (Connector cn : np.connectors) {
-            leasedCount += cn.getConnectionsLeased();
+        for (Connector cn : np.allConnectors) {
+            if (cn != null) leasedCount += cn.getConnectionsLeased();
         }
         return leasedCount;
     }
 
     public void resetCounters() {
-        for (Connector cn : np.connectors) {
-            cn.resetCounters();
+        for (Connector cn : np.allConnectors) {
+            if (cn != null) cn.resetCounters();
         }
     }
 }

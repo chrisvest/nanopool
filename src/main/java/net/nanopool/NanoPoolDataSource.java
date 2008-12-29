@@ -67,7 +67,10 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * invoked when the pool feels that the level of contention is a bit high.
      * Specifically, when the pool, during a call to getConnection, have
      * searched the entier CasArray for any available connections and found
-     * none. 
+     * none. ContentionHandlers can safely throw a RuntimeException (to be
+     * caught in client code) or briefly pause the thread in the hope that a
+     * connection will become available in the mean time.
+     * @since 1.0
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source,
             CasArray connectors, long timeToLive,

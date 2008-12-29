@@ -29,25 +29,25 @@ public class FunctionalTest extends TestSuite {
                 }
             }
         };
-        Factory<CasArray<Connector>>[] casArrayFactories = new Factory[] {
-            new Factory<CasArray<Connector>>() {
-                public CasArray<Connector> create() {
-                    return new StrongAtomicCasArray<Connector>(CA_SIZE);
+        Factory<CasArray>[] casArrayFactories = new Factory[] {
+            new Factory<CasArray>() {
+                public CasArray create() {
+                    return new StrongAtomicCasArray(CA_SIZE);
                 }
             },
-            new Factory<CasArray<Connector>>() {
-                public CasArray<Connector> create() {
-                    return new StrongStripedAtomicCasArray<Connector>(CA_SIZE);
+            new Factory<CasArray>() {
+                public CasArray create() {
+                    return new StrongStripedAtomicCasArray(CA_SIZE);
                 }
             },
-            new Factory<CasArray<Connector>>() {
-                public CasArray<Connector> create() {
-                    return new WeakAtomicCasArray<Connector>(CA_SIZE);
+            new Factory<CasArray>() {
+                public CasArray create() {
+                    return new WeakAtomicCasArray(CA_SIZE);
                 }
             },
-            new Factory<CasArray<Connector>>() {
-                public CasArray<Connector> create() {
-                    return new WeakStripedAtomicCasArray<Connector>(CA_SIZE);
+            new Factory<CasArray>() {
+                public CasArray create() {
+                    return new WeakStripedAtomicCasArray(CA_SIZE);
                 }
             },
         };

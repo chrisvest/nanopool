@@ -70,11 +70,10 @@ final class FsmMixin {
 
     public int countOpenConnections(CasArray<Connector> connectors) {
         int openCount = 0;
-        for (int i = 0, n = connectors.length(); i < n; i++) {
-            Object obj = connectors.get(i);
-            if (obj != null
-                && obj != reservationMarker
-                && obj != shutdownMarker) {
+        for (Connector cn : connectors) {
+            if (cn != null
+                && cn != reservationMarker
+                && cn != shutdownMarker) {
                 openCount++;
             }
         }

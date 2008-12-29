@@ -6,6 +6,6 @@ import net.nanopool.cas.CasArray;
 
 public interface DataSourceState {
 	DataSource createSource();
-	CasArray<Connector> createCasArray(int size);
+	CasArray createCasArray(int size);
 	ContentionHandler createContentionHandler();
 }

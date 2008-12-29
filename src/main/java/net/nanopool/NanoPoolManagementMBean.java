@@ -14,7 +14,10 @@ public interface NanoPoolManagementMBean {
     boolean isShutDown();
     String getSourceConnectionClassName();
     String getSourceConnection();
+    int getConnectionsCreated();
+    int getConnectionsLeased();
 
     // operations
     String shutDown();
+    void resetCounters();
 }

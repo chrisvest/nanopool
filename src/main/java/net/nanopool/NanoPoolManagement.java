@@ -74,4 +74,26 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     public String getSourceConnection() {
         return String.valueOf(np.source);
     }
+
+    public int getConnectionsCreated() {
+        int createdCount = 0;
+        for (Connector cn : np.connectors) {
+            createdCount += cn.getRealConnectionsCreated();
+        }
+        return createdCount;
+    }
+
+    public int getConnectionsLeased() {
+        int leasedCount = 0;
+        for (Connector cn : np.connectors) {
+            leasedCount += cn.getConnectionsLeased();
+        }
+        return leasedCount;
+    }
+
+    public void resetCounters() {
+        for (Connector cn : np.connectors) {
+            cn.resetCounters();
+        }
+    }
 }

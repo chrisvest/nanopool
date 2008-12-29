@@ -9,11 +9,11 @@ import javax.sql.DataSource;
 import net.nanopool.cas.CasArray;
 
 public abstract class PoolingDataSourceSupport implements DataSource {
-    protected final ConnectionPoolDataSource source;
-    protected final int poolSize;
-    protected final long timeToLive;
-    protected final CasArray connectors;
-    protected final ContentionHandler contentionHandler;
+    final ConnectionPoolDataSource source;
+    final int poolSize;
+    final long timeToLive;
+    final CasArray<Connector> connectors;
+    final ContentionHandler contentionHandler;
 
     PoolingDataSourceSupport(ConnectionPoolDataSource source,
             CasArray connectors, long timeToLive, 

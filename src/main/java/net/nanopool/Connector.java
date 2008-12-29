@@ -9,13 +9,25 @@ import javax.sql.PooledConnection;
 
 import net.nanopool.cas.CasArray;
 
-public final class Connector {
+final class Connector {
     private final ConnectionPoolDataSource source;
     private final CasArray<Connector> connectors;
     private final int idx;
     private final long timeToLive;
     private PooledConnection connection;
     private long deadTime;
+
+    /**
+     * Used for display through the JMX interface.
+     * 'volatile' is safe enough for these variables because we are guaranteed
+     * that only one thread will ever write to them at a time, thus we're not
+     * exposed to lost-update or ordering bugs.
+     * The downside of this approach is that resetting the counters isn't eager.
+     */
+    private volatile int realConnectionsCreated = 0;
+    private volatile int connectionsLeased = 0;
+    private volatile boolean flagReset = false;
+
     
     /**
      * Used for asserting that we're not producing multiple leases for the
@@ -39,19 +51,24 @@ public final class Connector {
     }
     
     Connection getConnection() throws SQLException {
+        if (flagReset) doReset();
         if (deadTime < System.currentTimeMillis())
             invalidate();
         if (connection == null) {
             connection = source.getPooledConnection();
             connection.addConnectionEventListener(new ConnectionListener(this));
             deadTime = System.currentTimeMillis() + timeToLive;
+            realConnectionsCreated++;
         }
         assert leaseCount.incrementAndGet() == 1:
             "Connector is used by more than one thread at a time";
-        return connection.getConnection();
+        Connection con = connection.getConnection();
+        connectionsLeased++;
+        return con;
     }
     
     void returnToPool() throws SQLException {
+        if (flagReset) doReset();
         if (deadTime < System.currentTimeMillis())
             invalidate();
         Connector marker = connectors.get(idx);
@@ -75,5 +92,23 @@ public final class Connector {
         } finally {
             connection = null;
         }
+    }
+
+    int getConnectionsLeased() {
+        return connectionsLeased;
+    }
+
+    int getRealConnectionsCreated() {
+        return realConnectionsCreated;
+    }
+
+    void resetCounters() {
+        flagReset = true;
+    }
+
+    private void doReset() {
+        realConnectionsCreated = 0;
+        connectionsLeased = 0;
+        flagReset = false;
     }
 }

@@ -9,6 +9,7 @@ package net.nanopool;
  */
 public class ThrowingContentionHandler implements ContentionHandler {
     public void handleContention() {
-        throw new NanoPoolRuntimeException("Connection pool contion too high.");
+        throw new NanoPoolRuntimeException(
+                "Connection pool contention too high.");
     }
 }

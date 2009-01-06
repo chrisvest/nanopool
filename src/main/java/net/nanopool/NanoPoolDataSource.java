@@ -13,6 +13,7 @@ import net.nanopool.cas.StrongAtomicCasArray;
 public final class NanoPoolDataSource extends PoolingDataSourceSupport {
     final CheapRandom rand;
     final FsmMixin fsm;
+    final boolean dumpStackOnConnect;
     
     /**
      * Create a new {@link NanoPoolDataSource} based on the specified
@@ -40,7 +41,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
     public NanoPoolDataSource(ConnectionPoolDataSource source, int poolSize,
             long timeToLive) {
         this(source, new StrongAtomicCasArray(poolSize), timeToLive,
-                new DefaultContentionHandler());
+                new DefaultContentionHandler(), false);
     }
     
     /**
@@ -74,10 +75,11 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source,
             CasArray connectors, long timeToLive,
-            ContentionHandler contentionHandler) {
+            ContentionHandler contentionHandler, boolean dumpStackOnConnect) {
         super(source, connectors, timeToLive, contentionHandler);
         rand = new CheapRandom();
         fsm = new FsmMixin();
+        this.dumpStackOnConnect = dumpStackOnConnect;
     }
 
     /**
@@ -105,7 +107,8 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      */
     public Connection getConnection() throws SQLException {
         return fsm.getConnection(connectors, source, rand,
-                poolSize, timeToLive, contentionHandler, allConnectors);
+                poolSize, timeToLive, contentionHandler, allConnectors,
+                dumpStackOnConnect);
     }
     
     /**

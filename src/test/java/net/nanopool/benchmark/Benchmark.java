@@ -73,7 +73,7 @@ public class Benchmark {
         CountDownLatch startSignal = new CountDownLatch(1);
         int timeToLive = 300000; // five minutes
         NanoPoolDataSource npds = new NanoPoolDataSource(
-                cpds, casArray, timeToLive, new DefaultContentionHandler(false));
+                cpds, casArray, timeToLive, new DefaultContentionHandler(false), false);
         Worker[] workers = new Worker[threads];
         for (int i = 0; i < threads; i++) {
             Worker worker = new Worker(npds, startSignal);

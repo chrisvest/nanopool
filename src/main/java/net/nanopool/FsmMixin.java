@@ -20,7 +20,9 @@ final class FsmMixin {
             final int poolSize,
             final long timeToLive,
             final ContentionHandler contentionHandler,
-            final Connector[] allConnectors) throws SQLException {
+            final Connector[] allConnectors,
+            final boolean dumpStack) throws SQLException {
+        if (dumpStack) Thread.dumpStack();
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
         int idx = start;
         while (true) {

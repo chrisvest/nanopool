@@ -27,6 +27,6 @@ public abstract class PoolingDataSourceStateMixin implements DataSourceState {
         cpds.setServerName("localhost");
         CasArray<Connector> ca = casArrayFactory.create();
         ContentionHandler ch = contentionHandlerFactory.create();
-        return new NanoPoolDataSource(cpds, ca, timeout, ch);
+        return new NanoPoolDataSource(cpds, ca, timeout, ch, false);
     }
 }

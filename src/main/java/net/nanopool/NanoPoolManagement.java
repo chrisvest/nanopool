@@ -98,4 +98,30 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
             if (cn != null) cn.resetCounters();
         }
     }
+
+    public String listConnectionOwningThreadsStackTraces() {
+        StringBuilder sb = new StringBuilder();
+        for (Connector cn : np.allConnectors) {
+            if (cn == null)
+                continue;
+            Thread owner = cn.getOwner();
+            sb.append(cn);
+            if (owner == null) {
+                sb.append(" is not currently owned by anyone.\n");
+            } else {
+                sb.append(" owned by " + owner.getName() + ":\n");
+                StackTraceElement[] trace = owner.getStackTrace();
+                if (trace.length == 0)
+                    sb.append("  No stack trace available.\n");
+                for (StackTraceElement frame : trace) {
+                    sb.append("  ").append(frame).append("\n");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    public void dumpConnectionOwningThreadsStackTraces() {
+        System.err.print(listConnectionOwningThreadsStackTraces());
+    }
 }

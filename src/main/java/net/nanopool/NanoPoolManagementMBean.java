@@ -20,4 +20,6 @@ public interface NanoPoolManagementMBean {
     // operations
     String shutDown();
     void resetCounters();
+    String listConnectionOwningThreadsStackTraces();
+    void dumpConnectionOwningThreadsStackTraces();
 }

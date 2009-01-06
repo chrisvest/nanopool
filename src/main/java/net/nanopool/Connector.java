@@ -16,6 +16,7 @@ final class Connector {
     private final long timeToLive;
     private PooledConnection connection;
     private long deadTime;
+    private volatile Thread owner;
 
     /**
      * Used for display through the JMX interface.
@@ -62,6 +63,7 @@ final class Connector {
         }
         assert leaseCount.incrementAndGet() == 1:
             "Connector is used by more than one thread at a time";
+        owner = Thread.currentThread();
         Connection con = connection.getConnection();
         connectionsLeased++;
         return con;
@@ -82,6 +84,7 @@ final class Connector {
             // we've been shut down, so let's clean up.
             invalidate();
         }
+        owner = null;
     }
     
     void invalidate() throws SQLException {
@@ -110,5 +113,9 @@ final class Connector {
         realConnectionsCreated = 0;
         connectionsLeased = 0;
         flagReset = false;
+    }
+
+    Thread getOwner() {
+        return owner;
     }
 }

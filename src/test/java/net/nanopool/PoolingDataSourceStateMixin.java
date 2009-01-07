@@ -1,5 +1,6 @@
 package net.nanopool;
 
+import net.nanopool.contention.ContentionHandler;
 import javax.sql.DataSource;
 
 import net.nanopool.cas.CasArray;
@@ -25,8 +26,7 @@ public abstract class PoolingDataSourceStateMixin implements DataSourceState {
         cpds.setUser("root");
         cpds.setPassword("");
         cpds.setServerName("localhost");
-        CasArray<Connector> ca = casArrayFactory.create();
         ContentionHandler ch = contentionHandlerFactory.create();
-        return new NanoPoolDataSource(cpds, ca, timeout, ch, false);
+        return new NanoPoolDataSource(cpds, 10, timeout, ch, false);
     }
 }

@@ -1,5 +1,6 @@
 package net.nanopool;
 
+import net.nanopool.contention.ContentionHandler;
 import javax.sql.DataSource;
 
 import net.nanopool.cas.CasArray;

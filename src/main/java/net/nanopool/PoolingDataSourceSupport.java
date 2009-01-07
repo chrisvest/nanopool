@@ -10,21 +10,16 @@ import net.nanopool.cas.CasArray;
 
 public abstract class PoolingDataSourceSupport implements DataSource {
     final ConnectionPoolDataSource source;
-    final int poolSize;
-    final long timeToLive;
     final CasArray<Connector> connectors;
     final Connector[] allConnectors;
-    final ContentionHandler contentionHandler;
+    final State state;
 
     PoolingDataSourceSupport(ConnectionPoolDataSource source,
-            CasArray connectors, long timeToLive, 
-            ContentionHandler contentionHandler) {
+            Configuration config) {
+        this.state = config.getState();
         this.source = source;
-        this.poolSize = connectors.length();
-        this.timeToLive = timeToLive;
-        this.connectors = connectors;
-        this.allConnectors = new Connector[poolSize];
-        this.contentionHandler = contentionHandler;
+        this.connectors = state.buildCasArray();
+        this.allConnectors = new Connector[state.poolSize];
     }
 
     public PrintWriter getLogWriter() throws SQLException {

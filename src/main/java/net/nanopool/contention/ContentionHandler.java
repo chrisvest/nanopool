@@ -1,4 +1,4 @@
-package net.nanopool;
+package net.nanopool.contention;
 
 /**
  * A ContentionHandler decides what to do when we reckon there's contention

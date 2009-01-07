@@ -1,4 +1,6 @@
-package net.nanopool;
+package net.nanopool.contention;
+
+import net.nanopool.*;
 
 /**
  * An implementation of {@link ContentionHandler} that throws a

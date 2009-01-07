@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
-import net.nanopool.DefaultContentionHandler;
+import net.nanopool.contention.DefaultContentionHandler;
 import net.nanopool.NanoPoolDataSource;
 import net.nanopool.cas.CasArray;
 import net.nanopool.cas.StrongAtomicCasArray;
@@ -73,7 +73,7 @@ public class Benchmark {
         CountDownLatch startSignal = new CountDownLatch(1);
         int timeToLive = 300000; // five minutes
         NanoPoolDataSource npds = new NanoPoolDataSource(
-                cpds, casArray, timeToLive, new DefaultContentionHandler(false), false);
+                cpds, casArray.length(), timeToLive);
         Worker[] workers = new Worker[threads];
         for (int i = 0; i < threads; i++) {
             Worker worker = new Worker(npds, startSignal);

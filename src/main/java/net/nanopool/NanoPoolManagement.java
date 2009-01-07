@@ -21,27 +21,27 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public int getCurrentOpenConnectionsCount() {
-        return np.fsm.countOpenConnections(np.connectors);
+        return FsmMixin.countOpenConnections(np.connectors);
     }
 
     public int getPoolSize() {
-        return np.poolSize;
+        return np.state.poolSize;
     }
 
     public long getConnectionTimeToLive() {
-        return np.timeToLive;
+        return np.state.ttl;
     }
 
     public String getContentionHandlerClassName() {
         try {
-            return np.contentionHandler.getClass().getName();
+            return np.state.contentionHandler.getClass().getName();
         } catch (NullPointerException npe) {
             return "null";
         }
     }
 
     public String getContentionHandler() {
-        return String.valueOf(np.contentionHandler);
+        return String.valueOf(np.state.contentionHandler);
     }
 
     public boolean isShutDown() {

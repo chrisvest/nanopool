@@ -1,5 +1,8 @@
 package net.nanopool;
 
+import net.nanopool.contention.DefaultContentionHandler;
+import net.nanopool.contention.ContentionHandler;
+import net.nanopool.contention.SleepyContentionHandler;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 

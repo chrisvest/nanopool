@@ -5,24 +5,25 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sql.CommonDataSource;
 import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
+import net.nanopool.hooks.Hook;
 
 final class FsmMixin {
     static final Connector reservationMarker = new Connector();
     static final Connector shutdownMarker = new Connector();
 
-    public Connection getConnection(
+    public static Connection getConnection(
             final CasArray<Connector> connectors,
             final ConnectionPoolDataSource source,
             final CheapRandom rand,
-            final int poolSize,
-            final long timeToLive,
-            final ContentionHandler contentionHandler,
             final Connector[] allConnectors,
-            final boolean dumpStack) throws SQLException {
-        if (dumpStack) Thread.dumpStack();
+            final State state) throws SQLException {
+        runHooks(state.preConnectHooks, source, null, null);
+        final int poolSize = state.poolSize;
+        final long ttl = state.ttl;
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
         int idx = start;
         while (true) {
@@ -35,20 +36,28 @@ final class FsmMixin {
                 // we might have gotten one
                 if (connectors.cas(idx, reservationMarker, con)) { // reserve it
                     if (con == null) {
-                        con = new Connector(source, connectors, idx, timeToLive);
+                        con = new Connector(source, connectors, idx, ttl);
                         allConnectors[idx] = con;
                     }
-                    return con.getConnection();
+                    try {
+                        Connection connection = con.getConnection();
+                        runHooks(state.postConnectHooks,
+                                source, connection, null);
+                        return connection;
+                    } catch (SQLException sqle) {
+                        runHooks(state.postConnectHooks,
+                                source, null, sqle);
+                    }
                 }
                 con = connectors.get(idx);
             }
             ++idx;
             if (idx == start)
-                contentionHandler.handleContention();
+                state.contentionHandler.handleContention();
         }
     }
 
-    public List<SQLException> shutdown(
+    public static List<SQLException> shutdown(
             final CasArray<Connector> connectors,
             final int poolSize) {
         List<SQLException> caughtExceptions = new ArrayList<SQLException>();
@@ -72,7 +81,7 @@ final class FsmMixin {
         return caughtExceptions;
     }
 
-    public int countOpenConnections(CasArray<Connector> connectors) {
+    public static int countOpenConnections(CasArray<Connector> connectors) {
         int openCount = 0;
         for (Connector cn : connectors) {
             if (cn != null
@@ -82,5 +91,13 @@ final class FsmMixin {
             }
         }
         return openCount;
+    }
+
+    private static void runHooks(Cons<Hook> hooks,
+            CommonDataSource source, Connection con, SQLException sqle) {
+        while (hooks != null) {
+            hooks.first.run(source, con, sqle);
+            hooks = hooks.rest;
+        }
     }
 }

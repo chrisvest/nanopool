@@ -1,5 +1,7 @@
 package net.nanopool;
 
+import net.nanopool.contention.DefaultContentionHandler;
+import net.nanopool.contention.ContentionHandler;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -8,12 +10,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
-import net.nanopool.cas.StrongAtomicCasArray;
 
 public final class NanoPoolDataSource extends PoolingDataSourceSupport {
     final CheapRandom rand;
-    final FsmMixin fsm;
-    final boolean dumpStackOnConnect;
     
     /**
      * Create a new {@link NanoPoolDataSource} based on the specified
@@ -40,8 +39,8 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source, int poolSize,
             long timeToLive) {
-        this(source, new StrongAtomicCasArray(poolSize), timeToLive,
-                new DefaultContentionHandler(), false);
+        this(source, new Configuration()
+                .setPoolSize(poolSize).setTimeToLive(timeToLive));
     }
     
     /**
@@ -74,12 +73,9 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * @since 1.0
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source,
-            CasArray connectors, long timeToLive,
-            ContentionHandler contentionHandler, boolean dumpStackOnConnect) {
-        super(source, connectors, timeToLive, contentionHandler);
+            Configuration config) {
+        super(source, config);
         rand = new CheapRandom();
-        fsm = new FsmMixin();
-        this.dumpStackOnConnect = dumpStackOnConnect;
     }
 
     /**
@@ -106,9 +102,8 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * @since 1.0
      */
     public Connection getConnection() throws SQLException {
-        return fsm.getConnection(connectors, source, rand,
-                poolSize, timeToLive, contentionHandler, allConnectors,
-                dumpStackOnConnect);
+        return FsmMixin.getConnection(connectors, source, rand,
+                allConnectors, state);
     }
     
     /**
@@ -134,7 +129,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * @since 1.0
      */
     public List<SQLException> shutdown() {
-        return fsm.shutdown(connectors, poolSize);
+        return FsmMixin.shutdown(connectors, state.poolSize);
     }
     
     /**

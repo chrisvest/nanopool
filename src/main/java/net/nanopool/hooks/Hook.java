@@ -14,5 +14,6 @@ import javax.sql.ConnectionPoolDataSource;
  * @author cvh
  */
 public interface Hook {
-    void run(ConnectionPoolDataSource source, Connection con, SQLException sqle);
+    void run(EventType type, ConnectionPoolDataSource source,
+            Connection con, SQLException sqle);
 }

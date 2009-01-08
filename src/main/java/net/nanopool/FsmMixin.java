@@ -8,6 +8,7 @@ import java.util.List;
 import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
+import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 
 final class FsmMixin {
@@ -20,7 +21,8 @@ final class FsmMixin {
             final CheapRandom rand,
             final Connector[] allConnectors,
             final State state) throws SQLException {
-        runHooks(state.preConnectHooks, source, null, null);
+        runHooks(state.preConnectHooks, EventType.preConnect,
+                source, null, null);
         final int poolSize = connectors.length();
         final long ttl = state.ttl;
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
@@ -42,11 +44,11 @@ final class FsmMixin {
                         Connection connection = con.getConnection(
                                 state.preReleaseHooks, state.postReleaseHooks,
                                 state.connectionInvalidationHooks);
-                        runHooks(state.postConnectHooks,
+                        runHooks(state.postConnectHooks, EventType.postConnect,
                                 source, connection, null);
                         return connection;
                     } catch (SQLException sqle) {
-                        runHooks(state.postConnectHooks,
+                        runHooks(state.postConnectHooks, EventType.postConnect,
                                 source, null, sqle);
                     }
                 }
@@ -93,10 +95,10 @@ final class FsmMixin {
         return openCount;
     }
 
-    static void runHooks(Cons<Hook> hooks,
+    static void runHooks(Cons<Hook> hooks, EventType type,
             ConnectionPoolDataSource source, Connection con, SQLException sqle) {
         while (hooks != null) {
-            hooks.first.run(source, con, sqle);
+            hooks.first.run(type, source, con, sqle);
             hooks = hooks.rest;
         }
     }

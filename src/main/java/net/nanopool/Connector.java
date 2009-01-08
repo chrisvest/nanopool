@@ -8,6 +8,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
 import net.nanopool.cas.CasArray;
+import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 
 final class Connector {
@@ -85,7 +86,8 @@ final class Connector {
     }
     
     void returnToPool() throws SQLException {
-        FsmMixin.runHooks(preReleaseHooks, source, currentLease, null);
+        FsmMixin.runHooks(preReleaseHooks, EventType.preRelease,
+                source, currentLease, null);
         try {
             if (flagReset) doReset();
             if (deadTime < System.currentTimeMillis())
@@ -105,7 +107,8 @@ final class Connector {
             Connection tmpLease = currentLease;
             currentLease = null;
             owner = null;
-            FsmMixin.runHooks(postReleaseHooks, source, tmpLease, null);
+            FsmMixin.runHooks(postReleaseHooks, EventType.postRelease,
+                    source, tmpLease, null);
         }
     }
     
@@ -121,7 +124,8 @@ final class Connector {
             throw e;
         } finally {
             connection = null;
-            FsmMixin.runHooks(connectionInvalidationHooks, source, null, sqle);
+            FsmMixin.runHooks(connectionInvalidationHooks,
+                    EventType.invalidation, source, null, sqle);
         }
     }
 

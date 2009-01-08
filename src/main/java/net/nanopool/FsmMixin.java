@@ -15,7 +15,7 @@ final class FsmMixin {
     static final Connector reservationMarker = new Connector();
     static final Connector shutdownMarker = new Connector();
 
-    public static Connection getConnection(
+    static Connection getConnection(
             final CasArray<Connector> connectors,
             final ConnectionPoolDataSource source,
             final CheapRandom rand,
@@ -57,7 +57,7 @@ final class FsmMixin {
         }
     }
 
-    public static List<SQLException> shutdown(
+    static List<SQLException> shutdown(
             final CasArray<Connector> connectors,
             final int poolSize) {
         List<SQLException> caughtExceptions = new ArrayList<SQLException>();
@@ -81,7 +81,7 @@ final class FsmMixin {
         return caughtExceptions;
     }
 
-    public static int countOpenConnections(CasArray<Connector> connectors) {
+    static int countOpenConnections(CasArray<Connector> connectors) {
         int openCount = 0;
         for (Connector cn : connectors) {
             if (cn != null

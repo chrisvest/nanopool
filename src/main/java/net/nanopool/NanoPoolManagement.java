@@ -128,4 +128,8 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     public void dumpConnectionOwningThreadsStackTraces() {
         System.err.print(listConnectionOwningThreadsStackTraces());
     }
+
+    public void resizePool(int newSize) {
+        FsmMixin.resizePool(np, newSize);
+    }
 }

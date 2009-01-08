@@ -8,6 +8,7 @@ import java.util.List;
 import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
+import net.nanopool.cas.ResizableCasArray;
 import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 
@@ -81,6 +82,46 @@ final class FsmMixin {
         }
         
         return caughtExceptions;
+    }
+
+    static void resizePool(PoolingDataSourceSupport pds, int newSize) {
+        if (pds.connectors.get(0) == shutdownMarker)
+            throw new IllegalStateException("Connection pool is shut down.");
+        CasArray newCA = pds.state.buildCasArray(newSize);
+        if (!(pds.connectors instanceof ResizableCasArray)) {
+            throw new IllegalStateException(
+                    "The CasArray in use does not support resizing.");
+        }
+        ResizableCasArray rca = (ResizableCasArray)pds.connectors;
+        if (rca.length() == newSize) return;
+
+        pds.resizingLock.lock();
+        try {
+            int len = rca.length();
+            if (len == newSize) return;
+            if (len < newSize) {
+                // pool growth
+                Connector[] newAllArray = new Connector[newSize];
+                System.arraycopy(pds.allConnectors, 0, newAllArray, 0, len);
+                pds.allConnectors = newAllArray;
+                for (int i = 0; i < len; i++) {
+                    newCA.cas(i, reservationMarker, null);
+                }
+                pds.connectors = newCA;
+                rca.setCasDelegate(newCA);
+                for (int i = 0; i < len; i++) {
+                    newCA.cas(i, rca.get(i), reservationMarker);
+                }
+            } else {
+                // pool shrink
+                Connector[] newAllArray = new Connector[newSize];
+                System.arraycopy(pds.allConnectors, 0, newAllArray, 0, newSize);
+                // TODO ...
+            }
+
+        } finally {
+            pds.resizingLock.unlock();
+        }
     }
 
     static int countOpenConnections(CasArray<Connector> connectors) {

@@ -38,9 +38,13 @@ final class State {
     }
 
     <T> CasArray<T> buildCasArray() {
+        return buildCasArray(poolSize);
+    }
+
+    <T> CasArray<T> buildCasArray(int size) {
         try {
             Constructor ctor = casArrayType.getConstructor(casArrayCtorSign);
-            return (CasArray<T>) ctor.newInstance(poolSize);
+            return (CasArray<T>) ctor.newInstance(size);
         } catch (Exception ex) {
             throw new NanoPoolRuntimeException(
                     "Could not build CasArray instance.", ex);

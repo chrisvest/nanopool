@@ -9,6 +9,6 @@ package net.nanopool.cas;
  *
  * @author cvh
  */
-public interface ResizableCasArray extends CasArray {
-    void resizeTo(int newSize);
+public interface ResizableCasArray<T> extends CasArray<T> {
+    void setCasDelegate(CasArray<T> delegate);
 }

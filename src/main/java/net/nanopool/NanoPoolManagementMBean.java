@@ -22,4 +22,5 @@ public interface NanoPoolManagementMBean {
     void resetCounters();
     String listConnectionOwningThreadsStackTraces();
     void dumpConnectionOwningThreadsStackTraces();
+    void resizePool(int newSize);
 }

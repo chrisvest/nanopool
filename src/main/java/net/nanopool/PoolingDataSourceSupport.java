@@ -3,15 +3,18 @@ package net.nanopool;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 import net.nanopool.cas.CasArray;
 
 public abstract class PoolingDataSourceSupport implements DataSource {
+    final Lock resizingLock = new ReentrantLock();
     final ConnectionPoolDataSource source;
-    final CasArray<Connector> connectors;
     final State state;
+    volatile CasArray<Connector> connectors;
     volatile Connector[] allConnectors;
 
     PoolingDataSourceSupport(ConnectionPoolDataSource source,

@@ -25,7 +25,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public int getPoolSize() {
-        return np.state.poolSize;
+        return np.connectors.length();
     }
 
     public long getConnectionTimeToLive() {
@@ -79,7 +79,8 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public int getConnectionsCreated() {
         int createdCount = 0;
-        for (Connector cn : np.allConnectors) {
+        Connector[] connectors = np.allConnectors;
+        for (Connector cn : connectors) {
             if (cn != null) createdCount += cn.getRealConnectionsCreated();
         }
         return createdCount;
@@ -87,21 +88,24 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public int getConnectionsLeased() {
         int leasedCount = 0;
-        for (Connector cn : np.allConnectors) {
+        Connector[] connectors = np.allConnectors;
+        for (Connector cn : connectors) {
             if (cn != null) leasedCount += cn.getConnectionsLeased();
         }
         return leasedCount;
     }
 
     public void resetCounters() {
-        for (Connector cn : np.allConnectors) {
+        Connector[] connectors = np.allConnectors;
+        for (Connector cn : connectors) {
             if (cn != null) cn.resetCounters();
         }
     }
 
     public String listConnectionOwningThreadsStackTraces() {
         StringBuilder sb = new StringBuilder();
-        for (Connector cn : np.allConnectors) {
+        Connector[] connectors = np.allConnectors;
+        for (Connector cn : connectors) {
             if (cn == null)
                 continue;
             Thread owner = cn.getOwner();

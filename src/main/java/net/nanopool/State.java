@@ -1,9 +1,6 @@
 package net.nanopool;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.nanopool.cas.CasArray;
 import net.nanopool.contention.ContentionHandler;
 import net.nanopool.hooks.Hook;
@@ -12,6 +9,11 @@ final class State {
     private static final Class[] casArrayCtorSign =
             new Class[] {Integer.TYPE};
 
+    /**
+     * Note on poolSize: It should _only_ be used for building the CasArray,
+     * because in future versions we might allow resizing of the pool, and
+     * therefor this value might grow stale.
+     */
     final int poolSize;
     final long ttl;
     final Class<? extends CasArray> casArrayType;

@@ -21,7 +21,7 @@ final class FsmMixin {
             final Connector[] allConnectors,
             final State state) throws SQLException {
         runHooks(state.preConnectHooks, source, null, null);
-        final int poolSize = state.poolSize;
+        final int poolSize = connectors.length();
         final long ttl = state.ttl;
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
         int idx = start;
@@ -59,11 +59,10 @@ final class FsmMixin {
     }
 
     static List<SQLException> shutdown(
-            final CasArray<Connector> connectors,
-            final int poolSize) {
+            final CasArray<Connector> connectors) {
         List<SQLException> caughtExceptions = new ArrayList<SQLException>();
         
-        iterate_connectors: for (int i = 0; i < poolSize; i++) {
+        iterate_connectors: for (int i = 0; i < connectors.length(); i++) {
             Connector con = null;
             do { // try snatching it and eagerly mark it as shut down.
                 con = connectors.get(i);

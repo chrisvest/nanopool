@@ -129,7 +129,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * @since 1.0
      */
     public List<SQLException> shutdown() {
-        return FsmMixin.shutdown(connectors, state.poolSize);
+        return FsmMixin.shutdown(connectors);
     }
     
     /**

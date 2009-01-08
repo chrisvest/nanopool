@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.sql.CommonDataSource;
 import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
@@ -40,7 +39,9 @@ final class FsmMixin {
                         allConnectors[idx] = con;
                     }
                     try {
-                        Connection connection = con.getConnection();
+                        Connection connection = con.getConnection(
+                                state.preReleaseHooks, state.postReleaseHooks,
+                                state.connectionInvalidationHooks);
                         runHooks(state.postConnectHooks,
                                 source, connection, null);
                         return connection;
@@ -93,8 +94,8 @@ final class FsmMixin {
         return openCount;
     }
 
-    private static void runHooks(Cons<Hook> hooks,
-            CommonDataSource source, Connection con, SQLException sqle) {
+    static void runHooks(Cons<Hook> hooks,
+            ConnectionPoolDataSource source, Connection con, SQLException sqle) {
         while (hooks != null) {
             hooks.first.run(source, con, sqle);
             hooks = hooks.rest;

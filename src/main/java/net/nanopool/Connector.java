@@ -8,6 +8,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
 import net.nanopool.cas.CasArray;
+import net.nanopool.hooks.Hook;
 
 final class Connector {
     private final ConnectionPoolDataSource source;
@@ -16,7 +17,7 @@ final class Connector {
     private final long timeToLive;
     private PooledConnection connection;
     private long deadTime;
-    private volatile Thread owner;
+    private Connection currentLease;
 
     /**
      * Used for display through the JMX interface.
@@ -28,7 +29,15 @@ final class Connector {
     private volatile int realConnectionsCreated = 0;
     private volatile int connectionsLeased = 0;
     private volatile boolean flagReset = false;
+    private volatile Thread owner;
 
+    /**
+     * Hooks. We don't need to sync these attributes because they are only
+     * ever touched by one thread during a lease period.
+     */
+    private Cons<Hook> preReleaseHooks;
+    private Cons<Hook> postReleaseHooks;
+    private Cons<Hook> connectionInvalidationHooks;
     
     /**
      * Used for asserting that we're not producing multiple leases for the
@@ -51,7 +60,10 @@ final class Connector {
         this(null, null, 0, 0);
     }
     
-    Connection getConnection() throws SQLException {
+    Connection getConnection(
+            Cons<Hook> preReleaseHooks,
+            Cons<Hook> postReleaseHooks,
+            Cons<Hook> connectionInvalidationHooks) throws SQLException {
         if (flagReset) doReset();
         if (deadTime < System.currentTimeMillis())
             invalidate();
@@ -63,37 +75,53 @@ final class Connector {
         }
         assert leaseCount.incrementAndGet() == 1:
             "Connector is used by more than one thread at a time";
-        owner = Thread.currentThread();
-        Connection con = connection.getConnection();
+        currentLease = connection.getConnection();
+        this.owner = Thread.currentThread();
+        this.preReleaseHooks = preReleaseHooks;
+        this.postReleaseHooks = postReleaseHooks;
+        this.connectionInvalidationHooks = connectionInvalidationHooks;
         connectionsLeased++;
-        return con;
+        return currentLease;
     }
     
     void returnToPool() throws SQLException {
-        if (flagReset) doReset();
-        if (deadTime < System.currentTimeMillis())
-            invalidate();
-        Connector marker = connectors.get(idx);
-        assert leaseCount.decrementAndGet() == 0:
-            "Connector was used by more than one thread at a time";
-        if (marker != FsmMixin.shutdownMarker) {
-            assert marker == FsmMixin.reservationMarker:
-                "Invalid state of CasArray<Connector> on index " + idx;
-            connectors.cas(idx, this, marker);
-        } else {
-            // we've been shut down, so let's clean up.
-            invalidate();
+        FsmMixin.runHooks(preReleaseHooks, source, currentLease, null);
+        try {
+            if (flagReset) doReset();
+            if (deadTime < System.currentTimeMillis())
+                invalidate();
+            Connector marker = connectors.get(idx);
+            assert leaseCount.decrementAndGet() == 0:
+                "Connector was used by more than one thread at a time";
+            if (marker != FsmMixin.shutdownMarker) {
+                assert marker == FsmMixin.reservationMarker:
+                    "Invalid state of CasArray<Connector> on index " + idx;
+                connectors.cas(idx, this, marker);
+            } else {
+                // we've been shut down, so let's clean up.
+                invalidate();
+            }
+        } finally {
+            Connection tmpLease = currentLease;
+            currentLease = null;
+            owner = null;
+            FsmMixin.runHooks(postReleaseHooks, source, tmpLease, null);
         }
-        owner = null;
     }
     
     void invalidate() throws SQLException {
+        currentLease = null;
+        SQLException sqle = null;
         if (connection == null)
             return;
         try {
             connection.close();
+        } catch (SQLException e) {
+            sqle = e;
+            throw e;
         } finally {
             connection = null;
+            FsmMixin.runHooks(connectionInvalidationHooks, source, null, sqle);
         }
     }
 

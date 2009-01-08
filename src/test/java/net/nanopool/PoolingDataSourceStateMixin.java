@@ -26,7 +26,10 @@ public abstract class PoolingDataSourceStateMixin implements DataSourceState {
         cpds.setUser("root");
         cpds.setPassword("");
         cpds.setServerName("localhost");
-        ContentionHandler ch = contentionHandlerFactory.create();
-        return new NanoPoolDataSource(cpds, 10, timeout, ch, false);
+        Configuration config = new Configuration();
+        config.setContentionHandler(contentionHandlerFactory.create())
+              .setPoolSize(10)
+              .setTimeToLive(timeout);
+        return new NanoPoolDataSource(cpds, config);
     }
 }

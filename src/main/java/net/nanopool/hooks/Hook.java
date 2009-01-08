@@ -7,12 +7,12 @@ package net.nanopool.hooks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.CommonDataSource;
+import javax.sql.ConnectionPoolDataSource;
 
 /**
  *
  * @author cvh
  */
 public interface Hook {
-    void run(CommonDataSource source, Connection con, SQLException sqle);
+    void run(ConnectionPoolDataSource source, Connection con, SQLException sqle);
 }

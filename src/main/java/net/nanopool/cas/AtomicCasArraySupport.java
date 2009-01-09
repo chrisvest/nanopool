@@ -5,13 +5,13 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public abstract class AtomicCasArraySupport<T>
         extends CasArraySupport<T> implements CasArray<T> {
-    private final AtomicReferenceArray<T> array;
+    protected final AtomicReferenceArray<T> array;
     
     public AtomicCasArraySupport(int size) {
         array = new AtomicReferenceArray<T>(size);
     }
     
-    public final boolean cas(int idx, T newValue, T oldValue) {
+    public boolean cas(int idx, T newValue, T oldValue) {
         return doCas(array, idx, newValue, oldValue);
     }
 

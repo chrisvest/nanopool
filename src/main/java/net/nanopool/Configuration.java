@@ -3,7 +3,7 @@ package net.nanopool;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import net.nanopool.cas.CasArray;
-import net.nanopool.cas.StrongAtomicCasArray;
+import net.nanopool.cas.StrongResizableAtomicCasArray;
 import net.nanopool.contention.ContentionHandler;
 import net.nanopool.contention.DefaultContentionHandler;
 import net.nanopool.hooks.Hook;
@@ -17,7 +17,7 @@ public class Configuration {
 
     public Configuration() {
         state.set(new State(
-                10, 300000, StrongAtomicCasArray.class,
+                10, 300000, StrongResizableAtomicCasArray.class,
                 new DefaultContentionHandler(), null, null, null, null, null
         ));
     }

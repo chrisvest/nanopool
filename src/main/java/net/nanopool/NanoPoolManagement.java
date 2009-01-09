@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.List;
 import javax.sql.DataSource;
+import net.nanopool.cas.ResizableCasArray;
 
 /**
  *
@@ -163,5 +164,9 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
                 ex.printStackTrace();
             }
         }
+    }
+
+    public boolean isReziable() {
+        return np.connectors instanceof ResizableCasArray;
     }
 }

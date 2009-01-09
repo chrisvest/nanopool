@@ -109,20 +109,22 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     public String listConnectionOwningThreadsStackTraces() {
         StringBuilder sb = new StringBuilder();
         Connector[] connectors = np.allConnectors;
+        int i = -1;
         for (Connector cn : connectors) {
+            i++;
             if (cn == null)
                 continue;
             Thread owner = cn.getOwner();
-            sb.append(cn);
+            sb.append('[').append(i).append("] ").append(cn);
             if (owner == null) {
                 sb.append(" is not currently owned by anyone.\n");
             } else {
                 sb.append(" owned by " + owner.getName() + ":\n");
                 StackTraceElement[] trace = owner.getStackTrace();
                 if (trace.length == 0)
-                    sb.append("  No stack trace available.\n");
+                    sb.append("    No stack trace available.\n");
                 for (StackTraceElement frame : trace) {
-                    sb.append("  ").append(frame).append("\n");
+                    sb.append("    ").append(frame).append("\n");
                 }
             }
         }
@@ -135,5 +137,31 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public void resizePool(int newSize) {
         FsmMixin.resizePool(np, newSize);
+    }
+
+    public void interruptConnection(int id) {
+        Connector cn = np.allConnectors[id];
+        Thread owner = cn.getOwner();
+        if (owner != null) {
+            owner.interrupt();
+        }
+    }
+
+    public void killConnection(int id) {
+        Connector cn = np.allConnectors[id];
+        Thread owner = cn.getOwner();
+        if (owner != null) {
+            owner.stop();
+            try {
+                cn.invalidate();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            try {
+                cn.returnToPool();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 }

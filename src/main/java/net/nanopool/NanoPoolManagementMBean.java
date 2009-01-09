@@ -23,4 +23,6 @@ public interface NanoPoolManagementMBean {
     String listConnectionOwningThreadsStackTraces();
     void dumpConnectionOwningThreadsStackTraces();
     void resizePool(int newSize);
+    void interruptConnection(int id);
+    void killConnection(int id);
 }

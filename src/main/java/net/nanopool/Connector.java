@@ -95,7 +95,8 @@ final class Connector {
             Connector marker = connectors.get(idx);
             assert leaseCount.decrementAndGet() == 0:
                 "Connector was used by more than one thread at a time";
-            if (marker != FsmMixin.shutdownMarker) {
+            if (marker != FsmMixin.shutdownMarker
+                    && marker != FsmMixin.outdatedMarker) {
                 assert marker == FsmMixin.reservationMarker:
                     "Invalid state of CasArray<Connector> on index " + idx;
                 connectors.cas(idx, this, marker);

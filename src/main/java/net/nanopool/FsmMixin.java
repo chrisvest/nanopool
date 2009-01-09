@@ -15,6 +15,7 @@ import net.nanopool.hooks.Hook;
 final class FsmMixin {
     static final Connector reservationMarker = new Connector();
     static final Connector shutdownMarker = new Connector();
+    static final Connector outdatedMarker = new Connector();
 
     static Connection getConnection(
             final CasArray<Connector> connectors,
@@ -32,6 +33,7 @@ final class FsmMixin {
             if (idx == poolSize)
                 idx = 0;
             Connector con = connectors.get(idx);
+            if (con == outdatedMarker) throw CasArrayOutdatedException.INSTANCE;
             while (con != reservationMarker) {
                 if (con == shutdownMarker)
                     throw new IllegalStateException("Connection pool is shut down.");
@@ -69,6 +71,8 @@ final class FsmMixin {
             Connector con = null;
             do { // try snatching it and eagerly mark it as shut down.
                 con = connectors.get(i);
+                if (con == outdatedMarker)
+                    throw CasArrayOutdatedException.INSTANCE;
                 // avoid CAS if already shut down:
                 if (con == shutdownMarker) continue iterate_connectors;
             } while(!connectors.cas(i, shutdownMarker, con));
@@ -87,26 +91,26 @@ final class FsmMixin {
     static void resizePool(PoolingDataSourceSupport pds, int newSize) {
         if (pds.connectors.get(0) == shutdownMarker)
             throw new IllegalStateException("Connection pool is shut down.");
-        CasArray newCA = pds.state.buildCasArray(newSize);
         if (!(pds.connectors instanceof ResizableCasArray)) {
             throw new IllegalStateException(
                     "The CasArray in use does not support resizing.");
         }
-        ResizableCasArray rca = (ResizableCasArray)pds.connectors;
-        if (rca.length() == newSize) return;
 
         pds.resizingLock.lock();
         try {
+            ResizableCasArray<Connector> rca = (ResizableCasArray)pds.connectors;
             int len = rca.length();
             if (len == newSize) return;
+            CasArray newCA = pds.state.buildCasArray(newSize);
+            for (int i = 0; i < len; i++) {
+                newCA.cas(i, reservationMarker, null);
+            }
+
             if (len < newSize) {
                 // pool growth
                 Connector[] newAllArray = new Connector[newSize];
                 System.arraycopy(pds.allConnectors, 0, newAllArray, 0, len);
                 pds.allConnectors = newAllArray;
-                for (int i = 0; i < len; i++) {
-                    newCA.cas(i, reservationMarker, null);
-                }
                 pds.connectors = newCA;
                 rca.setCasDelegate(newCA);
                 for (int i = 0; i < len; i++) {
@@ -115,10 +119,25 @@ final class FsmMixin {
             } else {
                 // pool shrink
                 Connector[] newAllArray = new Connector[newSize];
+                ArrayList<Integer> nilIndices = new ArrayList<Integer>();
+                pds.connectors = newCA;
+                for (int i = 0; i < newSize; i++) {
+                    Connector cn = rca.get(i);
+                    if (cn == null) {
+                        nilIndices.add(i);
+                    } else {
+                        newCA.cas(i, cn, reservationMarker);
+                    }
+                }
+                for (int i = newSize; i < len; i++) {
+                    rca.cas(i, rca.get(i), outdatedMarker);
+                }
                 System.arraycopy(pds.allConnectors, 0, newAllArray, 0, newSize);
-                // TODO ...
+                pds.allConnectors = newAllArray;
+                for (int i : nilIndices) {
+                    newCA.cas(i, null, reservationMarker);
+                }
             }
-
         } finally {
             pds.resizingLock.unlock();
         }
@@ -127,6 +146,7 @@ final class FsmMixin {
     static int countOpenConnections(CasArray<Connector> connectors) {
         int openCount = 0;
         for (Connector cn : connectors) {
+            if (cn == outdatedMarker) throw CasArrayOutdatedException.INSTANCE;
             if (cn != null
                 && cn != reservationMarker
                 && cn != shutdownMarker) {

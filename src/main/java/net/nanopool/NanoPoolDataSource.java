@@ -102,8 +102,12 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * @since 1.0
      */
     public Connection getConnection() throws SQLException {
-        return FsmMixin.getConnection(connectors, source, rand,
-                allConnectors, state);
+        try {
+            return FsmMixin.getConnection(connectors, source, rand,
+                    allConnectors, state);
+        } catch (CasArrayOutdatedException _) {
+            return getConnection();
+        }
     }
     
     /**
@@ -129,7 +133,11 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport {
      * @since 1.0
      */
     public List<SQLException> shutdown() {
-        return FsmMixin.shutdown(connectors);
+        try {
+            return FsmMixin.shutdown(connectors);
+        } catch (CasArrayOutdatedException _) {
+            return shutdown();
+        }
     }
     
     /**

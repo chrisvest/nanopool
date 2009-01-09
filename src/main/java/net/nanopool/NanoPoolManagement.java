@@ -21,7 +21,11 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public int getCurrentOpenConnectionsCount() {
-        return FsmMixin.countOpenConnections(np.connectors);
+        try {
+            return FsmMixin.countOpenConnections(np.connectors);
+        } catch (CasArrayOutdatedException _) {
+            return getCurrentOpenConnectionsCount();
+        }
     }
 
     public int getPoolSize() {

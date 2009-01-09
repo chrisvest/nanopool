@@ -5,7 +5,8 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 /**
- *
+ * This is a very simple base class for {@link DataSource} that throws
+ * {@link UnsupportedOperationException} on all method calls.
  * @author cvh
  */
 public abstract class AbstractDataSource implements DataSource {

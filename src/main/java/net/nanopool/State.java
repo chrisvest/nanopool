@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import net.nanopool.cas.CasArray;
 import net.nanopool.contention.ContentionHandler;
 import net.nanopool.hooks.Hook;
+import net.nanopool.loadbalancing.Strategy;
 
 final class State {
     private static final Class[] casArrayCtorSign =
@@ -23,8 +24,14 @@ final class State {
     final Cons<Hook> preReleaseHooks;
     final Cons<Hook> postReleaseHooks;
     final Cons<Hook> connectionInvalidationHooks;
+    final Strategy loadBalancingStrategy;
 
-    public State(int poolSize, long ttl, Class<? extends CasArray> casArrayType, ContentionHandler contentionHandler, Cons<Hook> preConnectHooks, Cons<Hook> postConnectHooks, Cons<Hook> preReleaseHook, Cons<Hook> postReleaseHook, Cons<Hook> connectionInvalidationHook) {
+    public State(int poolSize, long ttl,
+            Class<? extends CasArray> casArrayType,
+            ContentionHandler contentionHandler, Cons<Hook> preConnectHooks,
+            Cons<Hook> postConnectHooks, Cons<Hook> preReleaseHook,
+            Cons<Hook> postReleaseHook, Cons<Hook> connectionInvalidationHook,
+            Strategy loadBalancingStrategy) {
         super();
         this.poolSize = poolSize;
         this.ttl = ttl;
@@ -35,6 +42,7 @@ final class State {
         this.preReleaseHooks = preReleaseHook;
         this.postReleaseHooks = postReleaseHook;
         this.connectionInvalidationHooks = connectionInvalidationHook;
+        this.loadBalancingStrategy = loadBalancingStrategy;
     }
 
     <T> CasArray<T> buildCasArray() {

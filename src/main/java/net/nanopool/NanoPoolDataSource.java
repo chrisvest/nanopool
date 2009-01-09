@@ -11,7 +11,8 @@ import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.cas.CasArray;
 
-public final class NanoPoolDataSource extends PoolingDataSourceSupport {
+public final class NanoPoolDataSource extends PoolingDataSourceSupport
+        implements ManagedNanoPool {
     final CheapRandom rand;
     
     /**

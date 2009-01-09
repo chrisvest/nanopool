@@ -10,24 +10,44 @@ import javax.sql.DataSource;
  * @author cvh
  */
 public abstract class AbstractDataSource implements DataSource {
+    /**
+     * Always throws UnsupportedOperationException.
+     * @return
+     * @throws java.sql.SQLException
+     */
     public PrintWriter getLogWriter() throws SQLException {
         throw new UnsupportedOperationException("Not supported.");
     }
 
+    /**
+     * Always throws UnsupportedOperationException.
+     * @return
+     * @throws java.sql.SQLException
+     */
     public int getLoginTimeout() throws SQLException {
         throw new UnsupportedOperationException("Not supported.");
     }
 
+    /**
+     * Always throws UnsupportedOperationException.
+     * @param out
+     * @throws java.sql.SQLException
+     */
     public void setLogWriter(PrintWriter out) throws SQLException {
         throw new UnsupportedOperationException("Not supported.");
     }
 
+    /**
+     * Always throws UnsupportedOperationException.
+     * @param seconds
+     * @throws java.sql.SQLException
+     */
     public void setLoginTimeout(int seconds) throws SQLException {
         throw new UnsupportedOperationException("Not supported.");
     }
 
     /**
-     * This method will always throw UnsupportedOperationException.
+     * Always throws UnsupportedOperationException.
      * @param <T>
      * @param iface
      * @return
@@ -38,7 +58,7 @@ public abstract class AbstractDataSource implements DataSource {
     }
 
     /**
-     * This method will always throw UnsupportedOperationException.
+     * Always throws UnsupportedOperationException.
      * @param iface
      * @return
      * @throws java.sql.SQLException

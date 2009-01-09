@@ -7,8 +7,11 @@ import javax.sql.ConnectionPoolDataSource;
 import net.nanopool.loadbalancing.Strategy;
 
 /**
- *
+ * The LoadBalancedNanoPoolDataSource is like a proxy for a collection of
+ * {@link NanoPoolDataSource}s, and distributes the getConnection requests
+ * among these pools in accord to some {@link Strategy}.
  * @author cvh
+ * @since 1.0
  */
 public class LoadBalancedNanoPoolDataSource extends AbstractDataSource
         implements ManagedNanoPool {
@@ -32,7 +35,8 @@ public class LoadBalancedNanoPoolDataSource extends AbstractDataSource
         return strategy.getPool(pools).getConnection();
     }
 
-    public Connection getConnection(String username, String password) throws SQLException {
+    public Connection getConnection(String username, String password)
+            throws SQLException {
         throw new UnsupportedOperationException("Not supported.");
     }
 

@@ -11,7 +11,9 @@ import net.nanopool.loadbalancing.RandomStrategy;
 import net.nanopool.loadbalancing.Strategy;
 
 /**
- *
+ * Configuration is an atomically mutable state-container that describes to a
+ * {@link NanoPoolDataSource} how it should operate. The Configuration instance
+ * can be safely mutated after a NanoPoolDataSource has been created using it.
  * @author cvh
  */
 public class Configuration {

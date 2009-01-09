@@ -31,12 +31,13 @@ public class TimingHook implements Hook {
     }
 
     public void run(EventType type, ConnectionPoolDataSource source, Connection con, SQLException sqle) {
-        if (type == startType) {
+        if (currentStartTime.get() == null && type == startType) {
             currentStartTime.set(System.nanoTime());
         } else if (type == endType) {
             long end = System.nanoTime();
             long start = currentStartTime.get();
             long spanMs = (end - start) / 1000000L;
+            currentStartTime.set(null);
             writeLock.lock();
             try {
                 totalTimeMs += spanMs;

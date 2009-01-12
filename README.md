@@ -13,4 +13,4 @@ of the connection pool.
 License
 -------
 
-Apache 2.0 (I think...)
+Apache 2.0

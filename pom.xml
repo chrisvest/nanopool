@@ -8,6 +8,13 @@
   <version>1.0-SNAPSHOT</version>
   <name>nanopool</name>
   <url>http://maven.apache.org</url>
+  <licenses>
+    <license>
+      <name>Apache 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <build>
     <plugins>
       <plugin>
@@ -79,6 +86,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
       </plugin>
     </plugins>
   </reporting>

@@ -55,7 +55,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -75,7 +75,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -102,7 +102,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -122,7 +122,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -142,7 +142,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     strategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -174,7 +174,7 @@ public class Configuration {
                     new Cons(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -186,7 +186,7 @@ public class Configuration {
                     remove(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -202,7 +202,7 @@ public class Configuration {
                     s.preConnectHooks, new Cons(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -214,7 +214,7 @@ public class Configuration {
                     s.preConnectHooks, remove(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -230,7 +230,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks,
                     new Cons(hook, s.preReleaseHooks), s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -242,7 +242,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks,
                     remove(hook, s.preReleaseHooks), s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -258,7 +258,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, new Cons(hook, s.postReleaseHooks),
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -270,7 +270,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, remove(hook, s.postReleaseHooks),
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -287,7 +287,7 @@ public class Configuration {
                     s.preReleaseHooks, s.postReleaseHooks,
                     new Cons(hook, s.connectionInvalidationHooks),
                     s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 
@@ -300,7 +300,7 @@ public class Configuration {
                     s.preReleaseHooks, s.postReleaseHooks,
                     remove(hook, s.connectionInvalidationHooks),
                     s.loadBalancingStrategy);
-        } while (state.compareAndSet(s, n));
+        } while (!state.compareAndSet(s, n));
         return this;
     }
 }

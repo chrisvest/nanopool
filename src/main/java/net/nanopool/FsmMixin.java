@@ -56,6 +56,7 @@ final class FsmMixin {
                 if (connectors.cas(idx, reservationMarker, con)) { // reserve it
                     if (con == null) {
                         con = new Connector(source, connectors, idx, ttl);
+                        // this is safe bc. con is properly constructed:
                         allConnectors[idx] = con;
                     }
                     try {

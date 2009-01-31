@@ -68,6 +68,7 @@ final class FsmMixin {
                     } catch (SQLException sqle) {
                         runHooks(state.postConnectHooks, EventType.postConnect,
                                 source, null, sqle);
+                        throw sqle;
                     }
                 }
                 con = connectors.get(idx);

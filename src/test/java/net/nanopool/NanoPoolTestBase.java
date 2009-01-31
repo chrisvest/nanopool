@@ -25,13 +25,10 @@ import org.junit.Before;
  * @author cvh
  */
 public abstract class NanoPoolTestBase {
-    NanoPoolDataSource npds;
-
-    @Before
-    public void setUp() throws SQLException {
+    protected NanoPoolDataSource npds() throws SQLException {
         ConnectionPoolDataSource source = buildCpds();
         Configuration config = buildConfig();
-        npds = buildNpds(source, config);
+        return buildNpds(source, config);
     }
 
     protected ConnectionPoolDataSource buildCpds() throws SQLException {

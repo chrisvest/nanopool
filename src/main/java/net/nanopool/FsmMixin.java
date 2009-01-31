@@ -66,6 +66,8 @@ final class FsmMixin {
                                 source, connection, null);
                         return connection;
                     } catch (SQLException sqle) {
+                        allConnectors[idx] = null;
+                        connectors.cas(idx, null, reservationMarker);
                         runHooks(state.postConnectHooks, EventType.postConnect,
                                 source, null, sqle);
                         throw sqle;

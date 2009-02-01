@@ -33,20 +33,6 @@ public class ConnectivetyFailureTest extends NanoPoolTestBase {
     private static final String MESSAGE = "Bomb.";
 
     @Test
-    public void mustNormallyConnect() throws SQLException {
-        pool = npds();
-        Connection con = pool.getConnection();
-        try {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select 1");
-            assertTrue(rs.next());
-            assertEquals(1, rs.getInt(1));
-        } finally {
-            con.close();
-        }
-    }
-
-    @Test
     public void mustHandleThrowingConnector() throws SQLException {
         pool = npds();
         try {

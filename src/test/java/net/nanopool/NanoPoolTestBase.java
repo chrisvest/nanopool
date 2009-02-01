@@ -85,6 +85,7 @@ public abstract class NanoPoolTestBase {
                 try {
                     Thread.sleep(sleepTime);
                     if (!finishedMarker.get()) {
+                        exception.setStackTrace(thisThread.getStackTrace());
                         thisThread.stop(exception);
                     }
                 } catch (Exception ex) {

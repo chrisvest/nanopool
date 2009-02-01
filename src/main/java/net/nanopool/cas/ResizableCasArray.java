@@ -22,4 +22,5 @@ package net.nanopool.cas;
 public interface ResizableCasArray<T> extends CasArray<T> {
     void setDelegate(CasArray<T> delegate);
     CasArray<T> getDelegate();
+    void setThis(int idx, T toValue);
 }

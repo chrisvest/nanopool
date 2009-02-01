@@ -51,8 +51,9 @@ final class FsmMixin {
             if (idx == poolSize)
                 idx = 0;
             Connector con = connectors.get(idx);
-            if (con == outdatedMarker) throw CasArrayOutdatedException.INSTANCE;
             while (con != reservationMarker) {
+                if (con == outdatedMarker)
+                    throw CasArrayOutdatedException.INSTANCE;
                 if (con == shutdownMarker)
                     throw new IllegalStateException(MSG_SHUT_DOWN);
                 // we might have gotten one
@@ -158,6 +159,9 @@ final class FsmMixin {
                 for (int i : nilIndices) {
                     newCA.cas(i, null, reservationMarker);
                 }
+            }
+            for (int i = 0; i < len; i++) {
+                rca.setThis(i, outdatedMarker);
             }
         } finally {
             pds.resizingLock.unlock();

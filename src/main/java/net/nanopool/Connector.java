@@ -110,14 +110,13 @@ final class Connector {
             Connector marker = connectors.get(idx);
             assert leaseCount.decrementAndGet() == 0:
                 "Connector was used by more than one thread at a time";
-            if (marker != FsmMixin.shutdownMarker
-                    && marker != FsmMixin.outdatedMarker) {
+            if (marker != FsmMixin.shutdownMarker) {
                 if (marker == FsmMixin.reservationMarker) {
                     // standard procedure; return to pool
                     connectors.cas(idx, this, marker);
-                } else if (marker == this) {
+                } else if (marker == this || marker == FsmMixin.outdatedMarker) {
                     // the CasArray has been resized from under us.
-                    connectors.cas(idx, null, marker);
+                    connectors.cas(idx, null, FsmMixin.reservationMarker);
                     invalidate();
                 } else {
                     throw new IllegalStateException(

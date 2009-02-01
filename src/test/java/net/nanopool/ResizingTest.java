@@ -1,8 +1,8 @@
 package net.nanopool;
 
-import java.sql.Connection;
 import static org.junit.Assert.*;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.nanopool.contention.ThrowingContentionHandler;

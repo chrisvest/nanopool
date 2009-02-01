@@ -188,4 +188,8 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
     }
     private NanoPoolManagement poolManagement;
     private final ReentrantLock poolManagementLock = new ReentrantLock();
+
+    void resizePool(int newSize) {
+        FsmMixin.resizePool(this, newSize);
+    }
 }

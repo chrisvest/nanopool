@@ -18,6 +18,7 @@ package net.nanopool;
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.ConnectionPoolDataSource;
 import org.junit.After;
 
@@ -71,5 +72,27 @@ public abstract class NanoPoolTestBase {
                 throw sqles.get(0);
             }
         }
+    }
+
+    static void killMeLaterCheck(
+            final AtomicBoolean finishedMarker,
+            final long sleepTime,
+            final Exception exception) {
+        final Thread thisThread = Thread.currentThread();
+        Thread killer = new Thread(new Runnable() {
+            @SuppressWarnings("deprecation")
+            public void run() {
+                try {
+                    Thread.sleep(sleepTime);
+                    if (!finishedMarker.get()) {
+                        thisThread.stop(exception);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }, thisThread.getName() + "-killer");
+        killer.setDaemon(true);
+        killer.start();
     }
 }

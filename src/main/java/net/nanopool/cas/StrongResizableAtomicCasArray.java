@@ -17,7 +17,7 @@ package net.nanopool.cas;
 
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-public class StrongResizableAtomicCasArray<T> extends AtomicCasArraySupport<T> {
+public class StrongResizableAtomicCasArray<T> extends ResizableAtomicCasArraySupport<T> {
     public StrongResizableAtomicCasArray(int size) {
         super(size);
     }

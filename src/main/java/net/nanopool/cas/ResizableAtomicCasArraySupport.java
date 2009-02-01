@@ -32,7 +32,11 @@ public abstract class ResizableAtomicCasArraySupport<T>
         return super.cas(idx, newValue, oldValue);
     }
     
-    public final void setCasDelegate(CasArray<T> delegate) {
+    public final void setDelegate(CasArray<T> delegate) {
         this.delegate = delegate;
+    }
+
+    public final CasArray<T> getDelegate() {
+        return delegate;
     }
 }

@@ -31,24 +31,9 @@ public class ContentionTest extends NanoPoolTestBase {
 
         // pool is now empty. Next getConnection must throw.
 
-        final Thread thisThread = Thread.currentThread();
         final AtomicBoolean finishedMarker = new AtomicBoolean(false);
-        Thread killer = new Thread(new Runnable() {
-            @SuppressWarnings("deprecation")
-            public void run() {
-                try {
-                    Thread.sleep(10000);
-                    if (!finishedMarker.get()) {
-                        thisThread.stop(new SQLException(
-                                "Die you gravy sucking pig-dog."));
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }, "killer");
-        killer.setDaemon(true);
-        killer.start();
+        killMeLaterCheck(finishedMarker, 10000,
+                new SQLException("Die you gravy sucking pig-dog."));
 
         try {
             pool.getConnection();
@@ -56,6 +41,7 @@ public class ContentionTest extends NanoPoolTestBase {
         } catch (NanoPoolRuntimeException npre) {
             assertEquals(ThrowingContentionHandler.MESSAGE, npre.getMessage());
         }
+        finishedMarker.set(true);
 
         for (int i = 0; i < cons.length; i++) {
             cons[i].close();

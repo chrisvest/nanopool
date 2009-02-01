@@ -152,7 +152,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public void resizePool(int newSize) {
-        FsmMixin.resizePool(np, newSize);
+        np.resizePool(newSize);
     }
 
     public void interruptConnection(int id) {

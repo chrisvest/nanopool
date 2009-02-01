@@ -123,7 +123,7 @@ final class FsmMixin {
             int len = rca.length();
             if (len == newSize) return;
             CasArray newCA = pds.state.buildCasArray(newSize);
-            for (int i = 0; i < len; i++) {
+            for (int i = 0, n = Math.min(len, newSize); i < n; i++) {
                 newCA.cas(i, reservationMarker, null);
             }
 
@@ -133,7 +133,7 @@ final class FsmMixin {
                 System.arraycopy(pds.allConnectors, 0, newAllArray, 0, len);
                 pds.allConnectors = newAllArray;
                 pds.connectors = newCA;
-                rca.setCasDelegate(newCA);
+                rca.setDelegate(newCA);
                 for (int i = 0; i < len; i++) {
                     newCA.cas(i, rca.get(i), reservationMarker);
                 }

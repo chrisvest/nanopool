@@ -112,9 +112,19 @@ final class Connector {
                 "Connector was used by more than one thread at a time";
             if (marker != FsmMixin.shutdownMarker
                     && marker != FsmMixin.outdatedMarker) {
-                assert marker == FsmMixin.reservationMarker:
-                    "Invalid state of CasArray<Connector> on index " + idx;
-                connectors.cas(idx, this, marker);
+                if (marker == FsmMixin.reservationMarker) {
+                    // standard procedure; return to pool
+                    connectors.cas(idx, this, marker);
+                } else if (marker == this) {
+                    // the CasArray has been resized from under us.
+                    connectors.cas(idx, null, marker);
+                    invalidate();
+                } else {
+                    throw new IllegalStateException(
+                            "Invalid state of CasArray<Connector> on index " +
+                            idx + ". Expected " + FsmMixin.reservationMarker +
+                            " but got " + marker);
+                }
             } else {
                 // we've been shut down, so let's clean up.
                 invalidate();

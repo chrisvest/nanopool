@@ -17,10 +17,7 @@ package net.nanopool;
 
 import static org.junit.Assert.*;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import javax.sql.ConnectionPoolDataSource;
 import org.junit.Test;
 import org.mockito.Mockito;

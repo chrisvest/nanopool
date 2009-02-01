@@ -28,6 +28,8 @@ import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 
 final class FsmMixin {
+    static final String MSG_SHUT_DOWN = "Connection pool is shut down.";
+    static final String MSG_RESIZING = "The CasArray in use does not support resizing.";
     static final Connector reservationMarker = new Connector();
     static final Connector shutdownMarker = new Connector();
     static final Connector outdatedMarker = new Connector();
@@ -52,7 +54,7 @@ final class FsmMixin {
             if (con == outdatedMarker) throw CasArrayOutdatedException.INSTANCE;
             while (con != reservationMarker) {
                 if (con == shutdownMarker)
-                    throw new IllegalStateException("Connection pool is shut down.");
+                    throw new IllegalStateException(MSG_SHUT_DOWN);
                 // we might have gotten one
                 if (connectors.cas(idx, reservationMarker, con)) { // reserve it
                     if (con == null) {
@@ -110,10 +112,9 @@ final class FsmMixin {
 
     static void resizePool(PoolingDataSourceSupport pds, int newSize) {
         if (pds.connectors.get(0) == shutdownMarker)
-            throw new IllegalStateException("Connection pool is shut down.");
+            throw new IllegalStateException(MSG_SHUT_DOWN);
         if (!(pds.connectors instanceof ResizableCasArray)) {
-            throw new IllegalStateException(
-                    "The CasArray in use does not support resizing.");
+            throw new IllegalStateException(MSG_RESIZING);
         }
 
         pds.resizingLock.lock();

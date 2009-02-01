@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.util.List;
 import javax.sql.ConnectionPoolDataSource;
 import org.junit.After;
-import org.junit.Before;
 
 /**
  * Abstract base class for NanoPoolDataSource test cases.

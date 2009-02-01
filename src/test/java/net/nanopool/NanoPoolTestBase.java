@@ -17,7 +17,9 @@ package net.nanopool;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 import java.sql.SQLException;
+import java.util.List;
 import javax.sql.ConnectionPoolDataSource;
+import org.junit.After;
 import org.junit.Before;
 
 /**
@@ -25,6 +27,8 @@ import org.junit.Before;
  * @author cvh
  */
 public abstract class NanoPoolTestBase {
+    protected NanoPoolDataSource pool;
+
     protected NanoPoolDataSource npds() throws SQLException {
         ConnectionPoolDataSource source = buildCpds();
         Configuration config = buildConfig();
@@ -55,5 +59,18 @@ public abstract class NanoPoolTestBase {
     protected NanoPoolDataSource buildNpds(ConnectionPoolDataSource source,
             Configuration config) {
         return new NanoPoolDataSource(source, config);
+    }
+
+    @After
+    public void closePool() throws SQLException {
+        if (pool != null) {
+            List<SQLException> sqles = pool.shutdown();
+            if (!sqles.isEmpty()) {
+                for (SQLException sqle : sqles) {
+                    sqle.printStackTrace();
+                }
+                throw sqles.get(0);
+            }
+        }
     }
 }

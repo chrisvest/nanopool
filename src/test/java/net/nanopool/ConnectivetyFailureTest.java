@@ -30,9 +30,11 @@ import org.mockito.Mockito;
  * @author cvh
  */
 public class ConnectivetyFailureTest extends NanoPoolTestBase {
+    private static final String MESSAGE = "Bomb.";
+
     @Test
     public void mustNormallyConnect() throws SQLException {
-        NanoPoolDataSource pool = npds();
+        pool = npds();
         Connection con = pool.getConnection();
         try {
             Statement stmt = con.createStatement();
@@ -45,28 +47,26 @@ public class ConnectivetyFailureTest extends NanoPoolTestBase {
     }
 
     @Test
-    public void mustHandleThrowingConnector() {
-        String msg = "Bomb.";
-        NanoPoolDataSource pool = buildPoolThrowingOnConnect(msg);
+    public void mustHandleThrowingConnector() throws SQLException {
+        pool = npds();
         try {
             pool.getConnection();
             fail("Expected thrown exception.");
         } catch (SQLException ex) {
-            assertEquals(msg, ex.getMessage());
+            assertEquals(MESSAGE, ex.getMessage());
         }
     }
 
     @Test
-    public void throwingConnectorsMustNotLeakReservationTickets() {
+    public void throwingConnectorsMustNotLeakReservationTickets() throws SQLException {
         int connectAttempts = 1000;
-        String msg = "Bomb.";
-        NanoPoolDataSource pool = buildPoolThrowingOnConnect(msg);
+        pool = npds();
         for (int i = 0; i < connectAttempts; i++) {
             try {
                 pool.getConnection();
                 fail("Expected thrown exception.");
             } catch (SQLException ex) {
-                assertEquals(msg, ex.getMessage());
+                assertEquals(MESSAGE, ex.getMessage());
             }
         }
         for (int i = 0; i < pool.allConnectors.length; i++) {
@@ -75,14 +75,14 @@ public class ConnectivetyFailureTest extends NanoPoolTestBase {
         }
     }
 
-    private NanoPoolDataSource buildPoolThrowingOnConnect(String msg) {
+    @Override
+    protected ConnectionPoolDataSource buildCpds() throws SQLException {
         ConnectionPoolDataSource cpds = Mockito.mock(ConnectionPoolDataSource.class);
         try {
-            Mockito.doThrow(new SQLException(msg)).when(cpds).getPooledConnection();
+            Mockito.doThrow(new SQLException(MESSAGE)).when(cpds).getPooledConnection();
         } catch (SQLException ex) {
             fail("mock setup failure.");
         }
-        NanoPoolDataSource pool = buildNpds(cpds, buildConfig());
-        return pool;
+        return cpds;
     }
 }

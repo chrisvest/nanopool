@@ -26,8 +26,9 @@ import net.nanopool.*;
  * @since 1.0
  */
 public class ThrowingContentionHandler implements ContentionHandler {
+    public static final String MESSAGE = "Connection pool contention too high.";
+
     public void handleContention(int count) throws SQLException {
-        throw new NanoPoolRuntimeException(
-                "Connection pool contention too high.");
+        throw new NanoPoolRuntimeException(MESSAGE);
     }
 }

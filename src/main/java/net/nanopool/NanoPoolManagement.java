@@ -20,7 +20,6 @@ import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.List;
 import javax.sql.DataSource;
-import net.nanopool.cas.ResizableCasArray;
 
 /**
  *
@@ -45,7 +44,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public int getPoolSize() {
-        return np.connectors.length();
+        return np.connectors.length;
     }
 
     public long getConnectionTimeToLive() {
@@ -65,8 +64,10 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public boolean isShutDown() {
-        for (Connector cn : np.connectors) {
-            if (cn == FsmMixin.shutdownMarker) return true;
+        Connector[] cons = np.connectors;
+        if (cons == null) return true;
+        for (Connector cn : cons) {
+            if (cn.state.get() == Connector.SHUTDOWN) return true;
         }
         return false;
     }
@@ -99,7 +100,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public int getConnectionsCreated() {
         int createdCount = 0;
-        Connector[] connectors = np.allConnectors;
+        Connector[] connectors = np.connectors;
         for (Connector cn : connectors) {
             if (cn != null) createdCount += cn.getRealConnectionsCreated();
         }
@@ -108,7 +109,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public int getConnectionsLeased() {
         int leasedCount = 0;
-        Connector[] connectors = np.allConnectors;
+        Connector[] connectors = np.connectors;
         for (Connector cn : connectors) {
             if (cn != null) leasedCount += cn.getConnectionsLeased();
         }
@@ -116,7 +117,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public void resetCounters() {
-        Connector[] connectors = np.allConnectors;
+        Connector[] connectors = np.connectors;
         for (Connector cn : connectors) {
             if (cn != null) cn.resetCounters();
         }
@@ -124,7 +125,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public String listConnectionOwningThreadsStackTraces() {
         StringBuilder sb = new StringBuilder();
-        Connector[] connectors = np.allConnectors;
+        Connector[] connectors = np.connectors;
         int i = -1;
         for (Connector cn : connectors) {
             i++;
@@ -156,7 +157,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public void interruptConnection(int id) {
-        Connector cn = np.allConnectors[id];
+        Connector cn = np.connectors[id];
         Thread owner = cn.getOwner();
         if (owner != null) {
             owner.interrupt();
@@ -164,7 +165,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public void killConnection(int id) {
-        Connector cn = np.allConnectors[id];
+        Connector cn = np.connectors[id];
         Thread owner = cn.getOwner();
         if (owner != null) {
             owner.stop();
@@ -179,9 +180,5 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
                 ex.printStackTrace();
             }
         }
-    }
-
-    public boolean isReziable() {
-        return np.connectors instanceof ResizableCasArray;
     }
 }

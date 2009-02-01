@@ -24,12 +24,8 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.sql.ConnectionPoolDataSource;
 
-import net.nanopool.cas.CasArray;
-
 public final class NanoPoolDataSource extends PoolingDataSourceSupport
         implements ManagedNanoPool {
-    final CheapRandom rand;
-    
     /**
      * Create a new {@link NanoPoolDataSource} based on the specified
      * {@link ConnectionPoolDataSource}, and with the specified pool size and
@@ -91,7 +87,6 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
     public NanoPoolDataSource(ConnectionPoolDataSource source,
             Configuration config) {
         super(source, config);
-        rand = new CheapRandom();
     }
 
     /**
@@ -119,8 +114,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      */
     public Connection getConnection() throws SQLException {
         try {
-            return FsmMixin.getConnection(connectors, source, rand,
-                    allConnectors, state);
+            return FsmMixin.getConnection(this);
         } catch (CasArrayOutdatedException _) {
             return getConnection();
         }
@@ -150,7 +144,9 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      */
     public List<SQLException> shutdown() {
         try {
-            return FsmMixin.shutdown(connectors);
+            Connector[] cons = connectors;
+            connectors = null;
+            return FsmMixin.shutdown(cons);
         } catch (CasArrayOutdatedException _) {
             return shutdown();
         }

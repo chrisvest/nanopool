@@ -17,8 +17,6 @@ package net.nanopool;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import net.nanopool.cas.CasArray;
-import net.nanopool.cas.StrongResizableAtomicCasArray;
 import net.nanopool.contention.ContentionHandler;
 import net.nanopool.contention.DefaultContentionHandler;
 import net.nanopool.hooks.Hook;
@@ -41,7 +39,7 @@ public class Configuration {
 
     public Configuration() {
         this(new State(
-                10, 300000, StrongResizableAtomicCasArray.class,
+                10, 300000,
                 new DefaultContentionHandler(), null, null, null, null, null,
                 RandomStrategy.INSTANCE
         ));
@@ -67,7 +65,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy);
@@ -87,34 +85,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, ttl, s.casArrayType, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
-                    s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.loadBalancingStrategy);
-        } while (!state.compareAndSet(s, n));
-        return this;
-    }
-
-    public Class<? extends CasArray> getCasArrayType() {
-        return state.get().casArrayType;
-    }
-
-    public Configuration setCasArrayType(Class<? extends CasArray> type) {
-        if (!CasArray.class.isAssignableFrom(type)) {
-            throw new IllegalArgumentException(type.getCanonicalName() +
-                    " is not a kind of " + CasArray.class.getCanonicalName());
-        }
-        try {
-            type.getConstructor(new Class[]{Integer.TYPE});
-        } catch (Exception e) {
-            throw new IllegalArgumentException("No public public constructor " +
-                    "taking one int as an argument was found for this " +
-                    "CasArray implementation: " + type.getCanonicalName(), e);
-        }
-        State s, n;
-        do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, type, s.contentionHandler,
+            n = new State(s.poolSize, ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy);
@@ -134,7 +105,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, contentionHandler,
+            n = new State(s.poolSize, s.ttl, contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy);
@@ -154,7 +125,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     strategy);
@@ -186,7 +157,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     new Cons(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
@@ -198,7 +169,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     remove(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
@@ -214,7 +185,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, new Cons(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
@@ -226,7 +197,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, remove(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
@@ -242,7 +213,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     new Cons(hook, s.preReleaseHooks), s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
@@ -254,7 +225,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     remove(hook, s.preReleaseHooks), s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
@@ -270,7 +241,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, new Cons(hook, s.postReleaseHooks),
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
@@ -282,7 +253,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, remove(hook, s.postReleaseHooks),
                     s.connectionInvalidationHooks, s.loadBalancingStrategy);
@@ -298,7 +269,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     new Cons(hook, s.connectionInvalidationHooks),
@@ -311,7 +282,7 @@ public class Configuration {
         State s, n;
         do {
             s = state.get();
-            n = new State(s.poolSize, s.ttl, s.casArrayType, s.contentionHandler,
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     remove(hook, s.connectionInvalidationHooks),

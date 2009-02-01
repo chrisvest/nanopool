@@ -31,7 +31,6 @@ public interface NanoPoolManagementMBean {
     String getSourceConnection();
     int getConnectionsCreated();
     int getConnectionsLeased();
-    boolean isReziable();
 
     // operations
     String shutDown();

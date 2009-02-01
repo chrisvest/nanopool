@@ -20,21 +20,20 @@ import java.sql.SQLException;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.sql.ConnectionPoolDataSource;
 
-import net.nanopool.cas.CasArray;
-
 public abstract class PoolingDataSourceSupport extends AbstractDataSource {
     final ConnectionPoolDataSource source;
     final ReentrantLock resizingLock = new ReentrantLock();
     final State state;
-    volatile CasArray<Connector> connectors;
-    volatile Connector[] allConnectors;
+    volatile Connector[] connectors;
 
     PoolingDataSourceSupport(ConnectionPoolDataSource source,
             Configuration config) {
         this.source = source;
         this.state = config.getState();
-        this.connectors = state.buildCasArray();
-        this.allConnectors = new Connector[connectors.length()];
+        this.connectors = new Connector[state.poolSize];
+        for (int i = 0; i < connectors.length; i++) {
+            connectors[i] = new Connector(source, state.ttl);
+        }
     }
 
     @Override

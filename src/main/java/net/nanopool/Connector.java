@@ -22,14 +22,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
-import net.nanopool.cas.CasArray;
 import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 
 final class Connector {
+    public static final int AVAILABLE = 0;
+    public static final int RESERVED = 1;
+    public static final int SHUTDOWN = 2;
+    public static final int OUTDATED = 2;
+    public final AtomicInteger state = new AtomicInteger(AVAILABLE);
     private final ConnectionPoolDataSource source;
-    private final CasArray<Connector> connectors;
-    private final int idx;
     private final long timeToLive;
     private PooledConnection connection;
     private long deadTime;
@@ -64,16 +66,9 @@ final class Connector {
      */
     private final AtomicInteger leaseCount = new AtomicInteger();
     
-    Connector(ConnectionPoolDataSource source,
-            CasArray<Connector> connectors, int idx, long timeToLive) {
+    Connector(ConnectionPoolDataSource source, long timeToLive) {
         this.source = source;
-        this.connectors = connectors;
-        this.idx = idx;
         this.timeToLive = timeToLive;
-    }
-    
-    Connector() {
-        this(null, null, 0, 0);
     }
     
     Connection getConnection(
@@ -107,6 +102,24 @@ final class Connector {
             if (flagReset) doReset();
             if (deadTime < System.currentTimeMillis())
                 invalidate();
+            int st = state.get();
+            if (st == RESERVED) {
+                if (!state.compareAndSet(st, AVAILABLE)) {
+                    st = state.get();
+                    if (st == SHUTDOWN || st == OUTDATED) {
+                        invalidate();
+                    } else {
+                        throw new IllegalStateException(
+                                "Cannot return to pool in state: " + st);
+                    }
+                }
+            } else if (st == SHUTDOWN || st == OUTDATED) {
+                invalidate();
+            } else {
+                throw new IllegalStateException(
+                        "Unexpected state when returning to pool: " + st);
+            }
+            /*
             Connector marker = connectors.get(idx);
             assert leaseCount.decrementAndGet() == 0:
                 "Connector was used by more than one thread at a time";
@@ -128,6 +141,7 @@ final class Connector {
                 // we've been shut down, so let's clean up.
                 invalidate();
             }
+            //*/
         } finally {
             Connection tmpLease = currentLease;
             currentLease = null;

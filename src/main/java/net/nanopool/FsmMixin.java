@@ -22,63 +22,58 @@ import java.util.List;
 
 import javax.sql.ConnectionPoolDataSource;
 
-import net.nanopool.cas.CasArray;
-import net.nanopool.cas.ResizableCasArray;
 import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 
 final class FsmMixin {
+    static final CheapRandom rand = new CheapRandom();
     static final String MSG_SHUT_DOWN = "Connection pool is shut down.";
     static final String MSG_RESIZING = "The CasArray in use does not support resizing.";
-    static final Connector reservationMarker = new Connector();
-    static final Connector shutdownMarker = new Connector();
-    static final Connector outdatedMarker = new Connector();
 
     static Connection getConnection(
-            final CasArray<Connector> connectors,
-            final ConnectionPoolDataSource source,
-            final CheapRandom rand,
-            final Connector[] allConnectors,
-            final State state) throws SQLException {
-        runHooks(state.preConnectHooks, EventType.preConnect,
-                source, null, null);
-        final int poolSize = connectors.length();
-        final long ttl = state.ttl;
+            final PoolingDataSourceSupport pds) throws SQLException {
+        runHooks(pds.state.preConnectHooks, EventType.preConnect,
+                pds.source, null, null);
+        final Connector[] connectors = pds.connectors;
+        if (connectors == null)
+            throw new IllegalStateException(MSG_SHUT_DOWN);
+        final int poolSize = connectors.length;
+        final State state = pds.state;
+        final long ttl = pds.state.ttl;
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
         int idx = start;
         int contentionCounter = 0;
         while (true) {
             if (idx == poolSize)
                 idx = 0;
-            Connector con = connectors.get(idx);
-            while (con != reservationMarker) {
-                if (con == outdatedMarker)
+            Connector con = connectors[idx];
+            int st = con.state.get();
+            while (st != Connector.RESERVED) {
+                if (st == Connector.OUTDATED)
                     throw CasArrayOutdatedException.INSTANCE;
-                if (con == shutdownMarker)
+                if (st == Connector.SHUTDOWN)
                     throw new IllegalStateException(MSG_SHUT_DOWN);
                 // we might have gotten one
-                if (connectors.cas(idx, reservationMarker, con)) { // reserve it
-                    if (con == null) {
-                        con = new Connector(source, connectors, idx, ttl);
-                        // this is safe bc. con is properly constructed:
-                        allConnectors[idx] = con;
-                    }
+                if (con.state.compareAndSet(Connector.AVAILABLE, Connector.RESERVED)) { // reserve it
                     try {
                         Connection connection = con.getConnection(
                                 state.preReleaseHooks, state.postReleaseHooks,
                                 state.connectionInvalidationHooks);
                         runHooks(state.postConnectHooks, EventType.postConnect,
-                                source, connection, null);
+                                pds.source, connection, null);
                         return connection;
                     } catch (SQLException sqle) {
-                        allConnectors[idx] = null;
-                        connectors.cas(idx, null, reservationMarker);
-                        runHooks(state.postConnectHooks, EventType.postConnect,
-                                source, null, sqle);
+                        try {
+                            con.invalidate();
+                        } finally {
+                            con.state.set(Connector.AVAILABLE);
+                            runHooks(state.postConnectHooks, EventType.postConnect,
+                                    pds.source, null, sqle);
+                        }
                         throw sqle;
                     }
                 }
-                con = connectors.get(idx);
+                st = con.state.get();
             }
             ++idx;
             if (idx == start)
@@ -86,24 +81,20 @@ final class FsmMixin {
         }
     }
 
-    static List<SQLException> shutdown(
-            final CasArray<Connector> connectors) {
+    static List<SQLException> shutdown(Connector[] connectors) {
         List<SQLException> caughtExceptions = new ArrayList<SQLException>();
-        
-        iterate_connectors: for (int i = 0; i < connectors.length(); i++) {
-            Connector con = null;
-            do { // try snatching it and eagerly mark it as shut down.
-                con = connectors.get(i);
-                if (con == outdatedMarker)
-                    throw CasArrayOutdatedException.INSTANCE;
-                // avoid CAS if already shut down:
-                if (con == shutdownMarker) continue iterate_connectors;
-            } while(!connectors.cas(i, shutdownMarker, con));
-            if (con != reservationMarker && con != null) {
+        if (connectors == null) return caughtExceptions;
+
+        for (Connector con : connectors) {
+            int st = con.state.get();
+            con.state.set(Connector.SHUTDOWN);
+            if (st == Connector.OUTDATED)
+                throw CasArrayOutdatedException.INSTANCE;
+            if (st != Connector.RESERVED) {
                 try {
                     con.invalidate();
-                } catch (SQLException e) {
-                    caughtExceptions.add(e);
+                } catch (SQLException ex) {
+                    caughtExceptions.add(ex);
                 }
             }
         }
@@ -111,7 +102,7 @@ final class FsmMixin {
         return caughtExceptions;
     }
 
-    static void resizePool(PoolingDataSourceSupport pds, int newSize) {
+    static void resizePool(PoolingDataSourceSupport pds, int newSize) {/*
         if (pds.connectors.get(0) == shutdownMarker)
             throw new IllegalStateException(MSG_SHUT_DOWN);
         if (!(pds.connectors instanceof ResizableCasArray)) {
@@ -165,16 +156,15 @@ final class FsmMixin {
             }
         } finally {
             pds.resizingLock.unlock();
-        }
+        }*/
     }
 
-    static int countOpenConnections(CasArray<Connector> connectors) {
+    static int countOpenConnections(Connector[] connectors) {
         int openCount = 0;
         for (Connector cn : connectors) {
-            if (cn == outdatedMarker) throw CasArrayOutdatedException.INSTANCE;
-            if (cn != null
-                && cn != reservationMarker
-                && cn != shutdownMarker) {
+            int state = cn.state.get();
+            if (state == Connector.OUTDATED) throw CasArrayOutdatedException.INSTANCE;
+            if (state == Connector.AVAILABLE) {
                 openCount++;
             }
         }

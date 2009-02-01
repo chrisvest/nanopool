@@ -1,7 +1,5 @@
 package net.nanopool;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.junit.Assert.*;
 
 import java.sql.Connection;
@@ -24,7 +22,7 @@ public class ContentionTest extends NanoPoolTestBase {
     @Test
     public void contentionHandlerMustRun() throws SQLException {
         pool = npds();
-        Connection[] cons = new Connection[pool.allConnectors.length];
+        Connection[] cons = new Connection[pool.connectors.length];
         for (int i = 0; i < cons.length; i++) {
             cons[i] = pool.getConnection();
         }

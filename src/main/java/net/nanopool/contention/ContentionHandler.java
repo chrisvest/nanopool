@@ -15,6 +15,8 @@
  */
 package net.nanopool.contention;
 
+import java.sql.SQLException;
+
 /**
  * A ContentionHandler decides what to do when we reckon there's contention
  * on the pool.
@@ -34,9 +36,12 @@ public interface ContentionHandler {
      * Do something to ease contention on the pool.
      * This usually means calling {@link Thread#sleep(long)} or
      * {@link Thread#yield()}, but you could also throw a form of
-     * {@link RuntimeException} if you'd rather give up on getting a connection
-     * for this particular thread - just be sure to catch it in your own code!
+     * {@link RuntimeException} or {@link SQLException} if you'd rather give up
+     * on getting a connection for this particular thread - just be sure to
+     * catch it in your own code!
+     * @param count The number of times that this ContentionHandler has been
+     * called within the same getConnection.
      * @since 1.0
      */
-    void handleContention();
+    void handleContention(int count) throws SQLException;
 }

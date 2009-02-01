@@ -44,6 +44,7 @@ final class FsmMixin {
         final long ttl = state.ttl;
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
         int idx = start;
+        int contentionCounter = 0;
         while (true) {
             if (idx == poolSize)
                 idx = 0;
@@ -78,7 +79,7 @@ final class FsmMixin {
             }
             ++idx;
             if (idx == start)
-                state.contentionHandler.handleContention();
+                state.contentionHandler.handleContention(++contentionCounter);
         }
     }
 

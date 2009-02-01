@@ -15,6 +15,8 @@
  */
 package net.nanopool.contention;
 
+import java.sql.SQLException;
+
 /**
  * The default {@link ContentionHandler} implementation.
  * The waiting is implemented with {@link Thread#yield()} and by default
@@ -24,18 +26,24 @@ package net.nanopool.contention;
  */
 public final class DefaultContentionHandler implements ContentionHandler {
     private final boolean printWarning;
+    private final int throwLimit;
     
     public DefaultContentionHandler() {
-        this(true);
+        this(true, 1000);
     }
     
-    public DefaultContentionHandler(boolean printWarning) {
+    public DefaultContentionHandler(boolean printWarning, int throwLimit) {
         this.printWarning = printWarning;
+        this.throwLimit = throwLimit;
     }
     
-    public void handleContention() {
+    public void handleContention(int count) throws SQLException {
+        if (0 < throwLimit && throwLimit <= count)
+            throw new SQLException(
+                    "NanoPoolDataSource too contended. " +
+                    "Look for connection leaks or increase the pool size.");
         if (printWarning)
-            System.err.println("PoolingDataSource: contention warning.");
+            System.err.println("NanoPoolDataSource: contention warning.");
         Thread.yield();
     }
 }

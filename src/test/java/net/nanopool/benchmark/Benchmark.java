@@ -26,13 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
-import net.nanopool.contention.DefaultContentionHandler;
 import net.nanopool.NanoPoolDataSource;
-import net.nanopool.cas.CasArray;
-import net.nanopool.cas.StrongAtomicCasArray;
-import net.nanopool.cas.StrongStripedAtomicCasArray;
-import net.nanopool.cas.WeakAtomicCasArray;
-import net.nanopool.cas.WeakStripedAtomicCasArray;
 import org.junit.Test;
 
 public class Benchmark {
@@ -65,10 +59,7 @@ public class Benchmark {
     }
     
     private static void runTestSet(int threads, int poolSize) throws InterruptedException {
-//        benchmark(threads, new StrongAtomicCasArray(poolSize));
-//        benchmark(threads, new WeakAtomicCasArray(poolSize));
-        benchmark(threads, new StrongStripedAtomicCasArray(poolSize));
-//        benchmark(threads, new WeakStripedAtomicCasArray(poolSize));
+        benchmark(threads, poolSize);
     }
 
     private static ConnectionPoolDataSource newCpds() {
@@ -82,13 +73,13 @@ public class Benchmark {
         return myCpds;
     }
 
-    private static void benchmark(int threads, CasArray casArray) throws InterruptedException {
+    private static void benchmark(int threads, int poolSize) throws InterruptedException {
         ConnectionPoolDataSource cpds = newCpds();
         ExecutorService executor = Executors.newFixedThreadPool(threads);
         CountDownLatch startSignal = new CountDownLatch(1);
         int timeToLive = 300000; // five minutes
         NanoPoolDataSource npds = new NanoPoolDataSource(
-                cpds, casArray.length(), timeToLive);
+                cpds, poolSize, timeToLive);
         Worker[] workers = new Worker[threads];
         for (int i = 0; i < threads; i++) {
             Worker worker = new Worker(npds, startSignal);
@@ -107,16 +98,13 @@ public class Benchmark {
         for (Worker worker : workers) {
             sumThroughPut += worker.hits;
         }
-        int poolSize = casArray.length();
-        String casArrayImplName = casArray.getClass().getSimpleName();
         double totalThroughput = sumThroughPut / 60.0;
         double throughputPerThread = totalThroughput / threads;
         double throughputPerConnection = totalThroughput / poolSize;
         System.out.printf("%s thrs, %s cons: " +
-        		"%.2f cyc/sec/tot, %.2f cyc/sec/thr, %.2f cyc/sec/con | %s\n",
+        		"%.2f cyc/sec/tot, %.2f cyc/sec/thr, %.2f cyc/sec/con\n",
                 threads, poolSize, totalThroughput,
-                throughputPerThread, throughputPerConnection,
-                casArrayImplName);
+                throughputPerThread, throughputPerConnection);
     }
     
     private static class Worker implements Runnable {

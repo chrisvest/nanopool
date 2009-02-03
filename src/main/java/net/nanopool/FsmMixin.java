@@ -39,15 +39,14 @@ final class FsmMixin {
             throw new IllegalStateException(MSG_SHUT_DOWN);
         final int poolSize = connectors.length;
         final State state = pds.state;
-        final long ttl = pds.state.ttl;
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
         int idx = start;
         int contentionCounter = 0;
         while (true) {
-            if (idx == poolSize)
-                idx = 0;
             Connector con = connectors[idx];
             int st = con.state.get();
+            //System.out.printf("start=%s, idx=%s, st=%s, contentionCounter=%s, poolSize=%s, connectors#=%s\n",
+            //        start, idx, st, contentionCounter, poolSize, System.identityHashCode(connectors));
             while (st != Connector.RESERVED) {
                 if (st == Connector.OUTDATED)
                     throw CasArrayOutdatedException.INSTANCE;
@@ -76,6 +75,7 @@ final class FsmMixin {
                 st = con.state.get();
             }
             ++idx;
+            if (idx == poolSize) idx = 0;
             if (idx == start)
                 state.contentionHandler.handleContention(++contentionCounter);
         }

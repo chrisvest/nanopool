@@ -28,7 +28,7 @@ import net.nanopool.hooks.Hook;
 final class FsmMixin {
     static final CheapRandom rand = new CheapRandom();
     static final String MSG_SHUT_DOWN = "Connection pool is shut down.";
-    static final String MSG_RESIZING = "The CasArray in use does not support resizing.";
+    static final String MSG_TOO_SMALL = "Cannot resize. New size too small: ";
 
     static Connection getConnection(
             final PoolingDataSourceSupport pds) throws SQLException {
@@ -102,61 +102,36 @@ final class FsmMixin {
         return caughtExceptions;
     }
 
-    static void resizePool(PoolingDataSourceSupport pds, int newSize) {/*
-        if (pds.connectors.get(0) == shutdownMarker)
+    static void resizePool(PoolingDataSourceSupport pds, int newSize) {
+        if (pds.connectors[0].state.get() == Connector.SHUTDOWN) {
             throw new IllegalStateException(MSG_SHUT_DOWN);
-        if (!(pds.connectors instanceof ResizableCasArray)) {
-            throw new IllegalStateException(MSG_RESIZING);
         }
-
+        if (newSize < 1) {
+            throw new IllegalArgumentException(MSG_TOO_SMALL + newSize);
+        }
         pds.resizingLock.lock();
         try {
-            ResizableCasArray<Connector> rca = (ResizableCasArray)pds.connectors;
-            int len = rca.length();
-            if (len == newSize) return;
-            CasArray newCA = pds.state.buildCasArray(newSize);
-            for (int i = 0, n = Math.min(len, newSize); i < n; i++) {
-                newCA.cas(i, reservationMarker, null);
-            }
-
-            if (len < newSize) {
-                // pool growth
-                Connector[] newAllArray = new Connector[newSize];
-                System.arraycopy(pds.allConnectors, 0, newAllArray, 0, len);
-                pds.allConnectors = newAllArray;
-                pds.connectors = newCA;
-                rca.setDelegate(newCA);
-                for (int i = 0; i < len; i++) {
-                    newCA.cas(i, rca.get(i), reservationMarker);
+            Connector[] ocons = pds.connectors;
+            if (ocons.length == newSize) return;
+            Connector[] ncons = new Connector[newSize];
+            if (ocons.length < newSize) {
+                // grow pool
+                System.arraycopy(ocons, 0, ncons, 0, ocons.length);
+                for (int i = ocons.length; i < ncons.length; i++) {
+                    ncons[i] = new Connector(pds.source, pds.state.ttl);
                 }
+                pds.connectors = ncons;
             } else {
-                // pool shrink
-                Connector[] newAllArray = new Connector[newSize];
-                ArrayList<Integer> nilIndices = new ArrayList<Integer>();
-                pds.connectors = newCA;
-                for (int i = 0; i < newSize; i++) {
-                    Connector cn = rca.get(i);
-                    if (cn == null) {
-                        nilIndices.add(i);
-                    } else {
-                        newCA.cas(i, cn, reservationMarker);
-                    }
+                // shrink pool
+                System.arraycopy(ocons, 0, ncons, 0, newSize);
+                pds.connectors = ncons;
+                for (int i = newSize; i < ocons.length; i++) {
+                    ocons[i].state.set(Connector.OUTDATED);
                 }
-                for (int i = newSize; i < len; i++) {
-                    rca.cas(i, rca.get(i), outdatedMarker);
-                }
-                System.arraycopy(pds.allConnectors, 0, newAllArray, 0, newSize);
-                pds.allConnectors = newAllArray;
-                for (int i : nilIndices) {
-                    newCA.cas(i, null, reservationMarker);
-                }
-            }
-            for (int i = 0; i < len; i++) {
-                rca.setThis(i, outdatedMarker);
             }
         } finally {
             pds.resizingLock.unlock();
-        }*/
+        }
     }
 
     static int countOpenConnections(Connector[] connectors) {

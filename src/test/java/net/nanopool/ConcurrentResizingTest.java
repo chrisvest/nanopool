@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -12,7 +11,6 @@ import org.junit.Test;
  * @author cvh
  */
 public class ConcurrentResizingTest extends NanoPoolTestBase {
-    @Ignore
     @Test
     public void mustBePossibleToGetConnectionWhilePoolIsBeingResized() throws SQLException, InterruptedException {
         final int threadCount = 5;

@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.nanopool.contention.ThrowingContentionHandler;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -14,7 +13,6 @@ import org.junit.Test;
  * @author cvh
  */
 public class ResizingTest extends NanoPoolTestBase {
-    @Ignore
     @Test
     public void poolMustWorkAfterGrowing() throws SQLException {
         pool = npds();
@@ -24,7 +22,6 @@ public class ResizingTest extends NanoPoolTestBase {
         pool.shutdown();
     }
 
-    @Ignore
     @Test
     public void poolMustWorkAfterShrinking() throws SQLException {
         pool = npds();
@@ -43,7 +40,7 @@ public class ResizingTest extends NanoPoolTestBase {
         }
 
         final AtomicBoolean finishedMarker = new AtomicBoolean(false);
-        killMeLaterCheck(finishedMarker, 10000,
+        killMeLaterCheck(finishedMarker, 1000,
                 new SQLException("Die you gravy sucking pig-dog."));
 
         try {

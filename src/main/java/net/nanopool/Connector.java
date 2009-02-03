@@ -85,7 +85,8 @@ final class Connector {
             realConnectionsCreated++;
         }
         assert leaseCount.incrementAndGet() == 1:
-            "Connector is used by more than one thread at a time";
+            "Connector is used by more than one thread at a time: " +
+            leaseCount.get();
         currentLease = connection.getConnection();
         this.owner = Thread.currentThread();
         this.preReleaseHooks = preReleaseHooks;
@@ -102,6 +103,9 @@ final class Connector {
             if (flagReset) doReset();
             if (deadTime < System.currentTimeMillis())
                 invalidate();
+            assert leaseCount.decrementAndGet() == 0:
+                "Connector is used by more than one thread at a time: " +
+                leaseCount.get();
             int st = state.get();
             if (st == RESERVED) {
                 if (!state.compareAndSet(st, AVAILABLE)) {

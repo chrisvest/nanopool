@@ -123,29 +123,6 @@ final class Connector {
                 throw new IllegalStateException(
                         "Unexpected state when returning to pool: " + st);
             }
-            /*
-            Connector marker = connectors.get(idx);
-            assert leaseCount.decrementAndGet() == 0:
-                "Connector was used by more than one thread at a time";
-            if (marker != FsmMixin.shutdownMarker) {
-                if (marker == FsmMixin.reservationMarker) {
-                    // standard procedure; return to pool
-                    connectors.cas(idx, this, marker);
-                } else if (marker == this || marker == FsmMixin.outdatedMarker) {
-                    // the CasArray has been resized from under us.
-                    connectors.cas(idx, null, FsmMixin.reservationMarker);
-                    invalidate();
-                } else {
-                    throw new IllegalStateException(
-                            "Invalid state of CasArray<Connector> on index " +
-                            idx + ". Expected " + FsmMixin.reservationMarker +
-                            " but got " + marker);
-                }
-            } else {
-                // we've been shut down, so let's clean up.
-                invalidate();
-            }
-            //*/
         } finally {
             Connection tmpLease = currentLease;
             currentLease = null;

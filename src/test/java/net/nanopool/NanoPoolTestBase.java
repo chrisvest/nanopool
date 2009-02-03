@@ -74,7 +74,7 @@ public abstract class NanoPoolTestBase {
         }
     }
 
-    static void killMeLaterCheck(
+    static Thread killMeLaterCheck(
             final AtomicBoolean finishedMarker,
             final long sleepTime,
             final Exception exception) {
@@ -95,5 +95,6 @@ public abstract class NanoPoolTestBase {
         }, thisThread.getName() + "-killer");
         killer.setDaemon(true);
         killer.start();
+        return killer;
     }
 }

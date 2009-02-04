@@ -1,5 +1,6 @@
 package net.nanopool;
 
+import java.sql.Connection;
 import static org.junit.Assert.*;
 
 import java.sql.SQLException;
@@ -14,6 +15,9 @@ public class ShutdownTest extends NanoPoolTestBase {
     @Test
     public void shutDownPoolsMustRefuseToConnect() throws SQLException {
         pool = npds();
+        Connection con = pool.getConnection();
+        assertNotNull(con);
+        con.close();
         List sqles = pool.shutdown();
         assertTrue("Got exceptions from shutdown.", sqles.isEmpty());
         try {

@@ -20,13 +20,16 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
+import net.nanopool.Configuration;
 import net.nanopool.NanoPoolDataSource;
+import net.nanopool.contention.DefaultContentionHandler;
 import org.junit.Test;
 
 public class Benchmark {
@@ -49,8 +52,8 @@ public class Benchmark {
         System.out.println("------Warmup's over-------------");
             for (int connections = 1; connections <= 10; connections++) {
                 runTestSet(connections, connections);
-//                runTestSet(connections * 2, connections);
-//                System.out.println(" --+--");
+                runTestSet(connections * 2, connections);
+                runTestSet(connections, connections * 2);
             }
         } catch (InterruptedException ex) {
             ex.printStackTrace();
@@ -73,27 +76,52 @@ public class Benchmark {
         return myCpds;
     }
 
+    private static Configuration buildConfig(int poolSize, long ttl) {
+        Configuration conf = new Configuration();
+        conf.setPoolSize(poolSize)
+            .setTimeToLive(ttl)
+            .setContentionHandler(new DefaultContentionHandler(false, 0));
+        return conf;
+    }
+
+    private static DataSource buildPool(ConnectionPoolDataSource cpds, int size) {
+        long ttl = 300000; // five minutes
+        return new NanoPoolDataSource(cpds, buildConfig(size, ttl));
+    }
+
+    private static void shutdown(DataSource pool) {
+        if (pool instanceof NanoPoolDataSource) {
+            List<SQLException> sqles = ((NanoPoolDataSource)pool).shutdown();
+            for (SQLException sqle : sqles) {
+                sqle.printStackTrace();
+            }
+        }
+    }
+
     private static void benchmark(int threads, int poolSize) throws InterruptedException {
         ConnectionPoolDataSource cpds = newCpds();
         ExecutorService executor = Executors.newFixedThreadPool(threads);
         CountDownLatch startSignal = new CountDownLatch(1);
-        int timeToLive = 300000; // five minutes
-        NanoPoolDataSource npds = new NanoPoolDataSource(
-                cpds, poolSize, timeToLive);
+        DataSource pool = buildPool(cpds, poolSize);
+        int runningTime = 5000;
+
         Worker[] workers = new Worker[threads];
         for (int i = 0; i < threads; i++) {
-            Worker worker = new Worker(npds, startSignal);
+            Worker worker = new Worker(pool, startSignal);
             executor.execute(worker);
             workers[i] = worker;
         }
+
         startSignal.countDown();
         try {
-            Thread.sleep(60000);
+            Thread.sleep(runningTime);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
+
         executor.shutdownNow();
-        executor.awaitTermination(60, TimeUnit.SECONDS);
+        executor.awaitTermination(runningTime, TimeUnit.MILLISECONDS);
+        
         long sumThroughPut = 0;
         for (Worker worker : workers) {
             sumThroughPut += worker.hits;
@@ -105,6 +133,8 @@ public class Benchmark {
         		"%.2f cyc/sec/tot, %.2f cyc/sec/thr, %.2f cyc/sec/con\n",
                 threads, poolSize, totalThroughput,
                 throughputPerThread, throughputPerConnection);
+
+        shutdown(pool);
     }
     
     private static class Worker implements Runnable {
@@ -123,9 +153,7 @@ public class Benchmark {
                 latch.await();
                 while (!Thread.interrupted()) {
                     Connection con = ds.getConnection();
-                    Statement st = con.createStatement();
-                    ResultSet result = st.executeQuery("select now()");
-                    closeSafely(con, st, result);
+                    closeSafely(con);
                     count++;
                 }
             } catch (Exception e) {
@@ -134,17 +162,7 @@ public class Benchmark {
             hits = count;
         }
 
-        private void closeSafely(Connection con, Statement st, ResultSet result) {
-            try {
-                result.close();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            try {
-                st.close();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+        private void closeSafely(Connection con) {
             try {
                 con.close();
             } catch (SQLException ex) {

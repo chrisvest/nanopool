@@ -15,19 +15,24 @@
  */
 package net.nanopool.benchmark;
 
+import biz.source_code.miniConnectionPoolManager.MiniConnectionPoolManager;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
+import net.nanopool.AbstractDataSource;
 import net.nanopool.Configuration;
 import net.nanopool.NanoPoolDataSource;
 import net.nanopool.contention.DefaultContentionHandler;
@@ -106,6 +111,38 @@ public class Benchmark {
                     spds.close();
                 } catch (Exception ex) {
                     ex.printStackTrace();
+                }
+            }
+        };
+        runTestSet();
+
+        System.out.println("### Testing MiniConnectionPoolManager");
+        poolFactory = new PoolFactory() {
+            public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
+                final MiniConnectionPoolManager mcpm = new MiniConnectionPoolManager(cpds, size);
+                return new AbstractDataSource() {
+                    public Connection getConnection() throws SQLException {
+                        return mcpm.getConnection();
+                    }
+
+                    @Override
+                    public List<SQLException> shutdown() {
+                        List<SQLException> sqles = new ArrayList<SQLException>();
+                        try {
+                            mcpm.dispose();
+                        } catch (SQLException ex) {
+                            sqles.add(ex);
+                        }
+                        return sqles;
+                    }
+                };
+            }
+
+            public void closePool(DataSource pool) {
+                AbstractDataSource ads = (AbstractDataSource)pool;
+                List<SQLException> sqles = ads.shutdown();
+                for (SQLException sqle : sqles) {
+                    sqle.printStackTrace();
                 }
             }
         };

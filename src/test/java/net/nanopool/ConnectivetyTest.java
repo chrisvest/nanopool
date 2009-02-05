@@ -19,9 +19,13 @@ public class ConnectivetyTest extends NanoPoolTestBase {
         Connection con = pool.getConnection();
         try {
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select 1");
-            assertTrue(rs.next());
-            assertEquals(1, rs.getInt(1));
+            try {
+                ResultSet rs = stmt.executeQuery("select 1");
+                assertTrue(rs.next());
+                assertEquals(1, rs.getInt(1));
+            } finally {
+                stmt.close();
+            }
         } finally {
             con.close();
         }

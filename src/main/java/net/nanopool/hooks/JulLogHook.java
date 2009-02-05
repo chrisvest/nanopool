@@ -57,10 +57,6 @@ public class JulLogHook implements Hook {
         if (!logger.isLoggable(logLevel)) return;
         String msg = type.toString() +
                 ": " + source + "/" + con;
-        if (sqle != null) {
-            logger.log(logLevel, msg, sqle);
-        } else {
-            logger.log(logLevel, msg, sqle);
-        }
+        logger.log(logLevel, msg, sqle);
     }
 }

@@ -18,6 +18,7 @@ package net.nanopool.benchmark;
 import biz.source_code.miniConnectionPoolManager.MiniConnectionPoolManager;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
+import com.mchange.v2.c3p0.WrapperConnectionPoolDataSource;
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
@@ -78,6 +79,7 @@ public class Benchmark {
             public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
                 ComboPooledDataSource cmds = new ComboPooledDataSource();
                 try {
+                    WrapperConnectionPoolDataSource wcpds = new WrapperConnectionPoolDataSource();
                     cmds.setConnectionPoolDataSource(cpds);
                     cmds.setMaxPoolSize(size);
                     return cmds;
@@ -94,7 +96,7 @@ public class Benchmark {
                 }
             }
         };
-        runTestSet();
+        //runTestSet();
 
         System.out.println("### Testing Commons DBCP");
         poolFactory = new PoolFactory() {
@@ -159,8 +161,9 @@ public class Benchmark {
                 benchmark(connections * 2, connections);
                 benchmark(connections, connections * 2);
             }
-        } catch (InterruptedException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
+            System.err.println("This benchmark test run died.");
         }
         System.out.println("--------------------------------");
     }
@@ -201,8 +204,9 @@ public class Benchmark {
         int runningTime = 5000;
 
         Worker[] workers = new Worker[threads];
+        long stopTime = System.currentTimeMillis() + runningTime;
         for (int i = 0; i < threads; i++) {
-            Worker worker = new Worker(pool, startSignal);
+            Worker worker = new Worker(pool, startSignal, stopTime);
             executor.execute(worker);
             workers[i] = worker;
         }
@@ -214,39 +218,41 @@ public class Benchmark {
             ex.printStackTrace();
         }
 
-        executor.shutdownNow();
-        executor.awaitTermination(runningTime, TimeUnit.MILLISECONDS);
+        //executor.shutdownNow();
+        executor.awaitTermination(runningTime + 1000, TimeUnit.MILLISECONDS);
         
-        long sumThroughPut = 0;
+        int sumThroughPut = 0;
         for (Worker worker : workers) {
             sumThroughPut += worker.hits;
         }
         double totalThroughput = sumThroughPut / 60.0;
         double throughputPerThread = totalThroughput / threads;
         double throughputPerConnection = totalThroughput / poolSize;
-        System.out.printf("%s thrs, %s cons: " +
+        System.out.printf("%s thrs, %s cons: %s tot, " +
         		"%.2f cyc/sec/tot, %.2f cyc/sec/thr, %.2f cyc/sec/con\n",
-                threads, poolSize, totalThroughput,
+                threads, poolSize, sumThroughPut, totalThroughput,
                 throughputPerThread, throughputPerConnection);
 
         shutdown(pool);
     }
     
     private static class Worker implements Runnable {
-        public volatile long hits = 0;
+        public volatile int hits = 0;
         private final DataSource ds;
         private final CountDownLatch latch;
+        private final long stopTime;
 
-        public Worker(DataSource ds, CountDownLatch startLatch) {
+        public Worker(DataSource ds, CountDownLatch startLatch, long stopTime) {
             this.ds = ds;
             this.latch = startLatch;
+            this.stopTime = stopTime;
         }
         
         public void run() {
-            long count = 0;
+            int count = 0;
             try {
                 latch.await();
-                while (!Thread.interrupted()) {
+                while (System.currentTimeMillis() < stopTime) {
                     Connection con = ds.getConnection();
                     closeSafely(con);
                     count++;

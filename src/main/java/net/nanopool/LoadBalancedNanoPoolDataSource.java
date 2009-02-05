@@ -17,6 +17,8 @@ package net.nanopool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.ConnectionPoolDataSource;
 import net.nanopool.loadbalancing.Strategy;
@@ -50,12 +52,19 @@ public class LoadBalancedNanoPoolDataSource extends AbstractDataSource
         return strategy.getPool(pools).getConnection();
     }
 
-    public Connection getConnection(String username, String password)
-            throws SQLException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
     public NanoPoolManagementMBean getMXBean() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public List<SQLException> shutdown() {
+        NanoPoolDataSource[] npdss = pools.toArray(
+                new NanoPoolDataSource[pools.size()]);
+        pools.clear();
+        List<SQLException> sqles = new ArrayList<SQLException>();
+        for (NanoPoolDataSource npds : npdss) {
+            sqles.addAll(npds.shutdown());
+        }
+        return sqles;
     }
 }

@@ -16,7 +16,9 @@
 package net.nanopool;
 
 import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import javax.sql.DataSource;
 
 /**
@@ -81,4 +83,21 @@ public abstract class AbstractDataSource implements DataSource {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported.");
     }
+    
+    /**
+     * Always throws UnsupportedOperationException.
+     * @param username
+     * @param password
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public Connection getConnection(String username, String password) throws SQLException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /**
+     * Shut down and fully close this DataSource.
+     * @return
+     */
+    public abstract List<SQLException> shutdown();
 }

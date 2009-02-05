@@ -45,8 +45,6 @@ final class FsmMixin {
         while (true) {
             Connector con = connectors[idx];
             int st = con.state.get();
-            //System.out.printf("start=%s, idx=%s, st=%s, contentionCounter=%s, poolSize=%s, connectors#=%s\n",
-            //        start, idx, st, contentionCounter, poolSize, System.identityHashCode(connectors));
             while (st != Connector.RESERVED) {
                 if (st == Connector.OUTDATED)
                     throw CasArrayOutdatedException.INSTANCE;

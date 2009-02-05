@@ -15,11 +15,12 @@
  */
 package net.nanopool.benchmark;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.DataSources;
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
+import java.beans.PropertyVetoException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -30,15 +31,18 @@ import javax.sql.DataSource;
 import net.nanopool.Configuration;
 import net.nanopool.NanoPoolDataSource;
 import net.nanopool.contention.DefaultContentionHandler;
+import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
 import org.junit.Test;
 
 public class Benchmark {
+    private static PoolFactory poolFactory;
+
     @Test
-    public void executeBenchmark() {
+    public void executeBenchmark() throws InterruptedException {
         main(null);
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         System.out.println("--------------------------------");
         System.out.println("  thr = thread");
         System.out.println("  con = connection");
@@ -46,23 +50,82 @@ public class Benchmark {
         System.out.println("  tot = total");
         System.out.println("  sec = a second");
         System.out.println("--------------------------------");
+
+        System.out.println("### Testing NanoPool");
+        poolFactory = new PoolFactory() {
+            public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
+                return new NanoPoolDataSource(cpds, buildConfig(size, ttl));
+            }
+
+            public void closePool(DataSource pool) {
+                if (pool instanceof NanoPoolDataSource) {
+                    List<SQLException> sqles = ((NanoPoolDataSource)pool).shutdown();
+                    for (SQLException sqle : sqles) {
+                        sqle.printStackTrace();
+                    }
+                }
+            }
+        };
+        runTestSet();
+
+        System.out.println("### Testing C3P0");
+        poolFactory = new PoolFactory() {
+            public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
+                ComboPooledDataSource cmds = new ComboPooledDataSource();
+                try {
+                    cmds.setConnectionPoolDataSource(cpds);
+                    cmds.setMaxPoolSize(size);
+                    return cmds;
+                } catch (PropertyVetoException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            public void closePool(DataSource pool) {
+                try {
+                    DataSources.destroy(pool);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+        runTestSet();
+
+        System.out.println("### Testing Commons DBCP");
+        poolFactory = new PoolFactory() {
+            public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
+                SharedPoolDataSource spds = new SharedPoolDataSource();
+                spds.setConnectionPoolDataSource(cpds);
+                spds.setMaxActive(size);
+                return spds;
+            }
+
+            public void closePool(DataSource pool) {
+                SharedPoolDataSource spds = (SharedPoolDataSource)pool;
+                try {
+                    spds.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+        runTestSet();
+    }
+    
+    private static void runTestSet() throws InterruptedException {
         try {
-            runTestSet(50, 20);
-            runTestSet(2, 1);
+            benchmark(50, 20);
+            benchmark(2, 1);
         System.out.println("------Warmup's over-------------");
             for (int connections = 1; connections <= 10; connections++) {
-                runTestSet(connections, connections);
-                runTestSet(connections * 2, connections);
-                runTestSet(connections, connections * 2);
+                benchmark(connections, connections);
+                benchmark(connections * 2, connections);
+                benchmark(connections, connections * 2);
             }
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
         System.out.println("--------------------------------");
-    }
-    
-    private static void runTestSet(int threads, int poolSize) throws InterruptedException {
-        benchmark(threads, poolSize);
     }
 
     private static ConnectionPoolDataSource newCpds() {
@@ -86,16 +149,11 @@ public class Benchmark {
 
     private static DataSource buildPool(ConnectionPoolDataSource cpds, int size) {
         long ttl = 300000; // five minutes
-        return new NanoPoolDataSource(cpds, buildConfig(size, ttl));
+        return poolFactory.buildPool(cpds, size, ttl);
     }
 
     private static void shutdown(DataSource pool) {
-        if (pool instanceof NanoPoolDataSource) {
-            List<SQLException> sqles = ((NanoPoolDataSource)pool).shutdown();
-            for (SQLException sqle : sqles) {
-                sqle.printStackTrace();
-            }
-        }
+        poolFactory.closePool(pool);
     }
 
     private static void benchmark(int threads, int poolSize) throws InterruptedException {

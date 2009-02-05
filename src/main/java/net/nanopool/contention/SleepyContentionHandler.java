@@ -35,7 +35,7 @@ public class SleepyContentionHandler implements ContentionHandler {
 
     public void handleContention(int count) {
         try {
-            Thread.sleep(sleepTime < 1? count * 10: sleepTime);
+            Thread.sleep(sleepTime < 1? ((long)count) * 10: sleepTime);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

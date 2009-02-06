@@ -48,6 +48,9 @@ public class Benchmark {
     }
     
     public static void main(String[] args) throws InterruptedException {
+        String pools =
+                "," + System.getProperty("pools", "np,c3p0,dbcp,mcpm") + ",";
+
         System.out.println("--------------------------------");
         System.out.println("  thr = thread");
         System.out.println("  con = connection");
@@ -56,7 +59,6 @@ public class Benchmark {
         System.out.println("  sec = a second");
         System.out.println("--------------------------------");
 
-        System.out.println("### Testing NanoPool");
         poolFactory = new PoolFactory() {
             public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
                 return new NanoPoolDataSource(cpds, buildConfig(size, ttl));
@@ -71,9 +73,11 @@ public class Benchmark {
                 }
             }
         };
-        runTestSet();
+        if (pools.contains(",np,")) {
+            System.out.println("### Testing NanoPool");
+            runTestSet();
+        }
 
-        System.out.println("### Testing C3P0");
         poolFactory = new PoolFactory() {
             public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
                 ComboPooledDataSource cmds = new ComboPooledDataSource();
@@ -95,9 +99,11 @@ public class Benchmark {
                 }
             }
         };
-        //runTestSet();
+        if (pools.contains(",c3p0,")) {
+            System.out.println("### Testing C3P0");
+            //runTestSet();
+        }
 
-        System.out.println("### Testing Commons DBCP");
         poolFactory = new PoolFactory() {
             public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
                 SharedPoolDataSource spds = new SharedPoolDataSource();
@@ -115,9 +121,11 @@ public class Benchmark {
                 }
             }
         };
-        runTestSet();
+        if (pools.contains(",dbcp,")) {
+            System.out.println("### Testing Commons DBCP");
+            runTestSet();
+        }
 
-        System.out.println("### Testing MiniConnectionPoolManager");
         poolFactory = new PoolFactory() {
             public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
                 final MiniConnectionPoolManager mcpm = new MiniConnectionPoolManager(cpds, size);
@@ -147,7 +155,10 @@ public class Benchmark {
                 }
             }
         };
-        runTestSet();
+        if (pools.contains(",mcpm,")) {
+            System.out.println("### Testing MiniConnectionPoolManager");
+            runTestSet();
+        }
     }
     
     private static void runTestSet() throws InterruptedException {

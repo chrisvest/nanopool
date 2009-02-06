@@ -29,8 +29,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import net.nanopool.AbstractDataSource;
@@ -41,6 +39,7 @@ import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
 import org.junit.Test;
 
 public class Benchmark {
+    private static final boolean PRE_WARM_POOLS = true;
     private static PoolFactory poolFactory;
 
     @Test
@@ -197,16 +196,40 @@ public class Benchmark {
     }
 
     private static void benchmark(int threads, int poolSize) throws InterruptedException {
+        Thread.sleep(250); // give CPU some breathing room
         ConnectionPoolDataSource cpds = newCpds();
         ExecutorService executor = Executors.newFixedThreadPool(threads);
         CountDownLatch startSignal = new CountDownLatch(1);
+        CountDownLatch endSignal = new CountDownLatch(threads);
         DataSource pool = buildPool(cpds, poolSize);
         int runningTime = 5000;
+
+        if (PRE_WARM_POOLS) {
+            Connection[] cons = new Connection[poolSize];
+            for (int i = 0; i < poolSize; i++) {
+                try {
+                    cons[i] = pool.getConnection();
+                } catch (SQLException ex) {
+                    throw new RuntimeException(
+                            "Exception while getting connection for " +
+                            "pre-warming pool.", ex);
+                }
+            }
+            for (int i = 0; i < poolSize; i++) {
+                try {
+                    cons[i].close();
+                } catch (SQLException ex) {
+                    throw new RuntimeException(
+                            "Exception while closing connection for " +
+                            "pre-warming pool.", ex);
+                }
+            }
+        }
 
         Worker[] workers = new Worker[threads];
         long stopTime = System.currentTimeMillis() + runningTime;
         for (int i = 0; i < threads; i++) {
-            Worker worker = new Worker(pool, startSignal, stopTime);
+            Worker worker = new Worker(pool, startSignal, endSignal, stopTime);
             executor.execute(worker);
             workers[i] = worker;
         }
@@ -218,8 +241,7 @@ public class Benchmark {
             ex.printStackTrace();
         }
 
-        //executor.shutdownNow();
-        executor.awaitTermination(runningTime + 1000, TimeUnit.MILLISECONDS);
+        endSignal.await(runningTime + 200, TimeUnit.MILLISECONDS);
         
         int sumThroughPut = 0;
         for (Worker worker : workers) {
@@ -239,19 +261,22 @@ public class Benchmark {
     private static class Worker implements Runnable {
         public volatile int hits = 0;
         private final DataSource ds;
-        private final CountDownLatch latch;
+        private final CountDownLatch startLatch;
+        private final CountDownLatch endLatch;
         private final long stopTime;
 
-        public Worker(DataSource ds, CountDownLatch startLatch, long stopTime) {
+        public Worker(DataSource ds, CountDownLatch startLatch,
+                CountDownLatch endLatch, long stopTime) {
             this.ds = ds;
-            this.latch = startLatch;
+            this.startLatch = startLatch;
+            this.endLatch = endLatch;
             this.stopTime = stopTime;
         }
         
         public void run() {
             int count = 0;
             try {
-                latch.await();
+                startLatch.await();
                 while (System.currentTimeMillis() < stopTime) {
                     Connection con = ds.getConnection();
                     closeSafely(con);
@@ -261,6 +286,7 @@ public class Benchmark {
                 e.printStackTrace();
             }
             hits = count;
+            endLatch.countDown();
         }
 
         private void closeSafely(Connection con) {

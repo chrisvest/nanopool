@@ -14,7 +14,7 @@ import org.junit.Test;
  *
  * @author cvh
  */
-public class HooksTest extends NanoPoolTestBase {
+public class HooksCallOrderTest extends NanoPoolTestBase {
     private final AtomicInteger connectAttempts = new AtomicInteger();
     private final AtomicInteger preConnectCheck = new AtomicInteger();
     private final AtomicInteger postConnectCheck = new AtomicInteger();

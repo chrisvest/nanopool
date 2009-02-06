@@ -48,7 +48,18 @@ public class HooksTest extends NanoPoolTestBase {
     }
 
     @Test
-    public void hooksMustRunInCorrectOrder() {
+    public void hooksMustRunInCorrectOrder() throws SQLException {
+        pool = npds();
+        assertCorrectHooksSequence(pool);
+        assertCorrectHooksSequence(pool);
+        assertCorrectHooksSequence(pool);
+        assertCorrectHooksSequence(pool);
+    }
 
+    private void assertCorrectHooksSequence(NanoPoolDataSource pool) throws SQLException {
+        int count = connectAttempts.incrementAndGet();
+        Connection con = pool.getConnection();
+        con.close();
+        assertEquals(count, postReleaseCheck.get());
     }
 }

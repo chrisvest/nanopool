@@ -20,6 +20,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.WrapperConnectionPoolDataSource;
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
+import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -179,14 +180,18 @@ public class Benchmark {
     }
 
     private static ConnectionPoolDataSource newCpds() {
-        MysqlConnectionPoolDataSource myCpds =
+        /*MysqlConnectionPoolDataSource myCpds =
                 new MysqlConnectionPoolDataSource();
         myCpds.setUser("root");
         myCpds.setPassword("");
         myCpds.setDatabaseName("test");
         myCpds.setPort(3306);
-        myCpds.setServerName("localhost");
-        return myCpds;
+        myCpds.setServerName("localhost");//*/
+        EmbeddedConnectionPoolDataSource cpds =
+                new EmbeddedConnectionPoolDataSource();
+        cpds.setCreateDatabase("create");
+        cpds.setDatabaseName("test");
+        return cpds;
     }
 
     private static Configuration buildConfig(int poolSize, long ttl) {

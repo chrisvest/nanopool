@@ -40,7 +40,8 @@ import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
 import org.junit.Test;
 
 public class Benchmark {
-    private static final boolean PRE_WARM_POOLS = true;
+    private static final boolean PRE_WARM_POOLS = Boolean.parseBoolean(
+            System.getProperty("pre-warm", "true"));
     private static PoolFactory poolFactory;
 
     @Test
@@ -180,18 +181,25 @@ public class Benchmark {
     }
 
     private static ConnectionPoolDataSource newCpds() {
-        /*MysqlConnectionPoolDataSource myCpds =
-                new MysqlConnectionPoolDataSource();
-        myCpds.setUser("root");
-        myCpds.setPassword("");
-        myCpds.setDatabaseName("test");
-        myCpds.setPort(3306);
-        myCpds.setServerName("localhost");//*/
-        EmbeddedConnectionPoolDataSource cpds =
-                new EmbeddedConnectionPoolDataSource();
-        cpds.setCreateDatabase("create");
-        cpds.setDatabaseName("test");
-        return cpds;
+        String db = System.getProperty("db", "derby");
+        if ("mysql".equals(db)) {
+            MysqlConnectionPoolDataSource cpds =
+                    new MysqlConnectionPoolDataSource();
+            cpds.setUser("root");
+            cpds.setPassword("");
+            cpds.setDatabaseName("test");
+            cpds.setPort(3306);
+            cpds.setServerName("localhost");
+            return cpds;
+        }
+        if ("derby".equals(db)) {
+            EmbeddedConnectionPoolDataSource cpds =
+                    new EmbeddedConnectionPoolDataSource();
+            cpds.setCreateDatabase("create");
+            cpds.setDatabaseName("test");
+            return cpds;
+        }
+        throw new RuntimeException("Unknown database: " + db);
     }
 
     private static Configuration buildConfig(int poolSize, long ttl) {

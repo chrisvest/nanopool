@@ -47,7 +47,7 @@ final class FsmMixin {
             int st = con.state.get();
             while (st != Connector.RESERVED) {
                 if (st == Connector.OUTDATED)
-                    throw CasArrayOutdatedException.INSTANCE;
+                    throw OutdatedException.INSTANCE;
                 if (st == Connector.SHUTDOWN)
                     throw new IllegalStateException(MSG_SHUT_DOWN);
                 // we might have gotten one
@@ -87,7 +87,7 @@ final class FsmMixin {
             int st = con.state.get();
             con.state.set(Connector.SHUTDOWN);
             if (st == Connector.OUTDATED)
-                throw CasArrayOutdatedException.INSTANCE;
+                throw OutdatedException.INSTANCE;
             if (st != Connector.RESERVED) {
                 try {
                     con.invalidate();
@@ -136,7 +136,7 @@ final class FsmMixin {
         int openCount = 0;
         for (Connector cn : connectors) {
             int state = cn.state.get();
-            if (state == Connector.OUTDATED) throw CasArrayOutdatedException.INSTANCE;
+            if (state == Connector.OUTDATED) throw OutdatedException.INSTANCE;
             if (state == Connector.AVAILABLE) {
                 openCount++;
             }

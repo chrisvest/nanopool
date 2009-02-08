@@ -20,11 +20,11 @@ package net.nanopool;
  * we have at various places, the JMX interface in particular.
  * @author cvh
  */
-class CasArrayOutdatedException extends NanoPoolRuntimeException {
-    static final CasArrayOutdatedException INSTANCE =
-            new CasArrayOutdatedException();
+class OutdatedException extends NanoPoolRuntimeException {
+    static final OutdatedException INSTANCE =
+            new OutdatedException();
 
-    private CasArrayOutdatedException() {
+    private OutdatedException() {
     }
 
     @Override

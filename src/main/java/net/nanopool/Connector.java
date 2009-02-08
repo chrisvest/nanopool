@@ -33,6 +33,7 @@ final class Connector {
     public final AtomicInteger state = new AtomicInteger(AVAILABLE);
     private final ConnectionPoolDataSource source;
     private final long timeToLive;
+    private final TimeSource time;
     private PooledConnection connection;
     private long deadTime;
     private Connection currentLease;
@@ -66,9 +67,10 @@ final class Connector {
      */
     private final AtomicInteger leaseCount = new AtomicInteger();
     
-    Connector(ConnectionPoolDataSource source, long timeToLive) {
+    Connector(ConnectionPoolDataSource source, long timeToLive, TimeSource time) {
         this.source = source;
-        this.timeToLive = timeToLive;
+        this.timeToLive = time.millisecondsToUnit(timeToLive);
+        this.time = time;
     }
     
     Connection getConnection(
@@ -76,12 +78,12 @@ final class Connector {
             Cons<Hook> postReleaseHooks,
             Cons<Hook> connectionInvalidationHooks) throws SQLException {
         if (flagReset) doReset();
-        if (deadTime < System.currentTimeMillis())
+        if (deadTime < time.now())
             invalidate();
         if (connection == null) {
             connection = source.getPooledConnection();
             connection.addConnectionEventListener(new ConnectionListener(this));
-            deadTime = System.currentTimeMillis() + timeToLive;
+            deadTime = time.now() + timeToLive;
             realConnectionsCreated++;
         }
         assert leaseCount.incrementAndGet() == 1:
@@ -101,13 +103,13 @@ final class Connector {
                 source, currentLease, null);
         try {
             if (flagReset) doReset();
-            if (deadTime < System.currentTimeMillis())
+            if (deadTime < time.now())
                 invalidate();
-            assert leaseCount.decrementAndGet() == 0:
-                "Connector is used by more than one thread at a time: " +
-                leaseCount.get();
             int st = state.get();
             if (st == RESERVED) {
+                assert leaseCount.decrementAndGet() == 0:
+                    "Connector is used by more than one thread at a time: " +
+                    leaseCount.get();
                 if (!state.compareAndSet(st, AVAILABLE)) {
                     st = state.get();
                     if (st == SHUTDOWN || st == OUTDATED) {
@@ -138,12 +140,15 @@ final class Connector {
         if (connection == null)
             return;
         try {
-            connection.close();
+            PooledConnection pc = connection;
+            connection = null;
+            pc.close();
         } catch (SQLException e) {
             sqle = e;
-            throw e;
+            // we don't rethrow SQLExceptions from closing the physical
+            // connections because the pool-user never touches them, can't
+            // do jack about their exceptions and really does not care anyway.
         } finally {
-            connection = null;
             FsmMixin.runHooks(connectionInvalidationHooks,
                     EventType.invalidation, source, null, sqle);
         }

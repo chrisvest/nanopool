@@ -116,7 +116,8 @@ final class FsmMixin {
                 // grow pool
                 System.arraycopy(ocons, 0, ncons, 0, ocons.length);
                 for (int i = ocons.length; i < ncons.length; i++) {
-                    ncons[i] = new Connector(pds.source, pds.state.ttl);
+                    ncons[i] = new Connector(
+                            pds.source, pds.state.ttl, pds.state.time);
                 }
                 pds.connectors = ncons;
             } else {

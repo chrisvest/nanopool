@@ -32,7 +32,7 @@ public abstract class PoolingDataSourceSupport extends AbstractDataSource {
         this.state = config.getState();
         this.connectors = new Connector[state.poolSize];
         for (int i = 0; i < connectors.length; i++) {
-            connectors[i] = new Connector(source, state.ttl);
+            connectors[i] = new Connector(source, state.ttl, state.time);
         }
     }
 

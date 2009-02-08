@@ -41,7 +41,7 @@ public class Configuration {
         this(new State(
                 10, 300000,
                 new DefaultContentionHandler(), null, null, null, null, null,
-                RandomStrategy.INSTANCE
+                RandomStrategy.INSTANCE, MilliTime.INSTANCE
         ));
     }
 
@@ -68,7 +68,7 @@ public class Configuration {
             n = new State(poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.loadBalancingStrategy);
+                    s.loadBalancingStrategy, s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -88,7 +88,7 @@ public class Configuration {
             n = new State(s.poolSize, ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.loadBalancingStrategy);
+                    s.loadBalancingStrategy, s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -108,7 +108,7 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.loadBalancingStrategy);
+                    s.loadBalancingStrategy, s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -128,7 +128,27 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
-                    strategy);
+                    strategy, s.time);
+        } while (!state.compareAndSet(s, n));
+        return this;
+    }
+
+    public TimeSource getTimeSource() {
+        return state.get().time;
+    }
+
+    public Configuration setTimeSource(TimeSource time) {
+        if (time == null) {
+            throw new IllegalArgumentException(
+                    "Time Source should not be null.");
+        }
+        State s, n;
+        do {
+            s = state.get();
+            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+                    s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
+                    s.postReleaseHooks, s.connectionInvalidationHooks,
+                    s.loadBalancingStrategy, time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -160,7 +180,8 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     new Cons(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy);
+                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -172,7 +193,8 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     remove(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy);
+                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -188,7 +210,8 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, new Cons(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy);
+                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -200,7 +223,8 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, remove(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy);
+                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -216,7 +240,8 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     new Cons(hook, s.preReleaseHooks), s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy);
+                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -228,7 +253,8 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     remove(hook, s.preReleaseHooks), s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy);
+                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -244,7 +270,8 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, new Cons(hook, s.postReleaseHooks),
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy);
+                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -256,7 +283,8 @@ public class Configuration {
             n = new State(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, remove(hook, s.postReleaseHooks),
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy);
+                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -273,7 +301,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     new Cons(hook, s.connectionInvalidationHooks),
-                    s.loadBalancingStrategy);
+                    s.loadBalancingStrategy, s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }
@@ -286,7 +314,7 @@ public class Configuration {
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     remove(hook, s.connectionInvalidationHooks),
-                    s.loadBalancingStrategy);
+                    s.loadBalancingStrategy, s.time);
         } while (!state.compareAndSet(s, n));
         return this;
     }

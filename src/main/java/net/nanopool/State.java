@@ -37,12 +37,13 @@ final class State {
     final Cons<Hook> postReleaseHooks;
     final Cons<Hook> connectionInvalidationHooks;
     final Strategy loadBalancingStrategy;
+    final TimeSource time;
 
     public State(int poolSize, long ttl,
             ContentionHandler contentionHandler, Cons<Hook> preConnectHooks,
             Cons<Hook> postConnectHooks, Cons<Hook> preReleaseHook,
             Cons<Hook> postReleaseHook, Cons<Hook> connectionInvalidationHook,
-            Strategy loadBalancingStrategy) {
+            Strategy loadBalancingStrategy, TimeSource time) {
         super();
         this.poolSize = poolSize;
         this.ttl = ttl;
@@ -53,5 +54,6 @@ final class State {
         this.postReleaseHooks = postReleaseHook;
         this.connectionInvalidationHooks = connectionInvalidationHook;
         this.loadBalancingStrategy = loadBalancingStrategy;
+        this.time = time;
     }
 }

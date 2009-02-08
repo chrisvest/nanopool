@@ -21,7 +21,8 @@ package net.nanopool;
  */
 public interface NanoPoolManagementMBean {
     // attributes
-    int getCurrentOpenConnectionsCount();
+    int getCurrentAvailableConnectionsCount();
+    int getCurrentLeasedConnectionsCount();
     int getPoolSize();
     long getConnectionTimeToLive();
     String getContentionHandlerClassName();

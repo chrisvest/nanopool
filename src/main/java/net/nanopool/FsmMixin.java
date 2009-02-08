@@ -133,7 +133,10 @@ final class FsmMixin {
         }
     }
 
-    static int countOpenConnections(Connector[] connectors) {
+    private static int countConnections(Connector[] connectors, int ofState) {
+        assert ofState != Connector.OUTDATED && ofState != Connector.SHUTDOWN:
+            "Cannot count outdated or shut down state.";
+        
         int openCount = 0;
         for (Connector cn : connectors) {
             int state = cn.state.get();
@@ -143,6 +146,14 @@ final class FsmMixin {
             }
         }
         return openCount;
+    }
+
+    static int countAvailableConnections(Connector[] cons) {
+        return countConnections(cons, Connector.AVAILABLE);
+    }
+
+    static int countLeasedConnections(Connector[] cons) {
+        return countConnections(cons, Connector.RESERVED);
     }
 
     static void runHooks(Cons<Hook> hooks, EventType type,

@@ -35,11 +35,21 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
         this.np = (NanoPoolDataSource)np;
     }
 
-    public int getCurrentOpenConnectionsCount() {
+    public int getCurrentAvailableConnectionsCount() {
+        if (np.connectors == null) return 0;
         try {
-            return FsmMixin.countOpenConnections(np.connectors);
+            return FsmMixin.countAvailableConnections(np.connectors);
         } catch (OutdatedException _) {
-            return getCurrentOpenConnectionsCount();
+            return getCurrentAvailableConnectionsCount();
+        }
+    }
+
+    public int getCurrentLeasedConnectionsCount() {
+        if (np.connectors == null) return 0;
+        try {
+            return FsmMixin.countAvailableConnections(np.connectors);
+        } catch (OutdatedException _) {
+            return getCurrentAvailableConnectionsCount();
         }
     }
 
@@ -98,22 +108,26 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
         return String.valueOf(np.source);
     }
 
+    private volatile int connectionsCreated;
     public int getConnectionsCreated() {
         int createdCount = 0;
         Connector[] connectors = np.connectors;
+        if (connectors == null) return connectionsCreated;
         for (Connector cn : connectors) {
             if (cn != null) createdCount += cn.getRealConnectionsCreated();
         }
-        return createdCount;
+        return connectionsCreated = createdCount;
     }
 
+    private volatile int connectionsLeased;
     public int getConnectionsLeased() {
         int leasedCount = 0;
         Connector[] connectors = np.connectors;
+        if (connectors == null) return connectionsLeased;
         for (Connector cn : connectors) {
             if (cn != null) leasedCount += cn.getConnectionsLeased();
         }
-        return leasedCount;
+        return connectionsLeased = leasedCount;
     }
 
     public void resetCounters() {

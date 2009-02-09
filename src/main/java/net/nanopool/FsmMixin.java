@@ -141,7 +141,7 @@ final class FsmMixin {
         for (Connector cn : connectors) {
             int state = cn.state.get();
             if (state == Connector.OUTDATED) throw OutdatedException.INSTANCE;
-            if (state == Connector.AVAILABLE) {
+            if (state == ofState) {
                 openCount++;
             }
         }

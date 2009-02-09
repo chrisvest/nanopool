@@ -27,6 +27,8 @@ import javax.sql.DataSource;
  */
 public class NanoPoolManagement implements NanoPoolManagementMBean {
     private final NanoPoolDataSource np;
+    private volatile int connectionsLeased;
+    private volatile int connectionsCreated;
 
     public NanoPoolManagement(DataSource np) {
         if (np == null) throw new NullPointerException(
@@ -47,7 +49,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     public int getCurrentLeasedConnectionsCount() {
         if (np.connectors == null) return 0;
         try {
-            return FsmMixin.countAvailableConnections(np.connectors);
+            return FsmMixin.countLeasedConnections(np.connectors);
         } catch (OutdatedException _) {
             return getCurrentAvailableConnectionsCount();
         }
@@ -83,6 +85,10 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public String shutDown() {
+        // cache counters
+        getConnectionsCreated();
+        getConnectionsLeased();
+        // then shut down
         List<SQLException> faults = np.shutdown();
         if (faults.size() > 0) {
             StringWriter sos = new StringWriter();
@@ -108,7 +114,6 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
         return String.valueOf(np.source);
     }
 
-    private volatile int connectionsCreated;
     public int getConnectionsCreated() {
         int createdCount = 0;
         Connector[] connectors = np.connectors;
@@ -119,7 +124,6 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
         return connectionsCreated = createdCount;
     }
 
-    private volatile int connectionsLeased;
     public int getConnectionsLeased() {
         int leasedCount = 0;
         Connector[] connectors = np.connectors;
@@ -132,9 +136,13 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public void resetCounters() {
         Connector[] connectors = np.connectors;
-        for (Connector cn : connectors) {
-            if (cn != null) cn.resetCounters();
+        if (connectors != null) {
+            for (Connector cn : connectors) {
+                if (cn != null) cn.resetCounters();
+            }
         }
+        connectionsCreated = 0;
+        connectionsLeased = 0;
     }
 
     public String listConnectionOwningThreadsStackTraces() {

@@ -31,6 +31,8 @@ final class Connector {
     public static final int SHUTDOWN = 2;
     public static final int OUTDATED = 2;
     public final AtomicInteger state = new AtomicInteger(AVAILABLE);
+    private final AtomicInteger realConnectionsCreated = new AtomicInteger();
+    private final AtomicInteger connectionsLeased = new AtomicInteger();
     private final ConnectionPoolDataSource source;
     private final long timeToLive;
     private final TimeSource time;
@@ -40,14 +42,10 @@ final class Connector {
 
     /**
      * Used for display through the JMX interface.
-     * 'volatile' is safe enough for these variables because we are guaranteed
+     * 'volatile' is safe enough for this variable because we are guaranteed
      * that only one thread will ever write to them at a time, thus we're not
      * exposed to lost-update or ordering bugs.
-     * The downside of this approach is that resetting the counters isn't eager.
      */
-    private volatile int realConnectionsCreated = 0;
-    private volatile int connectionsLeased = 0;
-    private volatile boolean flagReset = false;
     private volatile Thread owner;
 
     /**
@@ -77,14 +75,13 @@ final class Connector {
             Cons<Hook> preReleaseHooks,
             Cons<Hook> postReleaseHooks,
             Cons<Hook> connectionInvalidationHooks) throws SQLException {
-        if (flagReset) doReset();
         if (deadTime < time.now())
             invalidate();
         if (connection == null) {
             connection = source.getPooledConnection();
             connection.addConnectionEventListener(new ConnectionListener(this));
             deadTime = time.now() + timeToLive;
-            realConnectionsCreated++;
+            realConnectionsCreated.incrementAndGet();
         }
         assert leaseCount.incrementAndGet() == 1:
             "Connector is used by more than one thread at a time: " +
@@ -94,7 +91,7 @@ final class Connector {
         this.preReleaseHooks = preReleaseHooks;
         this.postReleaseHooks = postReleaseHooks;
         this.connectionInvalidationHooks = connectionInvalidationHooks;
-        connectionsLeased++;
+        connectionsLeased.incrementAndGet();
         return currentLease;
     }
     
@@ -102,7 +99,6 @@ final class Connector {
         FsmMixin.runHooks(preReleaseHooks, EventType.preRelease,
                 source, currentLease, null);
         try {
-            if (flagReset) doReset();
             if (deadTime < time.now())
                 invalidate();
             int st = state.get();
@@ -155,21 +151,16 @@ final class Connector {
     }
 
     int getConnectionsLeased() {
-        return connectionsLeased;
+        return connectionsLeased.get();
     }
 
     int getRealConnectionsCreated() {
-        return realConnectionsCreated;
+        return realConnectionsCreated.get();
     }
 
     void resetCounters() {
-        flagReset = true;
-    }
-
-    private void doReset() {
-        realConnectionsCreated = 0;
-        connectionsLeased = 0;
-        flagReset = false;
+        realConnectionsCreated.set(0);
+        connectionsLeased.set(0);
     }
 
     Thread getOwner() {

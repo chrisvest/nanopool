@@ -19,6 +19,7 @@ public class JMXTest extends NanoPoolTestBase {
         assertEquals(0, mbean.getConnectionsCreated());
         assertEquals(0, mbean.getConnectionsLeased());
         assertEquals(1, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
         assertFalse(mbean.isShutDown());
 
         Connection con = pool.getConnection();
@@ -26,6 +27,7 @@ public class JMXTest extends NanoPoolTestBase {
         assertEquals(1, mbean.getConnectionsCreated());
         assertEquals(1, mbean.getConnectionsLeased());
         assertEquals(0, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(1, mbean.getCurrentLeasedConnectionsCount());
         assertFalse(mbean.isShutDown());
 
         con.close();
@@ -33,6 +35,7 @@ public class JMXTest extends NanoPoolTestBase {
         assertEquals(1, mbean.getConnectionsCreated());
         assertEquals(1, mbean.getConnectionsLeased());
         assertEquals(1, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
         assertFalse(mbean.isShutDown());
 
         con = pool.getConnection();
@@ -40,6 +43,7 @@ public class JMXTest extends NanoPoolTestBase {
         assertEquals(1, mbean.getConnectionsCreated());
         assertEquals(2, mbean.getConnectionsLeased());
         assertEquals(0, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(1, mbean.getCurrentLeasedConnectionsCount());
         assertFalse(mbean.isShutDown());
 
         con.close();
@@ -47,6 +51,7 @@ public class JMXTest extends NanoPoolTestBase {
         assertEquals(1, mbean.getConnectionsCreated());
         assertEquals(2, mbean.getConnectionsLeased());
         assertEquals(1, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
         assertFalse(mbean.isShutDown());
 
         pool.shutdown();
@@ -54,6 +59,47 @@ public class JMXTest extends NanoPoolTestBase {
         assertEquals(1, mbean.getConnectionsCreated());
         assertEquals(2, mbean.getConnectionsLeased());
         assertEquals(0, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
+        assertTrue(mbean.isShutDown());
+    }
+
+    @Test
+    public void resettingMustWorkForBothLiveAndShutDownPools() throws SQLException {
+        pool = npds();
+        NanoPoolManagementMBean mbean = pool.getMXBean();
+        Connection con = pool.getConnection();
+        con.close();
+
+        assertEquals(1, mbean.getConnectionsCreated());
+        assertEquals(1, mbean.getConnectionsLeased());
+        assertEquals(1, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
+        assertFalse(mbean.isShutDown());
+
+        mbean.resetCounters();
+
+        assertEquals(0, mbean.getConnectionsCreated());
+        assertEquals(0, mbean.getConnectionsLeased());
+        assertEquals(1, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
+        assertFalse(mbean.isShutDown());
+
+        con = pool.getConnection();
+        con.close();
+        mbean.shutDown();
+
+        assertEquals(0, mbean.getConnectionsCreated());
+        assertEquals(1, mbean.getConnectionsLeased());
+        assertEquals(0, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
+        assertTrue(mbean.isShutDown());
+
+        mbean.resetCounters();
+
+        assertEquals(0, mbean.getConnectionsCreated());
+        assertEquals(0, mbean.getConnectionsLeased());
+        assertEquals(0, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
         assertTrue(mbean.isShutDown());
     }
 

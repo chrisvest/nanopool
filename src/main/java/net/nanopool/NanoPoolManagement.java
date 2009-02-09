@@ -56,7 +56,8 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public int getPoolSize() {
-        return np.connectors.length;
+        Connector[] cons = np.connectors;
+        return cons == null? 0 : cons.length;
     }
 
     public long getConnectionTimeToLive() {

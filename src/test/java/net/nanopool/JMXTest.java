@@ -103,6 +103,26 @@ public class JMXTest extends NanoPoolTestBase {
         assertTrue(mbean.isShutDown());
     }
 
+    @Test
+    public void jmxInterfaceMustWorkAfterPoolShutDown() throws SQLException {
+        pool = npds();
+        NanoPoolManagementMBean mbean = pool.getMXBean();
+        mbean.shutDown();
+
+        State s = buildConfig().getState();
+
+        assertEquals(s.ttl, mbean.getConnectionTimeToLive());
+        assertEquals(0, mbean.getConnectionsCreated());
+        assertEquals(0, mbean.getConnectionsLeased());
+        assertNotNull(mbean.getContentionHandler());
+        assertEquals(s.contentionHandler.getClass().getName(), mbean.getContentionHandlerClassName());
+        assertEquals(0, mbean.getCurrentAvailableConnectionsCount());
+        assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
+        assertEquals(0, mbean.getPoolSize());
+        assertNotNull(mbean.getSourceConnection());
+        assertNotNull(mbean.getSourceConnectionClassName());
+    }
+
     @Override
     protected Configuration buildConfig() {
         return super.buildConfig().setPoolSize(1);

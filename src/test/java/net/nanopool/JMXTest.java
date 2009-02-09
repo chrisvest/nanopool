@@ -121,6 +121,26 @@ public class JMXTest extends NanoPoolTestBase {
         assertEquals(0, mbean.getPoolSize());
         assertNotNull(mbean.getSourceConnection());
         assertNotNull(mbean.getSourceConnectionClassName());
+        assertNotNull(mbean.listConnectionOwningThreadsStackTraces());
+        mbean.dumpConnectionOwningThreadsStackTraces(); // must not throw
+        try {
+            mbean.resizePool(2);
+            fail("resizing a shut down pool did not throw");
+        } catch (IllegalStateException ex) {
+            // yay!
+        }
+        try {
+            mbean.interruptConnection(0);
+            fail("interrupting connection on closed pool did not throw");
+        } catch (IllegalStateException ex) {
+            // yay!
+        }
+        try {
+            mbean.killConnection(0);
+            fail("killing connection on closed pool did not throw");
+        } catch (IllegalStateException ex) {
+            // yay!
+        }
     }
 
     @Override

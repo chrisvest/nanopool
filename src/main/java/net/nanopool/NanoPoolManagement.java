@@ -149,6 +149,9 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     public String listConnectionOwningThreadsStackTraces() {
         StringBuilder sb = new StringBuilder();
         Connector[] connectors = np.connectors;
+        if (connectors == null) {
+            return "Pool is shut down.";
+        }
         int i = -1;
         for (Connector cn : connectors) {
             i++;
@@ -180,7 +183,14 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public void interruptConnection(int id) {
-        Connector cn = np.connectors[id];
+        Connector[] cons = np.connectors;
+        if (cons == null) {
+            throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
+        }
+        Connector cn = cons[id];
+        if (cn.state.get() == Connector.SHUTDOWN) {
+            throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
+        }
         Thread owner = cn.getOwner();
         if (owner != null) {
             owner.interrupt();
@@ -188,7 +198,14 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public void killConnection(int id) {
-        Connector cn = np.connectors[id];
+        Connector[] cons = np.connectors;
+        if (cons == null) {
+            throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
+        }
+        Connector cn = cons[id];
+        if (cn.state.get() == Connector.SHUTDOWN) {
+            throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
+        }
         Thread owner = cn.getOwner();
         if (owner != null) {
             owner.stop();

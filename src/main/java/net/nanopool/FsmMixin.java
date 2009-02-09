@@ -101,15 +101,15 @@ final class FsmMixin {
     }
 
     static void resizePool(PoolingDataSourceSupport pds, int newSize) {
-        if (pds.connectors[0].state.get() == Connector.SHUTDOWN) {
-            throw new IllegalStateException(MSG_SHUT_DOWN);
-        }
         if (newSize < 1) {
             throw new IllegalArgumentException(MSG_TOO_SMALL + newSize);
         }
         pds.resizingLock.lock();
         try {
             Connector[] ocons = pds.connectors;
+            if (ocons == null || ocons[0].state.get() == Connector.SHUTDOWN) {
+                throw new IllegalStateException(MSG_SHUT_DOWN);
+            }
             if (ocons.length == newSize) return;
             Connector[] ncons = new Connector[newSize];
             if (ocons.length < newSize) {

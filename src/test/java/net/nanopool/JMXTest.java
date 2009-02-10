@@ -143,6 +143,28 @@ public class JMXTest extends NanoPoolTestBase {
         }
     }
 
+    @Test
+    public void operationsMustNotNormallyFail() throws SQLException {
+        pool = npds();
+        NanoPoolManagementMBean mbean = pool.getMXBean();
+        assertFalse(mbean.isShutDown());
+        assertNotNull(mbean.listConnectionOwningThreadsStackTraces());
+        mbean.resizePool(1);
+        mbean.resizePool(2);
+        mbean.resizePool(1);
+        Connection con = pool.getConnection();
+        assertFalse(Thread.interrupted());
+        mbean.interruptConnection(0);
+        assertTrue(Thread.interrupted());
+        try {
+            mbean.killConnection(0);
+            fail("killing myself did not throw");
+        } catch (Throwable th) {
+            // yay!
+        }
+        con.close(); // must not throw
+    }
+
     @Override
     protected Configuration buildConfig() {
         return super.buildConfig().setPoolSize(1);

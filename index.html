@@ -10,11 +10,13 @@
 /*<![CDATA[*/
     body {
         margin-top: 1.0em;
+        margin-left: 0;
+        margin-right: 0;
         background-color: #c0daf7;
         font-family: "Trebuchet MS", "Helvetica", "Verdana"; 
         color: #000000;
     }
-    #container {
+    .container {
         margin: 0 auto;
         width: 700px;
     }
@@ -24,6 +26,12 @@
     h2 { font-size: 1.5em; color: #3f2508; }
     h3 { text-align: center; color: #3f2508; }
     a { color: #3f2508; }
+    .content {
+        background-color: white;
+        margin: 0 auto;
+        border-top: 5px solid #80BBFF;
+        border-bottom: 5px solid #80BBFF;
+    }
     .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
     .download { float: right; }
     pre { background: #000; color: #fff; padding: 15px; font-family: "Monaco", "Monospace", "Consolas"}
@@ -36,15 +44,18 @@
         <p>
             <a href="http://github.com/karmazilla/nanopool"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
         </p>
-        <div id="container">
+        <div class="container">
             <div class="download">
-                <a href="http://github.com/karmazilla/nanopool/zipball/master"><img border="0" width="90" src="http://github.com/images/modules/download/zip.png" /></a> <a href="http://github.com/karmazilla/nanopool/tarball/master"><img border="0" width="90" src="http://github.com/images/modules/download/tar.png" /></a>
+                <a href="http://github.com/karmazilla/nanopool/zipball/master"><img width="90" src="http://github.com/images/modules/download/zip.png" alt="Download Zip"/></a> <a href="http://github.com/karmazilla/nanopool/tarball/master"><img width="90" src="http://github.com/images/modules/download/tar.png" alt="Download Tar ball"/></a>
             </div>
             <h1>
                 <a href="http://github.com/karmazilla/nanopool">nanopool</a> <span class="small">by <a href="http://github.com/karmazilla">karmazilla</a></span>
             </h1>
+        </div>
+        <div class="content">
+            <div class="container">
             <div class="description">
-                Lightweight and highly scalable JDBC (Java Database Connector) connection pool.
+                Lightweight and highly scalable JDBC connection pool.
             </div>
             <p>
                 NanoPool (NP) is a lightweight and highly scalable JDBC2 connection pool.
@@ -73,25 +84,6 @@
                 </li>
             </ol>
             <h2>
-                License
-            </h2>
-            <p>
-                Apache 2.0
-            </p>
-            <h2>
-                Authors
-            </h2>
-            <p>
-                Christian Vest Hansen (karmazilla@gmail.com)<br />
-                <br />
-            </p>
-            <h2>
-                Contact
-            </h2>
-            <p>
-                Christian Vest Hansen (karmazilla@gmail.com)<br />
-            </p>
-            <h2>
                 Download
             </h2>
             <p>
@@ -103,9 +95,20 @@
             <pre>
 $ git clone git://github.com/karmazilla/nanopool
 </pre>
-            <div class="footer">
-                get the source code on GitHub : <a href="http://github.com/karmazilla/nanopool">karmazilla/nanopool</a>
-            </div>
+            <h2>
+                License
+            </h2>
+            <p>
+                Apache 2.0
+            </p>
+            <h2>Authors</h2>
+            <p>
+                Christian Vest Hansen (karmazilla@gmail.com)
+            </p>
+        </div>
+        </div>
+        <div class="footer container">
+            get the source code on GitHub : <a href="http://github.com/karmazilla/nanopool">karmazilla/nanopool</a>
         </div>
     </body>
 </html>

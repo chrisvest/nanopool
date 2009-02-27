@@ -15,7 +15,6 @@
  */
 package net.nanopool;
 
-import net.nanopool.contention.DefaultContentionHandler;
 import net.nanopool.contention.ContentionHandler;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -30,23 +29,28 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      * Create a new {@link NanoPoolDataSource} based on the specified
      * {@link ConnectionPoolDataSource}, and with the specified pool size and
      * time-to-live.
-     * The pool will use a {@link DefaultContentionHandler} and create its own
-     * {@link CasArray} that isn't shared with anyone else.
+     *
+     * The pool will, appart from the pool size and time-to-live, use
+     * default values for all configurable parameters.
      * Merely constructing a pool does not open any connections. The connections
      * themselves are created lazily when they are requested.
+     *
      * @param source the {@link ConnectionPoolDataSource} instance that will
      * provide the raw connections to this pool. You usually get these instances
      * from your JDBC driver. If your driver of choice does not have an
      * implementation for this interface, then you either have to write it
      * yourself or give up and cry in a corner. Thankfully, most modern JDBC
      * drivers support this feature of the JDBC specification.
+     *
      * @param poolSize The total number of connections this pool can contain.
      * The size of the pool cannot be changed once set.
+     *
      * @param timeToLive The maximum allowed age of connections, specified in
      * milliseconds. A connection will be closed if it return to the pool older
      * than this, and connections will be reopened if they are older than this
      * when acquired. A connection that grows older than this while in use, will
      * not be closed from under you.
+     *
      * @since 1.0
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source, int poolSize,
@@ -57,24 +61,35 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
     
     /**
      * Create a new {@link NanoPoolDataSource} based on the specified
-     * {@link ConnectionPoolDataSource}, {@link CasArray} implementation and
-     * {@link ContentionHandler}, and connection time-to-live.
+     * {@link ConnectionPoolDataSource} and {@link Configuration} instance.
+     *
+     * The pool will take a snapshot of the Configuration state parsed to this
+     * constructor. This means that it is safe to share the same Configuration
+     * instance among multiple pools, and it is safe to mutate the Configuration
+     * instance - the changes will not affect any previously created pools.
+     *
+     * Merely constructing a pool does not open any connections. The connections
+     * themselves are created lazily when they are requested.
+     *
      * @param source the {@link ConnectionPoolDataSource} instance that will
      * provide the raw connections to this pool. You usually get these instances
      * from your JDBC driver. If your driver of choice does not have an
      * implementation for this interface, then you either have to write it
      * yourself or give up and cry in a corner. Thankfully, most modern JDBC
      * drivers support this feature of the JDBC specification.
+     *
      * @param connectors The specific {@link CasArray} implementation that this
      * NanoPoolDataSource instance should use for implementing the actual pool.
      * This CasArray also defines the size of the pool. The CasArray must be
      * empty when parsed to NanoPool, and must not be tampered with afterwards
      * unless you know how to do it without violating the integrity of the pool.
+     *
      * @param timeToLive The maximum allowed age of connections, specified in
      * milliseconds. A connection will be closed if it return to the pool older
      * than this, and connections will be reopened if they are older than this
      * when acquired. A connection that grows older than this while in use, will
      * not be closed from under you.
+     *
      * @param contentionHandler The {@link ContentionHandler} that will be
      * invoked when the pool feels that the level of contention is a bit high.
      * Specifically, when the pool, during a call to getConnection, have
@@ -82,6 +97,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      * none. ContentionHandlers can safely throw a RuntimeException (to be
      * caught in client code) or briefly pause the thread in the hope that a
      * connection will become available in the mean time.
+     *
      * @since 1.0
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source,

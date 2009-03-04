@@ -15,8 +15,8 @@
  */
 package net.nanopool;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -50,6 +50,45 @@ public class ConsTest {
         List l = c.toList();
         assertSame(x, l.get(0));
         assertSame(y, l.get(1));
+    }
+
+    @Test
+    public void testToListIsUnmodifiable() {
+        Cons c = new Cons(y, null);
+        c = new Cons(x, c);
+        List l = c.toList();
+        try {
+            l.add(z);
+            fail("list allowed add()");
+        } catch (RuntimeException _) {
+            // wo-hoo
+        }
+        try {
+            l.remove(x);
+            fail("list allowed remove(Object)");
+        } catch (RuntimeException _) {
+            // wo-hoo
+        }
+        try {
+            l.remove(0);
+            fail("list allowed remove(index)");
+        } catch (RuntimeException _) {
+            // wo-hoo
+        }
+        try {
+            l.clear();
+            fail("list allowed clear()");
+        } catch (RuntimeException _) {
+            // wo-hoo
+        }
+        try {
+            ListIterator li = l.listIterator();
+            li.next();
+            li.remove();
+            fail("list allowed ListIterator.remove()");
+        } catch (RuntimeException _) {
+            // wo-hoo
+        }
     }
 
     @Test

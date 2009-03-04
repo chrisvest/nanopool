@@ -15,28 +15,23 @@
  */
 package net.nanopool;
 
-import java.sql.CallableStatement;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLWarning;
-import java.sql.Savepoint;
-import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.*;
+
 import javax.sql.ConnectionEventListener;
-import static org.junit.Assert.*;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
-import net.nanopool.dummy.DummyConnection;
-import net.nanopool.dummy.DummyPooledConnection;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 /**
  * When a Connection has been idling for too long, the database server
@@ -92,30 +87,33 @@ public class DeadConnectionsTest extends NanoPoolTestBase {
 
     @Override
     protected ConnectionPoolDataSource buildCpds() throws SQLException {
-        PooledConnection pc = new DummyPooledConnection() {
-            ConnectionEventListener cel;
-            @Override
-            public Connection getConnection() throws SQLException {
-                final ConnectionEventListener c = cel;
-                return new DummyConnection() {
-                    @Override
-                    public void close() throws SQLException {
-                        c.connectionClosed(null);
-                    }
-                };
+        final AtomicReference<ConnectionEventListener> cel = new AtomicReference();
+
+        Connection con = Mockito.mock(Connection.class);
+        Mockito.doAnswer(new Answer() {
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                cel.get().connectionClosed(null);
+                return null;
             }
-            @Override
-            public void close() throws SQLException {
+        }).when(con).close();
+
+        PooledConnection pc = Mockito.mock(PooledConnection.class);
+        Mockito.doReturn(con).when(pc).getConnection();
+        Mockito.doAnswer(new Answer() {
+            public Object answer(InvocationOnMock invocation) throws Throwable {
                 if (throwOnPcClose.get()) {
                     throwOnPcClose.set(false);
                     throw new SQLException("PooledConnection boom.");
                 }
+                return null;
             }
-            @Override
-            public void addConnectionEventListener(ConnectionEventListener cel) {
-                this.cel = cel;
+        }).when(pc).close();
+        Mockito.doAnswer(new Answer() {
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                cel.set((ConnectionEventListener)invocation.getArguments()[0]);
+                return null;
             }
-        };
+        }).when(pc).addConnectionEventListener(Mockito.argThat(is(any(ConnectionEventListener.class))));
 
         ConnectionPoolDataSource cpds = Mockito.mock(ConnectionPoolDataSource.class);
         Mockito.doReturn(pc).when(cpds).getPooledConnection();

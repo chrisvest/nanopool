@@ -17,6 +17,8 @@ package net.nanopool;
 
 import static org.junit.Assert.*;
 
+import java.io.PrintStream;
+import java.io.ByteArrayOutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.junit.Test;
@@ -34,7 +36,10 @@ public class DefaultContentionHandlerTest extends NanoPoolTestBase {
         Connection con = pool.getConnection();
         assertNotNull(con);
         try {
+            PrintStream err = System.err;
+            System.setErr(new PrintStream(new ByteArrayOutputStream()));
             pool.getConnection();
+            System.setErr(err);
             fail("Second getConnection() did not throw");
         } catch (SQLException sqle) {
             assertTrue(sqle.getMessage().contains("too contended"));

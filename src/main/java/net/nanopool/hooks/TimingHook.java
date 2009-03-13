@@ -27,7 +27,6 @@ import javax.sql.ConnectionPoolDataSource;
  * @author cvh
  */
 public class TimingHook implements Hook {
-    private final ReentrantReadWriteLock rwlock;
     private final ReadLock readLock;
     private final WriteLock writeLock;
     private long totalTimeMs = 0;
@@ -43,7 +42,7 @@ public class TimingHook implements Hook {
         // it is important that this RW-lock is fair, because otherwise readers
         // may starve out writers, and that is bad because writers are in the
         // process of working with a connection.
-        rwlock = new ReentrantReadWriteLock(true);
+        ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock(true);
         readLock = rwlock.readLock();
         writeLock = rwlock.writeLock();
     }

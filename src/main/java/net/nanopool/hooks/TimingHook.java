@@ -40,12 +40,15 @@ public class TimingHook implements Hook {
     public TimingHook(EventType timerStartType, EventType timerEndType) {
         this.startType = timerStartType;
         this.endType = timerEndType;
+        // it is important that this RW-lock is fair, because otherwise readers
+        // may starve out writers, and that is bad because writers are in the
+        // process of working with a connection.
         rwlock = new ReentrantReadWriteLock(true);
         readLock = rwlock.readLock();
         writeLock = rwlock.writeLock();
     }
 
-    public void run(EventType type, ConnectionPoolDataSource source, Connection con, SQLException sqle) {
+    public final void run(EventType type, ConnectionPoolDataSource source, Connection con, SQLException sqle) {
         if (currentStartTime.get() == null && type == startType) {
             currentStartTime.set(System.nanoTime());
         } else if (type == endType) {
@@ -55,15 +58,15 @@ public class TimingHook implements Hook {
             currentStartTime.set(null);
             writeLock.lock();
             try {
-                totalTimeMs += spanMs;
                 totalConnects++;
+                recordTimeMillis(spanMs);
             } finally {
                 writeLock.unlock();
             }
         }
     }
 
-    public double avgMs() {
+    public final double avgMs() {
         double ms = 0;
         double connects = 0;
         readLock.lock();
@@ -76,7 +79,7 @@ public class TimingHook implements Hook {
         return ms / connects;
     }
 
-    public long totalMs() {
+    public final long totalMs() {
         readLock.lock();
         try {
             return totalTimeMs;
@@ -85,7 +88,7 @@ public class TimingHook implements Hook {
         }
     }
 
-    public int totalConnects() {
+    public final int totalConnects() {
         readLock.lock();
         try {
             return totalConnects;
@@ -94,7 +97,7 @@ public class TimingHook implements Hook {
         }
     }
 
-    public void reset() {
+    public final void reset() {
         writeLock.lock();
         try {
             totalConnects = 0;
@@ -102,5 +105,9 @@ public class TimingHook implements Hook {
         } finally {
             writeLock.unlock();
         }
+    }
+
+    protected void recordTimeMillis(long spanMs) {
+        totalTimeMs += spanMs;
     }
 }

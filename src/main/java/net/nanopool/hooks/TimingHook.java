@@ -29,12 +29,12 @@ import javax.sql.ConnectionPoolDataSource;
 public class TimingHook implements Hook {
     private final ReadLock readLock;
     private final WriteLock writeLock;
-    private long totalTimeMs = 0;
-    private int totalConnects = 0;
-
     private final ThreadLocal<Long> currentStartTime = new ThreadLocal<Long>();
     private final EventType startType;
     private final EventType endType;
+
+    private long totalTimeMs = 0;
+    private int totalConnects = 0;
 
     public TimingHook(EventType timerStartType, EventType timerEndType) {
         this.startType = timerStartType;

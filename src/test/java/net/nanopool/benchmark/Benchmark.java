@@ -68,7 +68,7 @@ public class Benchmark {
 
             public void closePool(DataSource pool) {
                 if (pool instanceof NanoPoolDataSource) {
-                    List<SQLException> sqles = ((NanoPoolDataSource)pool).shutdown();
+                    List<SQLException> sqles = ((NanoPoolDataSource)pool).close();
                     for (SQLException sqle : sqles) {
                         sqle.printStackTrace();
                     }
@@ -137,7 +137,7 @@ public class Benchmark {
                     }
 
                     @Override
-                    public List<SQLException> shutdown() {
+                    public List<SQLException> close() {
                         List<SQLException> sqles = new ArrayList<SQLException>();
                         try {
                             mcpm.dispose();
@@ -151,7 +151,7 @@ public class Benchmark {
 
             public void closePool(DataSource pool) {
                 AbstractDataSource ads = (AbstractDataSource)pool;
-                List<SQLException> sqles = ads.shutdown();
+                List<SQLException> sqles = ads.close();
                 for (SQLException sqle : sqles) {
                     sqle.printStackTrace();
                 }

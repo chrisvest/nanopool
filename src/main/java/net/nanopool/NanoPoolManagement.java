@@ -90,7 +90,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
         getConnectionsCreated();
         getConnectionsLeased();
         // then shut down
-        List<SQLException> faults = np.shutdown();
+        List<SQLException> faults = np.close();
         if (faults.size() > 0) {
             StringWriter sos = new StringWriter();
             PrintWriter pout = new PrintWriter(sos);

@@ -64,7 +64,7 @@ public abstract class NanoPoolTestBase {
     @After
     public void closePool() throws SQLException {
         if (pool != null) {
-            List<SQLException> sqles = pool.shutdown();
+            List<SQLException> sqles = pool.close();
             if (!sqles.isEmpty()) {
                 for (SQLException sqle : sqles) {
                     sqle.printStackTrace();

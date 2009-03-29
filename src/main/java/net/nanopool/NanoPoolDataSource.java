@@ -123,12 +123,12 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
     }
     
     /**
-     * Initiate a shutdown sequence on the pool.
-     * This method will return before the pool has completely shutdown, however
+     * Initiate a close sequence on the pool.
+     * This method will return before the pool has completely close, however
      * the pool <strong>will</strong> be unable to grant any new connections.
      * Calling {@link NanoPoolDataSource#getConnection()} on a shut down pool
      * will result in an {@link IllegalStateException}.
-     * Calling {@link net.nanopool.NanoPoolDataSource#shutdown()} on a pool that
+     * Calling {@link net.nanopool.NanoPoolDataSource#close()} on a pool that
      * has already been shut down, has no effect.
      * Connections that are active and in use when the pool is shut down will
      * <strong>not</strong> be forcibly killed. Instead, all active connections
@@ -144,13 +144,13 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      * the pool down.
      * @since 1.0
      */
-    public List<SQLException> shutdown() {
+    public List<SQLException> close() {
         try {
             Connector[] cons = connectors;
             connectors = null;
             return FsmMixin.shutdown(cons);
         } catch (OutdatedException _) {
-            return shutdown();
+            return close();
         }
     }
     

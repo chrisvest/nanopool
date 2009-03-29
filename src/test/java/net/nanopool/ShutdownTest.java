@@ -33,7 +33,7 @@ public class ShutdownTest extends NanoPoolTestBase {
         Connection con = pool.getConnection();
         assertNotNull(con);
         con.close();
-        List sqles = pool.shutdown();
+        List sqles = pool.close();
         assertTrue("Got exceptions from shutdown.", sqles.isEmpty());
         try {
             pool.getConnection();

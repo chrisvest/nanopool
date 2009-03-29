@@ -34,7 +34,7 @@ public class ResizingTest extends NanoPoolTestBase {
         assertWorking(pool);
         pool.resizePool(15);
         assertWorking(pool);
-        pool.shutdown();
+        pool.close();
     }
 
     @Test
@@ -43,7 +43,7 @@ public class ResizingTest extends NanoPoolTestBase {
         assertWorking(pool);
         pool.resizePool(5);
         assertWorking(pool);
-        pool.shutdown();
+        pool.close();
     }
 
     private void assertWorking(NanoPoolDataSource pool) throws SQLException {

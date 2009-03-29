@@ -57,13 +57,13 @@ public class LoadBalancedNanoPoolDataSource extends AbstractDataSource
     }
 
     @Override
-    public List<SQLException> shutdown() {
+    public List<SQLException> close() {
         NanoPoolDataSource[] npdss = pools.toArray(
                 new NanoPoolDataSource[pools.size()]);
         pools.clear();
         List<SQLException> sqles = new ArrayList<SQLException>();
         for (NanoPoolDataSource npds : npdss) {
-            sqles.addAll(npds.shutdown());
+            sqles.addAll(npds.close());
         }
         return sqles;
     }

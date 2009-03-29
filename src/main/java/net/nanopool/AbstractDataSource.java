@@ -100,5 +100,5 @@ public abstract class AbstractDataSource implements DataSource {
      * @return A List of the SQLExceptions generated while closing the physical
      * database connections.
      */
-    public abstract List<SQLException> shutdown();
+    public abstract List<SQLException> close();
 }

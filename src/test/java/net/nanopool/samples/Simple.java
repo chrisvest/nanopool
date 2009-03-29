@@ -65,7 +65,7 @@ public class Simple {
         }
         
         System.out.println("Shutting down pool");
-        List<SQLException> exceptions = ((NanoPoolDataSource)pds).shutdown();
+        List<SQLException> exceptions = ((NanoPoolDataSource)pds).close();
         
         if (!exceptions.isEmpty()) {
             System.out.println("Caught these SQLExceptions in shutdown:");

@@ -18,7 +18,7 @@ public class InterruptionTest extends NanoPoolTestBase {
         pool = npds();
         Connection con = pool.getConnection();
         con.close();
-        List<SQLException> sqles = pool.shutdown();
+        List<SQLException> sqles = pool.close();
         for (SQLException sqle : sqles) sqle.printStackTrace();
         assertTrue(sqles.isEmpty());
         assertTrue(Thread.interrupted());

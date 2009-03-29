@@ -54,7 +54,7 @@ public class JMXTest extends NanoPoolTestBase {
         assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
         assertFalse(mbean.isShutDown());
 
-        pool.shutdown();
+        pool.close();
 
         assertEquals(1, mbean.getConnectionsCreated());
         assertEquals(2, mbean.getConnectionsLeased());

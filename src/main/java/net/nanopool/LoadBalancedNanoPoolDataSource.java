@@ -36,9 +36,9 @@ public class LoadBalancedNanoPoolDataSource extends AbstractDataSource
     private final Strategy strategy;
 
     public LoadBalancedNanoPoolDataSource(ConnectionPoolDataSource[] sources,
-            Configuration config) {
+            Settings config) {
         NanoPoolDataSource[] dataSources = new NanoPoolDataSource[sources.length];
-        config = new Configuration(config.getState());
+        config = new Settings(config.getState());
         int perPoolSize = Math.max(1, config.getPoolSize() / sources.length);
         config.setPoolSize(perPoolSize);
         for (int i = 0; i < dataSources.length; i++) {

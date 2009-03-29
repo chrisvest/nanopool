@@ -72,8 +72,8 @@ public class ResizingTest extends NanoPoolTestBase {
     }
 
     @Override
-    protected Configuration buildConfig() {
-        return super.buildConfig().setContentionHandler(
+    protected Settings buildSettings() {
+        return super.buildSettings().setContentionHandler(
                 new ThrowingContentionHandler());
     }
 }

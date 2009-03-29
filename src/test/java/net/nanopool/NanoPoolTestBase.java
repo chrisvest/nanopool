@@ -31,7 +31,7 @@ public abstract class NanoPoolTestBase {
 
     protected NanoPoolDataSource npds() throws SQLException {
         ConnectionPoolDataSource source = buildCpds();
-        Configuration config = buildConfig();
+        Settings config = buildSettings();
         return buildNpds(source, config);
     }
 
@@ -52,12 +52,12 @@ public abstract class NanoPoolTestBase {
         return source;
     }
 
-    protected Configuration buildConfig() {
-        return new Configuration().setPoolSize(10).setTimeToLive(300000);
+    protected Settings buildSettings() {
+        return new Settings().setPoolSize(10).setTimeToLive(300000);
     }
 
     protected NanoPoolDataSource buildNpds(ConnectionPoolDataSource source,
-            Configuration config) {
+            Settings config) {
         return new NanoPoolDataSource(source, config);
     }
 

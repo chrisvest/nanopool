@@ -29,8 +29,8 @@ import org.junit.Test;
  */
 public class ContentionTest extends NanoPoolTestBase {
     @Override
-    protected Configuration buildConfig() {
-        return super.buildConfig().setContentionHandler(
+    protected Settings buildSettings() {
+        return super.buildSettings().setContentionHandler(
                 new ThrowingContentionHandler());
     }
 

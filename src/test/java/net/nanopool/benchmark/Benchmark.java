@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import net.nanopool.AbstractDataSource;
-import net.nanopool.Configuration;
+import net.nanopool.Settings;
 import net.nanopool.NanoPoolDataSource;
 import net.nanopool.contention.DefaultContentionHandler;
 import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
@@ -201,8 +201,8 @@ public class Benchmark {
         throw new RuntimeException("Unknown database: " + db);
     }
 
-    private static Configuration buildConfig(int poolSize, long ttl) {
-        Configuration conf = new Configuration();
+    private static Settings buildConfig(int poolSize, long ttl) {
+        Settings conf = new Settings();
         conf.setPoolSize(poolSize)
             .setTimeToLive(ttl)
             .setContentionHandler(new DefaultContentionHandler(false, 0));

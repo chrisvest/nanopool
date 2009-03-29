@@ -24,20 +24,20 @@ import net.nanopool.loadbalancing.RandomStrategy;
 import net.nanopool.loadbalancing.Strategy;
 
 /**
- * Configuration is an atomically mutable state-container that describes to a
- * {@link NanoPoolDataSource} how it should operate. The Configuration instance
+ * Settings is an atomically mutable container of attributes that describes to a
+ * {@link NanoPoolDataSource} how it should operate. The Settings instance
  * can be safely mutated after a NanoPoolDataSource has been created using it.
  * @author cvh
  * @since 1.0
  */
-public class Configuration {
+public class Settings {
     private final AtomicReference<State> state = new AtomicReference<State>();
 
-    Configuration(State st) {
+    Settings(State st) {
         state.set(st);
     }
 
-    public Configuration() {
+    public Settings() {
         this(new State(
                 10, 300000,
                 new DefaultContentionHandler(), null, null, null, null, null,
@@ -57,7 +57,7 @@ public class Configuration {
         return state.get().poolSize;
     }
 
-    public Configuration setPoolSize(int poolSize) {
+    public Settings setPoolSize(int poolSize) {
         if (poolSize < 1) {
             throw new IllegalArgumentException("Pool size must be at least " +
                     "one. " + poolSize + " is too low.");
@@ -77,7 +77,7 @@ public class Configuration {
         return state.get().ttl;
     }
 
-    public Configuration setTimeToLive(long ttl) {
+    public Settings setTimeToLive(long ttl) {
         if (ttl < 0) {
             throw new IllegalArgumentException("Time to live must be at " +
                     "least zero. " + ttl +" is too low.");
@@ -97,7 +97,7 @@ public class Configuration {
         return state.get().contentionHandler;
     }
 
-    public Configuration setContentionHandler(ContentionHandler contentionHandler) {
+    public Settings setContentionHandler(ContentionHandler contentionHandler) {
         if (contentionHandler == null) {
             throw new IllegalArgumentException(
                     "Contention handler cannot be null.");
@@ -117,7 +117,7 @@ public class Configuration {
         return state.get().loadBalancingStrategy;
     }
 
-    public Configuration setLoadBalancingStrategy(Strategy strategy) {
+    public Settings setLoadBalancingStrategy(Strategy strategy) {
         if (strategy == null) {
             throw new IllegalArgumentException(
                     "Load balancing strategy should not be null.");
@@ -137,7 +137,7 @@ public class Configuration {
         return state.get().time;
     }
 
-    Configuration setTimeSource(TimeSource time) {
+    Settings setTimeSource(TimeSource time) {
         if (time == null) {
             throw new IllegalArgumentException(
                     "Time Source should not be null.");
@@ -173,7 +173,7 @@ public class Configuration {
         return state.get().preConnectHooks.toList();
     }
 
-    public Configuration addPreConnectHook(Hook hook) {
+    public Settings addPreConnectHook(Hook hook) {
         State s, n;
         do {
             s = state.get();
@@ -186,7 +186,7 @@ public class Configuration {
         return this;
     }
 
-    public Configuration removePreConnectHook(Hook hook) {
+    public Settings removePreConnectHook(Hook hook) {
         State s, n;
         do {
             s = state.get();
@@ -203,7 +203,7 @@ public class Configuration {
         return state.get().postConnectHooks.toList();
     }
 
-    public Configuration addPostConnectHook(Hook hook) {
+    public Settings addPostConnectHook(Hook hook) {
         State s, n;
         do {
             s = state.get();
@@ -216,7 +216,7 @@ public class Configuration {
         return this;
     }
 
-    public Configuration removePostConnectHook(Hook hook) {
+    public Settings removePostConnectHook(Hook hook) {
         State s, n;
         do {
             s = state.get();
@@ -233,7 +233,7 @@ public class Configuration {
         return state.get().preReleaseHooks.toList();
     }
 
-    public Configuration addPreReleaseHook(Hook hook) {
+    public Settings addPreReleaseHook(Hook hook) {
         State s, n;
         do {
             s = state.get();
@@ -246,7 +246,7 @@ public class Configuration {
         return this;
     }
 
-    public Configuration removePreReleaseHook(Hook hook) {
+    public Settings removePreReleaseHook(Hook hook) {
         State s, n;
         do {
             s = state.get();
@@ -263,7 +263,7 @@ public class Configuration {
         return state.get().postReleaseHooks.toList();
     }
 
-    public Configuration addPostReleaseHook(Hook hook) {
+    public Settings addPostReleaseHook(Hook hook) {
         State s, n;
         do {
             s = state.get();
@@ -276,7 +276,7 @@ public class Configuration {
         return this;
     }
 
-    public Configuration removePostReleaseHook(Hook hook) {
+    public Settings removePostReleaseHook(Hook hook) {
         State s, n;
         do {
             s = state.get();
@@ -293,7 +293,7 @@ public class Configuration {
         return state.get().connectionInvalidationHooks.toList();
     }
 
-    public Configuration addConnectionInvalidationHook(Hook hook) {
+    public Settings addConnectionInvalidationHook(Hook hook) {
         State s, n;
         do {
             s = state.get();
@@ -306,7 +306,7 @@ public class Configuration {
         return this;
     }
 
-    public Configuration removeConnectionInvalidationHook(Hook hook) {
+    public Settings removeConnectionInvalidationHook(Hook hook) {
         State s, n;
         do {
             s = state.get();

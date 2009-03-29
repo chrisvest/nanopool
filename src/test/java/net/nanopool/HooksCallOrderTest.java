@@ -54,8 +54,8 @@ public class HooksCallOrderTest extends NanoPoolTestBase {
     }
 
     @Override
-    protected Configuration buildConfig() {
-        return super.buildConfig()
+    protected Settings buildSettings() {
+        return super.buildSettings()
                 .addPreConnectHook(new SyncHook("pre connect", connectAttempts, preConnectCheck))
                 .addPostConnectHook(new SyncHook("post connect", preConnectCheck, postConnectCheck))
                 .addPreReleaseHook(new SyncHook("pre release", postConnectCheck, preReleaseCheck))

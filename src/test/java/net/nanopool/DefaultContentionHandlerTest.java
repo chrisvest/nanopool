@@ -26,8 +26,8 @@ import org.junit.Test;
 public class DefaultContentionHandlerTest extends NanoPoolTestBase {
 
     @Override
-    protected Configuration buildConfig() {
-        return super.buildConfig().setPoolSize(1);
+    protected Settings buildSettings() {
+        return super.buildSettings().setPoolSize(1);
     }
 
     @Test

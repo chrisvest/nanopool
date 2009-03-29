@@ -72,14 +72,14 @@ public class DeadConnectionsTest extends NanoPoolTestBase {
     }
 
     @Override
-    protected Configuration buildConfig() {
+    protected Settings buildSettings() {
         TimeSource t = new MilliTime() {
             @Override
             public long now() {
                 return time.get();
             }
         };
-        return super.buildConfig()
+        return super.buildSettings()
                 .setTimeToLive(0)
                 .setPoolSize(1)
                 .setTimeSource(t);

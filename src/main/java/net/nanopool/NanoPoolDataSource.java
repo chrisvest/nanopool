@@ -55,17 +55,17 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source, int poolSize,
             long timeToLive) {
-        this(source, new Configuration()
+        this(source, new Settings()
                 .setPoolSize(poolSize).setTimeToLive(timeToLive));
     }
     
     /**
      * Create a new {@link NanoPoolDataSource} based on the specified
-     * {@link ConnectionPoolDataSource} and {@link Configuration} instance.
+     * {@link ConnectionPoolDataSource} and {@link Settings} instance.
      *
-     * The pool will take a snapshot of the Configuration state parsed to this
-     * constructor. This means that it is safe to share the same Configuration
-     * instance among multiple pools, and it is safe to mutate the Configuration
+     * The pool will take a snapshot of the Settings state parsed to this
+     * constructor. This means that it is safe to share the same Settings
+     * instance among multiple pools, and it is safe to mutate the Settings
      * instance - the changes will not affect any previously created pools.
      *
      * Merely constructing a pool does not open any connections. The connections
@@ -78,16 +78,16 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      * yourself or give up and cry in a corner. Thankfully, most modern JDBC
      * drivers support this feature of the JDBC specification.
      *
-     * @param config a {@link Configuration} instance that fully specifies how
+     * @param config a {@link Settings} instance that fully specifies how
      * this NanoPoolDataSource should be configured. A snapshot of the
-     * configuration state will be taken, so the Configuration instance can be
+     * configuration state will be taken, so the Settings instance can be
      * freely modified afterwards and even concurrently, without affecting this
      * new NanoPoolDataSource instance.
      *
      * @since 1.0
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source,
-            Configuration config) {
+            Settings config) {
         super(source, config);
     }
 

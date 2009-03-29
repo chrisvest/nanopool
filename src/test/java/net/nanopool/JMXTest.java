@@ -109,7 +109,7 @@ public class JMXTest extends NanoPoolTestBase {
         NanoPoolManagementMBean mbean = pool.getMXBean();
         mbean.shutDown();
 
-        State s = buildConfig().getState();
+        State s = buildSettings().getState();
 
         assertEquals(s.ttl, mbean.getConnectionTimeToLive());
         assertEquals(0, mbean.getConnectionsCreated());
@@ -166,7 +166,7 @@ public class JMXTest extends NanoPoolTestBase {
     }
 
     @Override
-    protected Configuration buildConfig() {
-        return super.buildConfig().setPoolSize(1);
+    protected Settings buildSettings() {
+        return super.buildSettings().setPoolSize(1);
     }
 }

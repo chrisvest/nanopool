@@ -31,14 +31,14 @@ final class FsmMixin {
     static final String MSG_TOO_SMALL = "Cannot resize. New size too small: ";
 
     static Connection getConnection(
-            final PoolingDataSourceSupport pds) throws SQLException {
-        runHooks(pds.config.preConnectHooks, EventType.preConnect,
-                pds.source, null, null);
-        final Connector[] connectors = pds.connectors;
+            final PoolState pool) throws SQLException {
+        runHooks(pool.config.preConnectHooks, EventType.preConnect,
+                pool.source, null, null);
+        final Connector[] connectors = pool.connectors;
         if (connectors == null)
             throw new IllegalStateException(MSG_SHUT_DOWN);
         final int poolSize = connectors.length;
-        final Config state = pds.config;
+        final Config state = pool.config;
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
         int idx = start;
         int contentionCounter = 0;
@@ -57,7 +57,7 @@ final class FsmMixin {
                                 state.preReleaseHooks, state.postReleaseHooks,
                                 state.connectionInvalidationHooks);
                         runHooks(state.postConnectHooks, EventType.postConnect,
-                                pds.source, connection, null);
+                                pool.source, connection, null);
                         return connection;
                     } catch (SQLException sqle) {
                         try {
@@ -65,7 +65,7 @@ final class FsmMixin {
                         } finally {
                             con.state.set(Connector.AVAILABLE);
                             runHooks(state.postConnectHooks, EventType.postConnect,
-                                    pds.source, null, sqle);
+                                    pool.source, null, sqle);
                         }
                         throw sqle;
                     }
@@ -76,6 +76,16 @@ final class FsmMixin {
             if (idx == poolSize) idx = 0;
             if (idx == start)
                 state.contentionHandler.handleContention(++contentionCounter);
+        }
+    }
+
+    static List<SQLException> close(PoolState pool) {
+        try {
+            Connector[] cons = pool.connectors;
+            pool.connectors = null;
+            return shutdown(cons);
+        } catch (OutdatedException _) {
+            return close(pool);
         }
     }
 
@@ -100,13 +110,13 @@ final class FsmMixin {
         return caughtExceptions;
     }
 
-    static void resizePool(PoolingDataSourceSupport pds, int newSize) {
+    static void resizePool(PoolState pool, int newSize) {
         if (newSize < 1) {
             throw new IllegalArgumentException(MSG_TOO_SMALL + newSize);
         }
-        pds.resizingLock.lock();
+        pool.resizingLock.lock();
         try {
-            Connector[] ocons = pds.connectors;
+            Connector[] ocons = pool.connectors;
             if (ocons == null || ocons[0].state.get() == Connector.SHUTDOWN) {
                 throw new IllegalStateException(MSG_SHUT_DOWN);
             }
@@ -117,19 +127,19 @@ final class FsmMixin {
                 System.arraycopy(ocons, 0, ncons, 0, ocons.length);
                 for (int i = ocons.length; i < ncons.length; i++) {
                     ncons[i] = new Connector(
-                            pds.source, pds.config.ttl, pds.config.time);
+                            pool.source, pool.config.ttl, pool.config.time);
                 }
-                pds.connectors = ncons;
+                pool.connectors = ncons;
             } else {
                 // shrink pool
                 System.arraycopy(ocons, 0, ncons, 0, newSize);
-                pds.connectors = ncons;
+                pool.connectors = ncons;
                 for (int i = newSize; i < ocons.length; i++) {
                     ocons[i].state.set(Connector.OUTDATED);
                 }
             }
         } finally {
-            pds.resizingLock.unlock();
+            pool.resizingLock.unlock();
         }
     }
 

@@ -17,42 +17,38 @@ package net.nanopool;
 
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.concurrent.locks.ReentrantLock;
 import javax.sql.ConnectionPoolDataSource;
 
 public abstract class PoolingDataSourceSupport extends AbstractDataSource {
-    final ConnectionPoolDataSource source;
-    final ReentrantLock resizingLock = new ReentrantLock();
-    final Config config;
-    volatile Connector[] connectors;
+    final PoolState state;
 
     PoolingDataSourceSupport(ConnectionPoolDataSource source,
             Settings settings) {
-        this.source = source;
-        this.config = settings.getConfig();
-        this.connectors = new Connector[config.poolSize];
+        Config config = settings.getConfig();
+        Connector[] connectors = new Connector[config.poolSize];
         for (int i = 0; i < connectors.length; i++) {
             connectors[i] = new Connector(source, config.ttl, config.time);
         }
+        state = new PoolState(source, config, connectors);
     }
 
     @Override
     public PrintWriter getLogWriter() throws SQLException {
-        return source.getLogWriter();
+        return state.source.getLogWriter();
     }
 
     @Override
     public int getLoginTimeout() throws SQLException {
-        return source.getLoginTimeout();
+        return state.source.getLoginTimeout();
     }
 
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
-        source.setLogWriter(out);
+        state.source.setLogWriter(out);
     }
 
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
-        source.setLoginTimeout(seconds);
+        state.source.setLoginTimeout(seconds);
     }
 }

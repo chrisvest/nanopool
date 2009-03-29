@@ -53,7 +53,7 @@ public class ResizingTest extends NanoPoolTestBase {
     }
 
     private void assertWorking(NanoPoolDataSource pool) throws SQLException {
-        int len = pool.connectors.length;
+        int len = pool.state.connectors.length;
         Connection[] cons = new Connection[len];
 
         for (int i = 0; i < len; i++) {

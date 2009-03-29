@@ -52,8 +52,8 @@ public class ConnectivetyFailureTest extends NanoPoolTestBase {
                 assertEquals(MESSAGE, ex.getMessage());
             }
         }
-        for (int i = 0; i < pool.connectors.length; i++) {
-            assertNotSame(Connector.RESERVED, pool.connectors[i].state.get());
+        for (int i = 0; i < pool.state.connectors.length; i++) {
+            assertNotSame(Connector.RESERVED, pool.state.connectors[i].state.get());
         }
     }
 

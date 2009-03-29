@@ -26,7 +26,7 @@ import javax.sql.DataSource;
  * @author cvh
  */
 public class NanoPoolManagement implements NanoPoolManagementMBean {
-    private final NanoPoolDataSource np;
+    private final PoolState pool;
     private volatile int connectionsLeased;
     private volatile int connectionsCreated;
 
@@ -34,50 +34,50 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
         if (np == null) throw new NullPointerException(
                 "DataSource parameter must be non-null and of type " +
                 "net.nanopool.NanoPoolDataSource.");
-        this.np = (NanoPoolDataSource)np;
+        this.pool = ((NanoPoolDataSource)np).state;
     }
 
     public int getCurrentAvailableConnectionsCount() {
-        if (np.connectors == null) return 0;
+        if (pool.connectors == null) return 0;
         try {
-            return FsmMixin.countAvailableConnections(np.connectors);
+            return FsmMixin.countAvailableConnections(pool.connectors);
         } catch (OutdatedException _) {
             return getCurrentAvailableConnectionsCount();
         }
     }
 
     public int getCurrentLeasedConnectionsCount() {
-        if (np.connectors == null) return 0;
+        if (pool.connectors == null) return 0;
         try {
-            return FsmMixin.countLeasedConnections(np.connectors);
+            return FsmMixin.countLeasedConnections(pool.connectors);
         } catch (OutdatedException _) {
             return getCurrentAvailableConnectionsCount();
         }
     }
 
     public int getPoolSize() {
-        Connector[] cons = np.connectors;
+        Connector[] cons = pool.connectors;
         return cons == null? 0 : cons.length;
     }
 
     public long getConnectionTimeToLive() {
-        return np.config.ttl;
+        return pool.config.ttl;
     }
 
     public String getContentionHandlerClassName() {
         try {
-            return np.config.contentionHandler.getClass().getName();
+            return pool.config.contentionHandler.getClass().getName();
         } catch (NullPointerException npe) {
             return "null";
         }
     }
 
     public String getContentionHandler() {
-        return String.valueOf(np.config.contentionHandler);
+        return String.valueOf(pool.config.contentionHandler);
     }
 
     public boolean isShutDown() {
-        Connector[] cons = np.connectors;
+        Connector[] cons = pool.connectors;
         if (cons == null) return true;
         for (Connector cn : cons) {
             if (cn.state.get() == Connector.SHUTDOWN) return true;
@@ -90,7 +90,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
         getConnectionsCreated();
         getConnectionsLeased();
         // then shut down
-        List<SQLException> faults = np.close();
+        List<SQLException> faults = FsmMixin.close(pool);
         if (faults.size() > 0) {
             StringWriter sos = new StringWriter();
             PrintWriter pout = new PrintWriter(sos);
@@ -105,19 +105,19 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public String getSourceConnectionClassName() {
         try {
-            return np.source.getClass().getName();
+            return pool.source.getClass().getName();
         } catch (NullPointerException npe) {
             return "null";
         }
     }
 
     public String getSourceConnection() {
-        return String.valueOf(np.source);
+        return String.valueOf(pool.source);
     }
 
     public int getConnectionsCreated() {
         int createdCount = 0;
-        Connector[] connectors = np.connectors;
+        Connector[] connectors = pool.connectors;
         if (connectors == null) return connectionsCreated;
         for (Connector cn : connectors) {
             if (cn != null) createdCount += cn.getRealConnectionsCreated();
@@ -127,7 +127,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public int getConnectionsLeased() {
         int leasedCount = 0;
-        Connector[] connectors = np.connectors;
+        Connector[] connectors = pool.connectors;
         if (connectors == null) return connectionsLeased;
         for (Connector cn : connectors) {
             if (cn != null) leasedCount += cn.getConnectionsLeased();
@@ -136,7 +136,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public void resetCounters() {
-        Connector[] connectors = np.connectors;
+        Connector[] connectors = pool.connectors;
         if (connectors != null) {
             for (Connector cn : connectors) {
                 if (cn != null) cn.resetCounters();
@@ -148,7 +148,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
 
     public String listConnectionOwningThreadsStackTraces() {
         StringBuilder sb = new StringBuilder();
-        Connector[] connectors = np.connectors;
+        Connector[] connectors = pool.connectors;
         if (connectors == null) {
             return "Pool is shut down.";
         }
@@ -179,11 +179,11 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public void resizePool(int newSize) {
-        np.resizePool(newSize);
+        FsmMixin.resizePool(pool, newSize);
     }
 
     public void interruptConnection(int id) {
-        Connector[] cons = np.connectors;
+        Connector[] cons = pool.connectors;
         if (cons == null) {
             throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
         }
@@ -198,7 +198,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public void killConnection(int id) {
-        Connector[] cons = np.connectors;
+        Connector[] cons = pool.connectors;
         if (cons == null) {
             throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
         }

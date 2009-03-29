@@ -116,7 +116,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      */
     public Connection getConnection() throws SQLException {
         try {
-            return FsmMixin.getConnection(this);
+            return FsmMixin.getConnection(state);
         } catch (OutdatedException _) {
             return getConnection();
         }
@@ -145,13 +145,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      * @since 1.0
      */
     public List<SQLException> close() {
-        try {
-            Connector[] cons = connectors;
-            connectors = null;
-            return FsmMixin.shutdown(cons);
-        } catch (OutdatedException _) {
-            return close();
-        }
+        return FsmMixin.close(state);
     }
     
     /**
@@ -190,6 +184,6 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
     private final ReentrantLock poolManagementLock = new ReentrantLock();
 
     void resizePool(int newSize) {
-        FsmMixin.resizePool(this, newSize);
+        FsmMixin.resizePool(state, newSize);
     }
 }

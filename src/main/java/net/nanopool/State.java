@@ -20,14 +20,6 @@ import net.nanopool.hooks.Hook;
 import net.nanopool.loadbalancing.Strategy;
 
 final class State {
-    private static final Class[] casArrayCtorSign =
-            new Class[] {Integer.TYPE};
-
-    /**
-     * Note on poolSize: It should _only_ be used for building the CasArray,
-     * because in future versions we might allow resizing of the pool, and
-     * therefor this value might grow stale.
-     */
     final int poolSize;
     final long ttl;
     final ContentionHandler contentionHandler;

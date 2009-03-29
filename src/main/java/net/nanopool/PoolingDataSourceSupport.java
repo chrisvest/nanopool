@@ -29,7 +29,7 @@ public abstract class PoolingDataSourceSupport extends AbstractDataSource {
     PoolingDataSourceSupport(ConnectionPoolDataSource source,
             Settings settings) {
         this.source = source;
-        this.config = settings.getState();
+        this.config = settings.getConfig();
         this.connectors = new Connector[config.poolSize];
         for (int i = 0; i < connectors.length; i++) {
             connectors[i] = new Connector(source, config.ttl, config.time);

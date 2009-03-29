@@ -109,7 +109,7 @@ public class JMXTest extends NanoPoolTestBase {
         NanoPoolManagementMBean mbean = pool.getMXBean();
         mbean.shutDown();
 
-        Config config = buildSettings().getState();
+        Config config = buildSettings().getConfig();
 
         assertEquals(config.ttl, mbean.getConnectionTimeToLive());
         assertEquals(0, mbean.getConnectionsCreated());

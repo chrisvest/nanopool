@@ -38,14 +38,14 @@ public class LoadBalancedNanoPoolDataSource extends AbstractDataSource
     public LoadBalancedNanoPoolDataSource(ConnectionPoolDataSource[] sources,
             Settings settings) {
         NanoPoolDataSource[] dataSources = new NanoPoolDataSource[sources.length];
-        settings = new Settings(settings.getState());
+        settings = new Settings(settings.getConfig());
         int perPoolSize = Math.max(1, settings.getPoolSize() / sources.length);
         settings.setPoolSize(perPoolSize);
         for (int i = 0; i < dataSources.length; i++) {
             dataSources[i] = new NanoPoolDataSource(sources[i], settings);
         }
         pools = new CopyOnWriteArrayList<NanoPoolDataSource>(dataSources);
-        strategy = settings.getState().loadBalancingStrategy.buildInstance(pools);
+        strategy = settings.getConfig().loadBalancingStrategy.buildInstance(pools);
     }
 
     public Connection getConnection() throws SQLException {

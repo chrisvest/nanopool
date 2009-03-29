@@ -45,7 +45,7 @@ public class Settings {
         ));
     }
 
-    Config getState() {
+    Config getConfig() {
         return config.get();
     }
 

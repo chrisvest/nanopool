@@ -63,7 +63,7 @@ public class Benchmark {
 
         poolFactory = new PoolFactory() {
             public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl) {
-                return new NanoPoolDataSource(cpds, buildConfig(size, ttl));
+                return new NanoPoolDataSource(cpds, buildSettings(size, ttl));
             }
 
             public void closePool(DataSource pool) {
@@ -201,12 +201,12 @@ public class Benchmark {
         throw new RuntimeException("Unknown database: " + db);
     }
 
-    private static Settings buildConfig(int poolSize, long ttl) {
-        Settings conf = new Settings();
-        conf.setPoolSize(poolSize)
+    private static Settings buildSettings(int poolSize, long ttl) {
+        Settings settings = new Settings();
+        settings.setPoolSize(poolSize)
             .setTimeToLive(ttl)
             .setContentionHandler(new DefaultContentionHandler(false, 0));
-        return conf;
+        return settings;
     }
 
     private static DataSource buildPool(ConnectionPoolDataSource cpds, int size) {

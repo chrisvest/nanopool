@@ -78,7 +78,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      * yourself or give up and cry in a corner. Thankfully, most modern JDBC
      * drivers support this feature of the JDBC specification.
      *
-     * @param config a {@link Settings} instance that fully specifies how
+     * @param settings a {@link Settings} instance that fully specifies how
      * this NanoPoolDataSource should be configured. A snapshot of the
      * configuration state will be taken, so the Settings instance can be
      * freely modified afterwards and even concurrently, without affecting this
@@ -87,8 +87,8 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      * @since 1.0
      */
     public NanoPoolDataSource(ConnectionPoolDataSource source,
-            Settings config) {
-        super(source, config);
+            Settings settings) {
+        super(source, settings);
     }
 
     /**
@@ -126,7 +126,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      * Initiate a close sequence on the pool.
      * This method will return before the pool has completely close, however
      * the pool <strong>will</strong> be unable to grant any new connections.
-     * Calling {@link NanoPoolDataSource#getConnection()} on a shut down pool
+     * Calling {@link NanoPoolDataSource#getConnection()} on a closed pool
      * will result in an {@link IllegalStateException}.
      * Calling {@link net.nanopool.NanoPoolDataSource#close()} on a pool that
      * has already been shut down, has no effect.

@@ -27,9 +27,9 @@ public abstract class PoolingDataSourceSupport extends AbstractDataSource {
     volatile Connector[] connectors;
 
     PoolingDataSourceSupport(ConnectionPoolDataSource source,
-            Settings config) {
+            Settings settings) {
         this.source = source;
-        this.state = config.getState();
+        this.state = settings.getState();
         this.connectors = new Connector[state.poolSize];
         for (int i = 0; i < connectors.length; i++) {
             connectors[i] = new Connector(source, state.ttl, state.time);

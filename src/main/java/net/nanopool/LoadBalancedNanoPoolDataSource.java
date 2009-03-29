@@ -36,16 +36,16 @@ public class LoadBalancedNanoPoolDataSource extends AbstractDataSource
     private final Strategy strategy;
 
     public LoadBalancedNanoPoolDataSource(ConnectionPoolDataSource[] sources,
-            Settings config) {
+            Settings settings) {
         NanoPoolDataSource[] dataSources = new NanoPoolDataSource[sources.length];
-        config = new Settings(config.getState());
-        int perPoolSize = Math.max(1, config.getPoolSize() / sources.length);
-        config.setPoolSize(perPoolSize);
+        settings = new Settings(settings.getState());
+        int perPoolSize = Math.max(1, settings.getPoolSize() / sources.length);
+        settings.setPoolSize(perPoolSize);
         for (int i = 0; i < dataSources.length; i++) {
-            dataSources[i] = new NanoPoolDataSource(sources[i], config);
+            dataSources[i] = new NanoPoolDataSource(sources[i], settings);
         }
         pools = new CopyOnWriteArrayList<NanoPoolDataSource>(dataSources);
-        strategy = config.getState().loadBalancingStrategy.buildInstance(pools);
+        strategy = settings.getState().loadBalancingStrategy.buildInstance(pools);
     }
 
     public Connection getConnection() throws SQLException {

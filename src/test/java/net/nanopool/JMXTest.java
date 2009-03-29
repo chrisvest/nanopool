@@ -109,13 +109,13 @@ public class JMXTest extends NanoPoolTestBase {
         NanoPoolManagementMBean mbean = pool.getMXBean();
         mbean.shutDown();
 
-        State s = buildSettings().getState();
+        Config config = buildSettings().getState();
 
-        assertEquals(s.ttl, mbean.getConnectionTimeToLive());
+        assertEquals(config.ttl, mbean.getConnectionTimeToLive());
         assertEquals(0, mbean.getConnectionsCreated());
         assertEquals(0, mbean.getConnectionsLeased());
         assertNotNull(mbean.getContentionHandler());
-        assertEquals(s.contentionHandler.getClass().getName(), mbean.getContentionHandlerClassName());
+        assertEquals(config.contentionHandler.getClass().getName(), mbean.getContentionHandlerClassName());
         assertEquals(0, mbean.getCurrentAvailableConnectionsCount());
         assertEquals(0, mbean.getCurrentLeasedConnectionsCount());
         assertEquals(0, mbean.getPoolSize());

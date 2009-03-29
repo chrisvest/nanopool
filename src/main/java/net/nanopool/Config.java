@@ -19,7 +19,7 @@ import net.nanopool.contention.ContentionHandler;
 import net.nanopool.hooks.Hook;
 import net.nanopool.loadbalancing.Strategy;
 
-final class State {
+final class Config {
     final int poolSize;
     final long ttl;
     final ContentionHandler contentionHandler;
@@ -31,7 +31,7 @@ final class State {
     final Strategy loadBalancingStrategy;
     final TimeSource time;
 
-    public State(int poolSize, long ttl,
+    public Config(int poolSize, long ttl,
             ContentionHandler contentionHandler, Cons<Hook> preConnectHooks,
             Cons<Hook> postConnectHooks, Cons<Hook> preReleaseHook,
             Cons<Hook> postReleaseHook, Cons<Hook> connectionInvalidationHook,

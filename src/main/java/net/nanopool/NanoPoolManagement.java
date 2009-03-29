@@ -61,19 +61,19 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
     }
 
     public long getConnectionTimeToLive() {
-        return np.state.ttl;
+        return np.config.ttl;
     }
 
     public String getContentionHandlerClassName() {
         try {
-            return np.state.contentionHandler.getClass().getName();
+            return np.config.contentionHandler.getClass().getName();
         } catch (NullPointerException npe) {
             return "null";
         }
     }
 
     public String getContentionHandler() {
-        return String.valueOf(np.state.contentionHandler);
+        return String.valueOf(np.config.contentionHandler);
     }
 
     public boolean isShutDown() {

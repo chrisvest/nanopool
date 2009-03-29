@@ -23,16 +23,16 @@ import javax.sql.ConnectionPoolDataSource;
 public abstract class PoolingDataSourceSupport extends AbstractDataSource {
     final ConnectionPoolDataSource source;
     final ReentrantLock resizingLock = new ReentrantLock();
-    final State state;
+    final Config config;
     volatile Connector[] connectors;
 
     PoolingDataSourceSupport(ConnectionPoolDataSource source,
             Settings settings) {
         this.source = source;
-        this.state = settings.getState();
-        this.connectors = new Connector[state.poolSize];
+        this.config = settings.getState();
+        this.connectors = new Connector[config.poolSize];
         for (int i = 0; i < connectors.length; i++) {
-            connectors[i] = new Connector(source, state.ttl, state.time);
+            connectors[i] = new Connector(source, config.ttl, config.time);
         }
     }
 

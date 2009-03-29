@@ -63,7 +63,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      * Create a new {@link NanoPoolDataSource} based on the specified
      * {@link ConnectionPoolDataSource} and {@link Settings} instance.
      *
-     * The pool will take a snapshot of the Settings state parsed to this
+     * The pool will take a snapshot of the Settings config parsed to this
      * constructor. This means that it is safe to share the same Settings
      * instance among multiple pools, and it is safe to mutate the Settings
      * instance - the changes will not affect any previously created pools.
@@ -80,7 +80,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
      *
      * @param settings a {@link Settings} instance that fully specifies how
      * this NanoPoolDataSource should be configured. A snapshot of the
-     * configuration state will be taken, so the Settings instance can be
+     * configuration config will be taken, so the Settings instance can be
      * freely modified afterwards and even concurrently, without affecting this
      * new NanoPoolDataSource instance.
      *

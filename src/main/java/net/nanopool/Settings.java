@@ -31,22 +31,22 @@ import net.nanopool.loadbalancing.Strategy;
  * @since 1.0
  */
 public class Settings {
-    private final AtomicReference<State> state = new AtomicReference<State>();
+    private final AtomicReference<Config> config = new AtomicReference<Config>();
 
-    Settings(State st) {
-        state.set(st);
+    Settings(Config cfg) {
+        this.config.set(cfg);
     }
 
     public Settings() {
-        this(new State(
+        this(new Config(
                 10, 300000,
                 new DefaultContentionHandler(), null, null, null, null, null,
                 RandomStrategy.INSTANCE, MilliTime.INSTANCE
         ));
     }
 
-    State getState() {
-        return state.get();
+    Config getState() {
+        return config.get();
     }
 
     /*
@@ -54,7 +54,7 @@ public class Settings {
      */
 
     public int getPoolSize() {
-        return state.get().poolSize;
+        return config.get().poolSize;
     }
 
     public Settings setPoolSize(int poolSize) {
@@ -62,19 +62,19 @@ public class Settings {
             throw new IllegalArgumentException("Pool size must be at least " +
                     "one. " + poolSize + " is too low.");
         }
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy, s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public long getTimeToLive() {
-        return state.get().ttl;
+        return config.get().ttl;
     }
 
     public Settings setTimeToLive(long ttl) {
@@ -82,19 +82,19 @@ public class Settings {
             throw new IllegalArgumentException("Time to live must be at " +
                     "least zero. " + ttl +" is too low.");
         }
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy, s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public ContentionHandler getContentionHandler() {
-        return state.get().contentionHandler;
+        return config.get().contentionHandler;
     }
 
     public Settings setContentionHandler(ContentionHandler contentionHandler) {
@@ -102,19 +102,19 @@ public class Settings {
             throw new IllegalArgumentException(
                     "Contention handler cannot be null.");
         }
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy, s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public Strategy getLoadBalancingStrategy() {
-        return state.get().loadBalancingStrategy;
+        return config.get().loadBalancingStrategy;
     }
 
     public Settings setLoadBalancingStrategy(Strategy strategy) {
@@ -122,19 +122,19 @@ public class Settings {
             throw new IllegalArgumentException(
                     "Load balancing strategy should not be null.");
         }
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     strategy, s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     TimeSource getTimeSource() {
-        return state.get().time;
+        return config.get().time;
     }
 
     Settings setTimeSource(TimeSource time) {
@@ -142,14 +142,14 @@ public class Settings {
             throw new IllegalArgumentException(
                     "Time Source should not be null.");
         }
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
                     s.loadBalancingStrategy, time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
@@ -170,152 +170,152 @@ public class Settings {
     }
 
     public List<Hook> getPreConnectHooks() {
-        return state.get().preConnectHooks.toList();
+        return config.get().preConnectHooks.toList();
     }
 
     public Settings addPreConnectHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     new Cons(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public Settings removePreConnectHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     remove(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public List<Hook> getPostConnectHooks() {
-        return state.get().postConnectHooks.toList();
+        return config.get().postConnectHooks.toList();
     }
 
     public Settings addPostConnectHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, new Cons(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public Settings removePostConnectHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, remove(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public List<Hook> getPreReleaseHooks() {
-        return state.get().preReleaseHooks.toList();
+        return config.get().preReleaseHooks.toList();
     }
 
     public Settings addPreReleaseHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     new Cons(hook, s.preReleaseHooks), s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public Settings removePreReleaseHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     remove(hook, s.preReleaseHooks), s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public List<Hook> getPostReleaseHooks() {
-        return state.get().postReleaseHooks.toList();
+        return config.get().postReleaseHooks.toList();
     }
 
     public Settings addPostReleaseHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, new Cons(hook, s.postReleaseHooks),
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public Settings removePostReleaseHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, remove(hook, s.postReleaseHooks),
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public List<Hook> getConnectionInvalidationHooks() {
-        return state.get().connectionInvalidationHooks.toList();
+        return config.get().connectionInvalidationHooks.toList();
     }
 
     public Settings addConnectionInvalidationHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     new Cons(hook, s.connectionInvalidationHooks),
                     s.loadBalancingStrategy, s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 
     public Settings removeConnectionInvalidationHook(Hook hook) {
-        State s, n;
+        Config s, n;
         do {
-            s = state.get();
-            n = new State(s.poolSize, s.ttl, s.contentionHandler,
+            s = config.get();
+            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     remove(hook, s.connectionInvalidationHooks),
                     s.loadBalancingStrategy, s.time);
-        } while (!state.compareAndSet(s, n));
+        } while (!config.compareAndSet(s, n));
         return this;
     }
 }

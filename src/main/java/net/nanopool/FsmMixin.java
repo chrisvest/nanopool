@@ -32,13 +32,13 @@ final class FsmMixin {
 
     static Connection getConnection(
             final PoolingDataSourceSupport pds) throws SQLException {
-        runHooks(pds.state.preConnectHooks, EventType.preConnect,
+        runHooks(pds.config.preConnectHooks, EventType.preConnect,
                 pds.source, null, null);
         final Connector[] connectors = pds.connectors;
         if (connectors == null)
             throw new IllegalStateException(MSG_SHUT_DOWN);
         final int poolSize = connectors.length;
-        final State state = pds.state;
+        final Config state = pds.config;
         final int start = StrictMath.abs(rand.nextInt()) % poolSize;
         int idx = start;
         int contentionCounter = 0;
@@ -117,7 +117,7 @@ final class FsmMixin {
                 System.arraycopy(ocons, 0, ncons, 0, ocons.length);
                 for (int i = ocons.length; i < ncons.length; i++) {
                     ncons[i] = new Connector(
-                            pds.source, pds.state.ttl, pds.state.time);
+                            pds.source, pds.config.ttl, pds.config.time);
                 }
                 pds.connectors = ncons;
             } else {

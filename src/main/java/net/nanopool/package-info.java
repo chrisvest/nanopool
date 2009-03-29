@@ -1,4 +1,4 @@
-/**
+/*
    Copyright 2008-2009 Christian Vest Hansen
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +12,9 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
-   Please see the {@link NanoPoolDataSource} documentation on
+ */
+/**
+   Please see the {@link net.nanopool.NanoPoolDataSource} documentation on
    general usage or this package - it's where the beef is.
  */
 package net.nanopool;

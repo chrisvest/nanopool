@@ -26,8 +26,8 @@ import java.sql.SQLException;
  * is exactly what ContentionHandler implementations do.
  * This interface is provided because the pool-using applications might want
  * to do logging or other stuff, while they wait.
- * The {@link NanoPoolDataSource} instances get their ContentionHandlers
- * through their constructors when they are created.
+ * The {@link net.nanopool.NanoPoolDataSource} instances get their
+ * ContentionHandlers through their constructors when they are created.
  * @author vest
  * @since 1.0
  */

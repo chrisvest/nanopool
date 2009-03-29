@@ -19,7 +19,7 @@ package net.nanopool;
  *
  * @author vest
  */
-public interface TimeSource {
+interface TimeSource {
     long millisecondsToUnit(long millis);
     long now();
 }

@@ -29,7 +29,7 @@ import javax.sql.DataSource;
 public abstract class AbstractDataSource implements DataSource {
     /**
      * Always throws UnsupportedOperationException.
-     * @return
+     * @return never.
      * @throws java.sql.SQLException
      */
     public PrintWriter getLogWriter() throws SQLException {
@@ -38,7 +38,7 @@ public abstract class AbstractDataSource implements DataSource {
 
     /**
      * Always throws UnsupportedOperationException.
-     * @return
+     * @return never.
      * @throws java.sql.SQLException
      */
     public int getLoginTimeout() throws SQLException {
@@ -67,7 +67,7 @@ public abstract class AbstractDataSource implements DataSource {
      * Always throws UnsupportedOperationException.
      * @param <T>
      * @param iface
-     * @return
+     * @return never.
      * @throws java.sql.SQLException
      */
     public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -77,7 +77,7 @@ public abstract class AbstractDataSource implements DataSource {
     /**
      * Always throws UnsupportedOperationException.
      * @param iface
-     * @return
+     * @return never.
      * @throws java.sql.SQLException
      */
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
@@ -88,7 +88,7 @@ public abstract class AbstractDataSource implements DataSource {
      * Always throws UnsupportedOperationException.
      * @param username
      * @param password
-     * @return
+     * @return never.
      * @throws java.sql.SQLException
      */
     public Connection getConnection(String username, String password) throws SQLException {
@@ -97,7 +97,8 @@ public abstract class AbstractDataSource implements DataSource {
 
     /**
      * Shut down and fully close this DataSource.
-     * @return
+     * @return A List of the SQLExceptions generated while closing the physical
+     * database connections.
      */
     public abstract List<SQLException> shutdown();
 }

@@ -133,11 +133,11 @@ public class Configuration {
         return this;
     }
 
-    public TimeSource getTimeSource() {
+    TimeSource getTimeSource() {
         return state.get().time;
     }
 
-    public Configuration setTimeSource(TimeSource time) {
+    Configuration setTimeSource(TimeSource time) {
         if (time == null) {
             throw new IllegalArgumentException(
                     "Time Source should not be null.");

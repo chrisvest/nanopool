@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CheapRandomTestCase {
@@ -36,7 +37,8 @@ public class CheapRandomTestCase {
     public void setUp() {
         cr = new CheapRandom();
     }
-    
+
+    @Ignore("because it is slow - especially when running under Cobertura.")
     @Test
     public void ensureReasonableSpreadWithoutBias() {
         final int sampleCount = 100000000;

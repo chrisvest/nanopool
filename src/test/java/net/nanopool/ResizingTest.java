@@ -46,6 +46,12 @@ public class ResizingTest extends NanoPoolTestBase {
         pool.close();
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void cannotResizeToLessThanOne() throws SQLException {
+        pool = npds();
+        pool.resizePool(0);
+    }
+
     private void assertWorking(NanoPoolDataSource pool) throws SQLException {
         int len = pool.connectors.length;
         Connection[] cons = new Connection[len];

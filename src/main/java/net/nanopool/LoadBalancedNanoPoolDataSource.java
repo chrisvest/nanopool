@@ -56,7 +56,6 @@ public class LoadBalancedNanoPoolDataSource extends AbstractDataSource
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    @Override
     public List<SQLException> close() {
         NanoPoolDataSource[] npdss = pools.toArray(
                 new NanoPoolDataSource[pools.size()]);

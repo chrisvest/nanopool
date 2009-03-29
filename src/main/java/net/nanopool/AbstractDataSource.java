@@ -18,7 +18,6 @@ package net.nanopool;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import javax.sql.DataSource;
 
 /**
@@ -26,7 +25,7 @@ import javax.sql.DataSource;
  * {@link UnsupportedOperationException} on all method calls.
  * @author cvh
  */
-public abstract class AbstractDataSource implements DataSource {
+public abstract class AbstractDataSource implements CloseableDataSource {
     /**
      * Always throws UnsupportedOperationException.
      * @return never.
@@ -94,11 +93,4 @@ public abstract class AbstractDataSource implements DataSource {
     public Connection getConnection(String username, String password) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    /**
-     * Shut down and fully close this DataSource.
-     * @return A List of the SQLExceptions generated while closing the physical
-     * database connections.
-     */
-    public abstract List<SQLException> close();
 }

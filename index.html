@@ -62,7 +62,7 @@
                 By "highly scalable" is meant that NP scales very well (hopefully linearly) to hundreds of concurrent threads, and with a very low constant-time overhead.
             </p>
             <p>
-                This means that thread contention will be on the <strong>size</strong> of the pool (or the JDBC driver, or the database, or..) as oppose to the internal implementation of the connection pool.
+                This means that thread contention will be on the <strong>size</strong> of the pool (or the JDBC driver, or the database, or..) as oppose to the internal implementation of the connection pool. Ofcouse, this scalability will still be constrained by the JDBC driver in use and the number of CPUs a system has.
             </p>
             <h2>
                 Dependencies

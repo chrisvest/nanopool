@@ -52,7 +52,7 @@
               <version>2.4.2</version>
               <configuration>
                 <forkMode>once</forkMode>
-                <argLine>-server -ea</argLine>
+                <argLine>-server</argLine>
                 <excludes>
                   <exclude>**/Test*.java</exclude>
                   <exclude>**/*Test.java</exclude>

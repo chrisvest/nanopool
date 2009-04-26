@@ -42,6 +42,16 @@ import org.junit.Test;
 public class Benchmark {
     private static final boolean PRE_WARM_POOLS = Boolean.parseBoolean(
             System.getProperty("pre-warm", "true"));
+    private static final int RUN_TIME = Integer.parseInt(
+            System.getProperty("run-time", "500"));
+    private static final int WARMUP_TIME = Integer.parseInt(
+            System.getProperty("warmup-time", "5000"));
+    private static final int TTL = Integer.parseInt(
+            System.getProperty("ttl", "900000")); // 15 minutes
+    private static final int THR_SCALE = Integer.parseInt(
+            System.getProperty("thr-scale", "2"));
+    private static final int CON_SCALE = Integer.parseInt(
+            System.getProperty("con-scale", "2"));
     private static PoolFactory poolFactory;
 
     @Test
@@ -164,13 +174,15 @@ public class Benchmark {
     
     private static void runTestSet() throws InterruptedException {
         try {
-            benchmark(50, 20);
-            benchmark(2, 1);
+            benchmark(50, 20, WARMUP_TIME);
+            benchmark(2, 1, WARMUP_TIME);
         System.out.println("------Warmup's over-------------");
             for (int connections = 1; connections <= 10; connections++) {
-                benchmark(connections, connections);
-                benchmark(connections * 2, connections);
-                benchmark(connections, connections * 2);
+                benchmark(connections, connections, RUN_TIME);
+                if (THR_SCALE > 1)
+                    benchmark(connections * THR_SCALE, connections, RUN_TIME);
+                if (CON_SCALE > 1)
+                    benchmark(connections, connections * CON_SCALE, RUN_TIME);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -210,22 +222,20 @@ public class Benchmark {
     }
 
     private static DataSource buildPool(ConnectionPoolDataSource cpds, int size) {
-        long ttl = 300000; // five minutes
-        return poolFactory.buildPool(cpds, size, ttl);
+        return poolFactory.buildPool(cpds, size, TTL);
     }
 
     private static void shutdown(DataSource pool) {
         poolFactory.closePool(pool);
     }
 
-    private static void benchmark(int threads, int poolSize) throws InterruptedException {
+    private static void benchmark(int threads, int poolSize, int runTime) throws InterruptedException {
         Thread.sleep(250); // give CPU some breathing room
         ConnectionPoolDataSource cpds = newCpds();
         ExecutorService executor = Executors.newFixedThreadPool(threads);
         CountDownLatch startSignal = new CountDownLatch(1);
         CountDownLatch endSignal = new CountDownLatch(threads);
         DataSource pool = buildPool(cpds, poolSize);
-        int runningTime = 5000;
 
         if (PRE_WARM_POOLS) {
             Connection[] cons = new Connection[poolSize];
@@ -250,7 +260,7 @@ public class Benchmark {
         }
 
         Worker[] workers = new Worker[threads];
-        long stopTime = System.currentTimeMillis() + runningTime;
+        long stopTime = System.currentTimeMillis() + runTime;
         for (int i = 0; i < threads; i++) {
             Worker worker = new Worker(pool, startSignal, endSignal, stopTime);
             executor.execute(worker);
@@ -259,12 +269,12 @@ public class Benchmark {
 
         startSignal.countDown();
         try {
-            Thread.sleep(runningTime);
+            Thread.sleep(runTime);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
 
-        endSignal.await(runningTime + 200, TimeUnit.MILLISECONDS);
+        endSignal.await(runTime + 200, TimeUnit.MILLISECONDS);
         
         int sumThroughPut = 0;
         for (Worker worker : workers) {

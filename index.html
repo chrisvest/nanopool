@@ -59,10 +59,10 @@
                 NanoPool (NP) is a lightweight and highly scalable JDBC2 connection pool.
             </p>
             <p>
-                By "highly scalable" is meant that NP scales very well (hopefully linearly) to hundreds of concurrent threads, and with a very low constant-time overhead.
+                By "highly scalable" is meant that NP scales well to many concurrent threads, and with a low overhead. The current implementation does a sequential search from a random starting point, to find a possibly available connection. Then it does a CAS on a marker of that connection to mark it as reserved and returns that connection if the CAS succeeds. But if the CAS fails, then it means that some other thread got the connection first, and so we continue our sequential search, wrapping around the pool if we got to the end.
             </p>
             <p>
-                This means that thread contention will be on the <strong>size</strong> of the pool (or the JDBC driver, or the database, or..) as oppose to the internal implementation of the connection pool. Of cause, this scalability will still be constrained by the JDBC driver in use and the number of CPUs a system has.
+                This means that thread contention will be on the <strong>size</strong> of the pool (or the JDBC driver, or the database, or..) as oppose to the internal implementation of the connection pool. Of cause, this scalability will still be constrained by the JDBC driver in use, the number of CPUs a system has and, to a lesser degree, by the O(N) time-complexity of the search.
             </p>
             <p>
                 NanoPool, while being a lightweight implementation, is fairly feature complete. Here's a couple of noteworthy things I just want to hightlight:

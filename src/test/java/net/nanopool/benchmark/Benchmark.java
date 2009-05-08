@@ -40,12 +40,14 @@ import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
 import org.junit.Test;
 
 public class Benchmark {
+    private static final int CORES =
+            Runtime.getRuntime().availableProcessors();
     private static final boolean PRE_WARM_POOLS = Boolean.parseBoolean(
             System.getProperty("pre-warm", "true"));
     private static final int RUN_TIME = Integer.parseInt(
-            System.getProperty("run-time", "500"));
+            System.getProperty("run-time", "650"));
     private static final int WARMUP_TIME = Integer.parseInt(
-            System.getProperty("warmup-time", "5000"));
+            System.getProperty("warmup-time", "8000"));
     private static final int TTL = Integer.parseInt(
             System.getProperty("ttl", "900000")); // 15 minutes
     private static final int THR_SCALE = Integer.parseInt(
@@ -66,9 +68,10 @@ public class Benchmark {
         System.out.println("--------------------------------");
         System.out.println("  thr = thread");
         System.out.println("  con = connection");
-        System.out.println("  cyc = connect-query-close cycle");
+        System.out.println("  cyc = connect-close cycle");
         System.out.println("  tot = total");
-        System.out.println("  sec = a second");
+        System.out.println("  cor = cpu core");
+        System.out.println("  s   = a second");
         System.out.println("--------------------------------");
 
         poolFactory = new PoolFactory() {
@@ -173,6 +176,8 @@ public class Benchmark {
     }
     
     private static void runTestSet() throws InterruptedException {
+        System.out.println("[thrs] [cons] : " +
+        		"  [total] [cyc/tot/s] [syc/cor/s] [cyc/thr/s] [cyc/con/s]");
         try {
             benchmark(50, 20, WARMUP_TIME);
             benchmark(2, 1, WARMUP_TIME);
@@ -280,13 +285,14 @@ public class Benchmark {
         for (Worker worker : workers) {
             sumThroughPut += worker.hits;
         }
-        double totalThroughput = sumThroughPut / 60.0;
+        double totalThroughput = sumThroughPut / (runTime / 1000.0);
+        double throughputPerCore = totalThroughput / CORES;
         double throughputPerThread = totalThroughput / threads;
-        double throughputPerConnection = totalThroughput / poolSize;
-        System.out.printf("%s thrs, %s cons: %s tot, " +
-        		"%.2f cyc/sec/tot, %.2f cyc/sec/thr, %.2f cyc/sec/con\n",
+        double throughputPerCon = totalThroughput / poolSize;
+        System.out.printf("%6d %6d : %9d %11.0f " +
+        		"%11.0f %11.0f %11.0f\n",
                 threads, poolSize, sumThroughPut, totalThroughput,
-                throughputPerThread, throughputPerConnection);
+                throughputPerCore, throughputPerThread, throughputPerCon);
 
         shutdown(pool);
     }

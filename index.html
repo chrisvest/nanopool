@@ -62,7 +62,18 @@
                 By "highly scalable" is meant that NP scales very well (hopefully linearly) to hundreds of concurrent threads, and with a very low constant-time overhead.
             </p>
             <p>
-                This means that thread contention will be on the <strong>size</strong> of the pool (or the JDBC driver, or the database, or..) as oppose to the internal implementation of the connection pool. Ofcouse, this scalability will still be constrained by the JDBC driver in use and the number of CPUs a system has.
+                This means that thread contention will be on the <strong>size</strong> of the pool (or the JDBC driver, or the database, or..) as oppose to the internal implementation of the connection pool. Of cause, this scalability will still be constrained by the JDBC driver in use and the number of CPUs a system has.
+            </p>
+            <p>
+                NanoPool, while being a lightweight implementation, is fairly feature complete. Here's a couple of noteworthy things I just want to hightlight:
+                <ul>
+                    <li>JMX management interface</li>
+                    <li>Lock-free implementation</li>
+                    <li>No internal threads</li>
+                    <li>Hot resize with low overhead</li>
+                    <li>Plug-able contention control</li>
+                </ul>
+                There's more to NanoPool than that, but those five bullets are probably what I would consider the key selling points.
             </p>
             <h2>
                 Dependencies

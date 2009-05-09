@@ -29,7 +29,7 @@ final class Connector {
     public static final int AVAILABLE = 0;
     public static final int RESERVED = 1;
     public static final int SHUTDOWN = 2;
-    public static final int OUTDATED = 2;
+    public static final int OUTDATED = 3;
     public final AtomicInteger state = new AtomicInteger(AVAILABLE);
     private final AtomicInteger realConnectionsCreated = new AtomicInteger();
     private final AtomicInteger connectionsLeased = new AtomicInteger();

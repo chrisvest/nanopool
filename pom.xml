@@ -118,7 +118,16 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>1.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <configuration>
+          <linkXref>true</linkXref>
+          <sourceEncoding>utf-8</sourceEncoding>
+          <!--minimumTokens>100</minimumTokens-->
+          <targetJdk>1.5</targetJdk>
+        </configuration>
       </plugin>
     </plugins>
   </reporting>

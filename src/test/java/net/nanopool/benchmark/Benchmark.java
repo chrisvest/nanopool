@@ -29,7 +29,7 @@ import org.junit.Test;
 
 public class Benchmark {
     private static final String DEFAULT_POOLS =
-            "np,c3p0,dbcp,mcpm";
+            "np,dbcp,mcpm";
     private static final int CORES =
             Runtime.getRuntime().availableProcessors();
     private static final boolean PRE_WARM_POOLS = Boolean.parseBoolean(
@@ -67,12 +67,6 @@ public class Benchmark {
             System.out.println("### Testing NanoPool");
             poolFactory = new PoolFactories.NanoPoolFactory();
             runTestSet();
-        }
-
-        if (pools.contains(",c3p0,")) {
-            System.out.println("### Testing C3P0");
-            poolFactory = new PoolFactories.C3P0PoolFactory();
-            //runTestSet();
         }
 
         if (pools.contains(",dbcp,")) {

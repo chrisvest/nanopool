@@ -1,6 +1,5 @@
 package net.nanopool.benchmark;
 
-import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,9 +11,6 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
 
 import biz.source_code.miniConnectionPoolManager.MiniConnectionPoolManager;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.mchange.v2.c3p0.DataSources;
 
 import net.nanopool.AbstractDataSource;
 import net.nanopool.NanoPoolDataSource;
@@ -43,30 +39,6 @@ public class PoolFactories {
       settings.setPoolSize(poolSize).setTimeToLive(ttl).setContentionHandler(
           new DefaultContentionHandler(false, 0));
       return settings;
-    }
-  }
-  
-  static final class C3P0PoolFactory implements PoolFactory {
-    // TODO I think this one's broken...
-    public DataSource buildPool(
-        ConnectionPoolDataSource cpds, int size, long ttl) {
-      ComboPooledDataSource cmds = new ComboPooledDataSource();
-      try {
-        //WrapperConnectionPoolDataSource wcpds = new WrapperConnectionPoolDataSource();
-        cmds.setConnectionPoolDataSource(cpds);
-        cmds.setMaxPoolSize(size);
-        return cmds;
-      } catch (PropertyVetoException ex) {
-        throw new RuntimeException(ex);
-      }
-    }
-    
-    public void closePool(DataSource pool) {
-      try {
-        DataSources.destroy(pool);
-      } catch (SQLException ex) {
-        ex.printStackTrace();
-      }
     }
   }
   

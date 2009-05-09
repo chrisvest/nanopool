@@ -20,8 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import net.nanopool.contention.ContentionHandler;
 import net.nanopool.contention.DefaultContentionHandler;
 import net.nanopool.hooks.Hook;
-import net.nanopool.loadbalancing.RandomStrategy;
-import net.nanopool.loadbalancing.Strategy;
 
 /**
  * Settings is an atomically mutable container of attributes that describes to a
@@ -41,7 +39,7 @@ public class Settings {
         this(new Config(
                 10, 300000,
                 new DefaultContentionHandler(), null, null, null, null, null,
-                RandomStrategy.INSTANCE, MilliTime.INSTANCE
+                MilliTime.INSTANCE
         ));
     }
 
@@ -68,7 +66,7 @@ public class Settings {
             n = new Config(poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.loadBalancingStrategy, s.time);
+                    s.time);
         } while (!config.compareAndSet(s, n));
         return this;
     }
@@ -88,7 +86,7 @@ public class Settings {
             n = new Config(s.poolSize, ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.loadBalancingStrategy, s.time);
+                    s.time);
         } while (!config.compareAndSet(s, n));
         return this;
     }
@@ -108,27 +106,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.loadBalancingStrategy, s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public Strategy getLoadBalancingStrategy() {
-        return config.get().loadBalancingStrategy;
-    }
-
-    public Settings setLoadBalancingStrategy(Strategy strategy) {
-        if (strategy == null) {
-            throw new IllegalArgumentException(
-                    "Load balancing strategy should not be null.");
-        }
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
-                    s.postReleaseHooks, s.connectionInvalidationHooks,
-                    strategy, s.time);
+                    s.time);
         } while (!config.compareAndSet(s, n));
         return this;
     }
@@ -148,7 +126,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
                     s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.loadBalancingStrategy, time);
+                    time);
         } while (!config.compareAndSet(s, n));
         return this;
     }
@@ -180,7 +158,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     new Cons<Hook>(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.connectionInvalidationHooks,
                     s.time);
         } while (!config.compareAndSet(s, n));
         return this;
@@ -193,7 +171,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     remove(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.connectionInvalidationHooks,
                     s.time);
         } while (!config.compareAndSet(s, n));
         return this;
@@ -210,7 +188,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, new Cons<Hook>(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.connectionInvalidationHooks,
                     s.time);
         } while (!config.compareAndSet(s, n));
         return this;
@@ -223,7 +201,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, remove(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.connectionInvalidationHooks,
                     s.time);
         } while (!config.compareAndSet(s, n));
         return this;
@@ -240,7 +218,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     new Cons<Hook>(hook, s.preReleaseHooks), s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.connectionInvalidationHooks,
                     s.time);
         } while (!config.compareAndSet(s, n));
         return this;
@@ -253,7 +231,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     remove(hook, s.preReleaseHooks), s.postReleaseHooks,
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.connectionInvalidationHooks,
                     s.time);
         } while (!config.compareAndSet(s, n));
         return this;
@@ -270,7 +248,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, new Cons<Hook>(hook, s.postReleaseHooks),
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.connectionInvalidationHooks,
                     s.time);
         } while (!config.compareAndSet(s, n));
         return this;
@@ -283,7 +261,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, remove(hook, s.postReleaseHooks),
-                    s.connectionInvalidationHooks, s.loadBalancingStrategy,
+                    s.connectionInvalidationHooks,
                     s.time);
         } while (!config.compareAndSet(s, n));
         return this;
@@ -301,7 +279,7 @@ public class Settings {
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     new Cons<Hook>(hook, s.connectionInvalidationHooks),
-                    s.loadBalancingStrategy, s.time);
+                    s.time);
         } while (!config.compareAndSet(s, n));
         return this;
     }
@@ -314,7 +292,7 @@ public class Settings {
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     remove(hook, s.connectionInvalidationHooks),
-                    s.loadBalancingStrategy, s.time);
+                    s.time);
         } while (!config.compareAndSet(s, n));
         return this;
     }

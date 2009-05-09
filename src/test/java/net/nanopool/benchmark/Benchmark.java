@@ -88,7 +88,7 @@ public class Benchmark {
                 }
             }
         };
-        if (pools.contains(",np,")) {
+        if (pools.contains(",np,") || pools.contains(",npds,")) {
             System.out.println("### Testing NanoPool");
             runTestSet();
         }

@@ -87,10 +87,11 @@ public class DeadConnectionsTest extends NanoPoolTestBase {
 
     @Override
     protected ConnectionPoolDataSource buildCpds() throws SQLException {
-        final AtomicReference<ConnectionEventListener> cel = new AtomicReference();
+        final AtomicReference<ConnectionEventListener> cel =
+          new AtomicReference<ConnectionEventListener>();
 
         Connection con = Mockito.mock(Connection.class);
-        Mockito.doAnswer(new Answer() {
+        Mockito.doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 cel.get().connectionClosed(null);
                 return null;
@@ -99,7 +100,7 @@ public class DeadConnectionsTest extends NanoPoolTestBase {
 
         PooledConnection pc = Mockito.mock(PooledConnection.class);
         Mockito.doReturn(con).when(pc).getConnection();
-        Mockito.doAnswer(new Answer() {
+        Mockito.doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 if (throwOnPcClose.get()) {
                     throwOnPcClose.set(false);
@@ -108,7 +109,7 @@ public class DeadConnectionsTest extends NanoPoolTestBase {
                 return null;
             }
         }).when(pc).close();
-        Mockito.doAnswer(new Answer() {
+        Mockito.doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 cel.set((ConnectionEventListener)invocation.getArguments()[0]);
                 return null;

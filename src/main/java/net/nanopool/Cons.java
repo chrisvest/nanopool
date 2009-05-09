@@ -41,7 +41,7 @@ final class Cons<T> {
     }
 
     List<T> toList() {
-        List<T> list = new ArrayList();
+        List<T> list = new ArrayList<T>();
         appendTo(list);
         return Collections.unmodifiableList(list);
     }

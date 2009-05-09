@@ -41,6 +41,7 @@ public interface ContentionHandler {
      * catch it in your own code!
      * @param count The number of times that this ContentionHandler has been
      * called within the same getConnection.
+     * @throws SQLException 
      * @since 1.0
      */
     void handleContention(int count) throws SQLException;

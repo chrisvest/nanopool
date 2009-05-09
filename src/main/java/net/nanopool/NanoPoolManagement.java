@@ -197,6 +197,7 @@ public class NanoPoolManagement implements NanoPoolManagementMBean {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void killConnection(int id) {
         Connector[] cons = pool.connectors;
         if (cons == null) {

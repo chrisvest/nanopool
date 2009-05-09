@@ -160,7 +160,7 @@ public class Settings {
     private <T> Cons<T> recurRemove(T obj, Cons<T> from) {
         if (from == null) return null;
         if (from.first.equals(obj)) return from.rest;
-        return new Cons(from.first, recurRemove(obj, from.rest));
+        return new Cons<T>(from.first, recurRemove(obj, from.rest));
     }
 
     private <T> Cons<T> remove(T obj, Cons<T> from) {
@@ -178,7 +178,7 @@ public class Settings {
         do {
             s = config.get();
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    new Cons(hook, s.preConnectHooks), s.postConnectHooks,
+                    new Cons<Hook>(hook, s.preConnectHooks), s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
@@ -208,7 +208,7 @@ public class Settings {
         do {
             s = config.get();
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, new Cons(hook, s.postConnectHooks),
+                    s.preConnectHooks, new Cons<Hook>(hook, s.postConnectHooks),
                     s.preReleaseHooks, s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
@@ -239,7 +239,7 @@ public class Settings {
             s = config.get();
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
-                    new Cons(hook, s.preReleaseHooks), s.postReleaseHooks,
+                    new Cons<Hook>(hook, s.preReleaseHooks), s.postReleaseHooks,
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
         } while (!config.compareAndSet(s, n));
@@ -269,7 +269,7 @@ public class Settings {
             s = config.get();
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
-                    s.preReleaseHooks, new Cons(hook, s.postReleaseHooks),
+                    s.preReleaseHooks, new Cons<Hook>(hook, s.postReleaseHooks),
                     s.connectionInvalidationHooks, s.loadBalancingStrategy,
                     s.time);
         } while (!config.compareAndSet(s, n));
@@ -300,7 +300,7 @@ public class Settings {
             n = new Config(s.poolSize, s.ttl, s.contentionHandler,
                     s.preConnectHooks, s.postConnectHooks,
                     s.preReleaseHooks, s.postReleaseHooks,
-                    new Cons(hook, s.connectionInvalidationHooks),
+                    new Cons<Hook>(hook, s.connectionInvalidationHooks),
                     s.loadBalancingStrategy, s.time);
         } while (!config.compareAndSet(s, n));
         return this;

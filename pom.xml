@@ -4,7 +4,7 @@
   <groupId>net.karmazilla.nanopool</groupId>
   <artifactId>nanopool</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>nanopool</name>
   <url>http://maven.apache.org</url>
   <licenses>

@@ -16,9 +16,9 @@
 package net.nanopool;
 
 /**
- *
+ * 
  * @author cvh
  */
 public interface ManagedNanoPool {
-    NanoPoolManagementMBean getMXBean();
+  NanoPoolManagementMBean getMXBean();
 }

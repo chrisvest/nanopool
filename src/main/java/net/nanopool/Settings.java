@@ -23,277 +23,253 @@ import net.nanopool.hooks.Hook;
 
 /**
  * Settings is an atomically mutable container of attributes that describes to a
- * {@link NanoPoolDataSource} how it should operate. The Settings instance
- * can be safely mutated after a NanoPoolDataSource has been created using it.
+ * {@link NanoPoolDataSource} how it should operate. The Settings instance can
+ * be safely mutated after a NanoPoolDataSource has been created using it.
+ * 
  * @author cvh
  * @since 1.0
  */
 public class Settings {
-    private final AtomicReference<Config> config = new AtomicReference<Config>();
+  private final AtomicReference<Config> config = new AtomicReference<Config>();
+  
+  Settings(Config cfg) {
+    this.config.set(cfg);
+  }
+  
+  public Settings() {
+    this(new Config(10, 300000, new DefaultContentionHandler(), null, null,
+        null, null, null, MilliTime.INSTANCE));
+  }
+  
+  Config getConfig() {
+    return config.get();
+  }
+  
+  /*
+   * Simpler properties.
+   */
 
-    Settings(Config cfg) {
-        this.config.set(cfg);
+  public int getPoolSize() {
+    return config.get().poolSize;
+  }
+  
+  public Settings setPoolSize(int poolSize) {
+    if (poolSize < 1) {
+      throw new IllegalArgumentException("Pool size must be at least "
+          + "one. " + poolSize + " is too low.");
     }
-
-    public Settings() {
-        this(new Config(
-                10, 300000,
-                new DefaultContentionHandler(), null, null, null, null, null,
-                MilliTime.INSTANCE
-        ));
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
+          s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public long getTimeToLive() {
+    return config.get().ttl;
+  }
+  
+  public Settings setTimeToLive(long ttl) {
+    if (ttl < 0) {
+      throw new IllegalArgumentException("Time to live must be at "
+          + "least zero. " + ttl + " is too low.");
     }
-
-    Config getConfig() {
-        return config.get();
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, ttl, s.contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
+          s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public ContentionHandler getContentionHandler() {
+    return config.get().contentionHandler;
+  }
+  
+  public Settings setContentionHandler(ContentionHandler contentionHandler) {
+    if (contentionHandler == null) {
+      throw new IllegalArgumentException("Contention handler cannot be null.");
     }
-
-    /*
-     * Simpler properties.
-     */
-
-    public int getPoolSize() {
-        return config.get().poolSize;
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
+          s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  TimeSource getTimeSource() {
+    return config.get().time;
+  }
+  
+  Settings setTimeSource(TimeSource time) {
+    if (time == null) {
+      throw new IllegalArgumentException("Time Source should not be null.");
     }
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
+          s.connectionInvalidationHooks, time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  /*
+   * Hooks.
+   */
 
-    public Settings setPoolSize(int poolSize) {
-        if (poolSize < 1) {
-            throw new IllegalArgumentException("Pool size must be at least " +
-                    "one. " + poolSize + " is too low.");
-        }
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
-                    s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public long getTimeToLive() {
-        return config.get().ttl;
-    }
-
-    public Settings setTimeToLive(long ttl) {
-        if (ttl < 0) {
-            throw new IllegalArgumentException("Time to live must be at " +
-                    "least zero. " + ttl +" is too low.");
-        }
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
-                    s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public ContentionHandler getContentionHandler() {
-        return config.get().contentionHandler;
-    }
-
-    public Settings setContentionHandler(ContentionHandler contentionHandler) {
-        if (contentionHandler == null) {
-            throw new IllegalArgumentException(
-                    "Contention handler cannot be null.");
-        }
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
-                    s.postReleaseHooks, s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    TimeSource getTimeSource() {
-        return config.get().time;
-    }
-
-    Settings setTimeSource(TimeSource time) {
-        if (time == null) {
-            throw new IllegalArgumentException(
-                    "Time Source should not be null.");
-        }
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks, s.preReleaseHooks,
-                    s.postReleaseHooks, s.connectionInvalidationHooks,
-                    time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    /*
-     * Hooks.
-     */
-
-    private <T> Cons<T> recurRemove(T obj, Cons<T> from) {
-        if (from == null) return null;
-        if (from.first.equals(obj)) return from.rest;
-        return new Cons<T>(from.first, recurRemove(obj, from.rest));
-    }
-
-    private <T> Cons<T> remove(T obj, Cons<T> from) {
-        if (from == null) return null;
-        if (!from.contains(obj)) return from;
-        return recurRemove(obj, from);
-    }
-
-    public List<Hook> getPreConnectHooks() {
-        return config.get().preConnectHooks.toList();
-    }
-
-    public Settings addPreConnectHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    new Cons<Hook>(hook, s.preConnectHooks), s.postConnectHooks,
-                    s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public Settings removePreConnectHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    remove(hook, s.preConnectHooks), s.postConnectHooks,
-                    s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public List<Hook> getPostConnectHooks() {
-        return config.get().postConnectHooks.toList();
-    }
-
-    public Settings addPostConnectHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, new Cons<Hook>(hook, s.postConnectHooks),
-                    s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public Settings removePostConnectHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, remove(hook, s.postConnectHooks),
-                    s.preReleaseHooks, s.postReleaseHooks,
-                    s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public List<Hook> getPreReleaseHooks() {
-        return config.get().preReleaseHooks.toList();
-    }
-
-    public Settings addPreReleaseHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks,
-                    new Cons<Hook>(hook, s.preReleaseHooks), s.postReleaseHooks,
-                    s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public Settings removePreReleaseHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks,
-                    remove(hook, s.preReleaseHooks), s.postReleaseHooks,
-                    s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public List<Hook> getPostReleaseHooks() {
-        return config.get().postReleaseHooks.toList();
-    }
-
-    public Settings addPostReleaseHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks,
-                    s.preReleaseHooks, new Cons<Hook>(hook, s.postReleaseHooks),
-                    s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public Settings removePostReleaseHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks,
-                    s.preReleaseHooks, remove(hook, s.postReleaseHooks),
-                    s.connectionInvalidationHooks,
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public List<Hook> getConnectionInvalidationHooks() {
-        return config.get().connectionInvalidationHooks.toList();
-    }
-
-    public Settings addConnectionInvalidationHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks,
-                    s.preReleaseHooks, s.postReleaseHooks,
-                    new Cons<Hook>(hook, s.connectionInvalidationHooks),
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
-
-    public Settings removeConnectionInvalidationHook(Hook hook) {
-        Config s, n;
-        do {
-            s = config.get();
-            n = new Config(s.poolSize, s.ttl, s.contentionHandler,
-                    s.preConnectHooks, s.postConnectHooks,
-                    s.preReleaseHooks, s.postReleaseHooks,
-                    remove(hook, s.connectionInvalidationHooks),
-                    s.time);
-        } while (!config.compareAndSet(s, n));
-        return this;
-    }
+  private <T> Cons<T> recurRemove(T obj, Cons<T> from) {
+    if (from == null)
+      return null;
+    if (from.first.equals(obj))
+      return from.rest;
+    return new Cons<T>(from.first, recurRemove(obj, from.rest));
+  }
+  
+  private <T> Cons<T> remove(T obj, Cons<T> from) {
+    if (from == null)
+      return null;
+    if (!from.contains(obj))
+      return from;
+    return recurRemove(obj, from);
+  }
+  
+  public List<Hook> getPreConnectHooks() {
+    return config.get().preConnectHooks.toList();
+  }
+  
+  public Settings addPreConnectHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, new Cons<Hook>(
+          hook, s.preConnectHooks), s.postConnectHooks, s.preReleaseHooks,
+          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public Settings removePreConnectHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, remove(hook,
+          s.preConnectHooks), s.postConnectHooks, s.preReleaseHooks,
+          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public List<Hook> getPostConnectHooks() {
+    return config.get().postConnectHooks.toList();
+  }
+  
+  public Settings addPostConnectHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          new Cons<Hook>(hook, s.postConnectHooks), s.preReleaseHooks,
+          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public Settings removePostConnectHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          remove(hook, s.postConnectHooks), s.preReleaseHooks,
+          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public List<Hook> getPreReleaseHooks() {
+    return config.get().preReleaseHooks.toList();
+  }
+  
+  public Settings addPreReleaseHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, new Cons<Hook>(hook, s.preReleaseHooks),
+          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public Settings removePreReleaseHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, remove(hook, s.preReleaseHooks),
+          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public List<Hook> getPostReleaseHooks() {
+    return config.get().postReleaseHooks.toList();
+  }
+  
+  public Settings addPostReleaseHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, s.preReleaseHooks, new Cons<Hook>(hook,
+              s.postReleaseHooks), s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public Settings removePostReleaseHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, s.preReleaseHooks, remove(hook,
+              s.postReleaseHooks), s.connectionInvalidationHooks, s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public List<Hook> getConnectionInvalidationHooks() {
+    return config.get().connectionInvalidationHooks.toList();
+  }
+  
+  public Settings addConnectionInvalidationHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
+          new Cons<Hook>(hook, s.connectionInvalidationHooks), s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
+  
+  public Settings removeConnectionInvalidationHook(Hook hook) {
+    Config s, n;
+    do {
+      s = config.get();
+      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
+          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks, remove(
+              hook, s.connectionInvalidationHooks), s.time);
+    } while (!config.compareAndSet(s, n));
+    return this;
+  }
 }

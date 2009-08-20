@@ -21,17 +21,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.ConnectionPoolDataSource;
 
 /**
- *
+ * 
  * @author cvh
  */
 public class CountUpHook implements Hook {
-    public final AtomicInteger counter;
-
-    public CountUpHook(AtomicInteger counter) {
-        this.counter = counter;
-    }
-
-    public void run(EventType type, ConnectionPoolDataSource source, Connection con, SQLException sqle) {
-        counter.incrementAndGet();
-    }
+  public final AtomicInteger counter;
+  
+  public CountUpHook(AtomicInteger counter) {
+    this.counter = counter;
+  }
+  
+  public void run(EventType type, ConnectionPoolDataSource source,
+      Connection con, SQLException sqle) {
+    counter.incrementAndGet();
+  }
 }

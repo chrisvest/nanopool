@@ -22,13 +22,14 @@ import net.nanopool.*;
  * An implementation of {@link ContentionHandler} that throws a
  * {@link NanoPoolRuntimeException} when there's too much contention on the
  * pool.
+ * 
  * @author cvh
  * @since 1.0
  */
 public class ThrowingContentionHandler implements ContentionHandler {
-    public static final String MESSAGE = "Connection pool contention too high.";
-
-    public void handleContention(int count) throws SQLException {
-        throw new NanoPoolRuntimeException(MESSAGE);
-    }
+  public static final String MESSAGE = "Connection pool contention too high.";
+  
+  public void handleContention(int count) throws SQLException {
+    throw new NanoPoolRuntimeException(MESSAGE);
+  }
 }

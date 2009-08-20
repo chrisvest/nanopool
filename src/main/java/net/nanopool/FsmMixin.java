@@ -26,151 +26,162 @@ import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 
 final class FsmMixin {
-    static final CheapRandom rand = new CheapRandom();
-    static final String MSG_SHUT_DOWN = "Connection pool is shut down.";
-    static final String MSG_TOO_SMALL = "Cannot resize. New size too small: ";
-
-    static Connection getConnection(
-            final PoolState pool) throws SQLException {
-        runHooks(pool.config.preConnectHooks, EventType.preConnect,
-                pool.source, null, null);
-        final Connector[] connectors = pool.connectors;
-        if (connectors == null)
-            throw new IllegalStateException(MSG_SHUT_DOWN);
-        final int poolSize = connectors.length;
-        final Config state = pool.config;
-        final int start = StrictMath.abs(rand.nextInt()) % poolSize;
-        int idx = start;
-        int contentionCounter = 0;
-        while (true) {
-            Connector con = connectors[idx];
-            int st = con.state.get();
-            while (st != Connector.RESERVED) {
-                if (st == Connector.OUTDATED)
-                    throw OutdatedException.INSTANCE;
-                if (st == Connector.SHUTDOWN)
-                    throw new IllegalStateException(MSG_SHUT_DOWN);
-                // we might have gotten one
-                if (con.state.compareAndSet(Connector.AVAILABLE, Connector.RESERVED)) { // reserve it
-                    try {
-                        Connection connection = con.getConnection(
-                                state.preReleaseHooks, state.postReleaseHooks,
-                                state.connectionInvalidationHooks);
-                        runHooks(state.postConnectHooks, EventType.postConnect,
-                                pool.source, connection, null);
-                        return connection;
-                    } catch (SQLException sqle) {
-                        try {
-                            con.invalidate();
-                        } finally {
-                            con.state.set(Connector.AVAILABLE);
-                            runHooks(state.postConnectHooks, EventType.postConnect,
-                                    pool.source, null, sqle);
-                        }
-                        throw sqle;
-                    }
-                }
-                st = con.state.get();
-            }
-            ++idx;
-            if (idx == poolSize) idx = 0;
-            if (idx == start)
-                state.contentionHandler.handleContention(++contentionCounter);
-        }
+  static final CheapRandom rand = new CheapRandom();
+  static final String MSG_SHUT_DOWN = "Connection pool is shut down.";
+  static final String MSG_TOO_SMALL = "Cannot resize. New size too small: ";
+  
+  static Connection getConnection(final PoolState pool) throws SQLException {
+    runHooks(pool.config.preConnectHooks, EventType.preConnect, pool.source,
+        null, null);
+    final Connector[] connectors = pool.connectors;
+    if (connectors == null) {
+      throw new IllegalStateException(MSG_SHUT_DOWN);
     }
-
-    static List<SQLException> close(PoolState pool) {
+    final int poolSize = connectors.length;
+    final Config state = pool.config;
+    final int start = StrictMath.abs(rand.nextInt()) % poolSize;
+    int idx = start;
+    int contentionCounter = 0;
+    while (true) {
+      Connector con = connectors[idx];
+      int st = con.state.get();
+      while (st != Connector.RESERVED) {
+        if (st == Connector.OUTDATED) {
+          throw OutdatedException.INSTANCE;
+        }
+        if (st == Connector.SHUTDOWN) {
+          throw new IllegalStateException(MSG_SHUT_DOWN);
+        }
+        // we might have gotten one - reserve it
+        if (con.state.compareAndSet(Connector.AVAILABLE, Connector.RESERVED)) {
+          try {
+            Connection connection = con.getConnection(state.preReleaseHooks,
+                state.postReleaseHooks, state.connectionInvalidationHooks);
+            runHooks(state.postConnectHooks, EventType.postConnect,
+                pool.source, connection, null);
+            return connection;
+          } catch (SQLException sqle) {
+            try {
+              con.invalidate();
+            } finally {
+              con.state.set(Connector.AVAILABLE);
+              runHooks(state.postConnectHooks, EventType.postConnect,
+                  pool.source, null, sqle);
+            }
+            throw sqle;
+          }
+        }
+        st = con.state.get();
+      }
+      ++idx;
+      if (idx == poolSize) {
+        idx = 0;
+      }
+      if (idx == start) {
+        state.contentionHandler.handleContention(++contentionCounter);
+      }
+    }
+  }
+  
+  static List<SQLException> close(PoolState pool) {
+    try {
+      Connector[] cons = pool.connectors;
+      pool.connectors = null;
+      return shutdown(cons);
+    } catch (OutdatedException _) {
+      return close(pool);
+    }
+  }
+  
+  static List<SQLException> shutdown(Connector[] connectors) {
+    List<SQLException> caughtExceptions = new ArrayList<SQLException>();
+    if (connectors == null) {
+      return caughtExceptions;
+    }
+    
+    for (Connector con : connectors) {
+      int st = con.state.get();
+      con.state.set(Connector.SHUTDOWN);
+      if (st == Connector.OUTDATED) {
+        throw OutdatedException.INSTANCE;
+      }
+      if (st != Connector.RESERVED) {
         try {
-            Connector[] cons = pool.connectors;
-            pool.connectors = null;
-            return shutdown(cons);
-        } catch (OutdatedException _) {
-            return close(pool);
+          con.invalidate();
+        } catch (SQLException ex) {
+          caughtExceptions.add(ex);
         }
+      }
     }
-
-    static List<SQLException> shutdown(Connector[] connectors) {
-        List<SQLException> caughtExceptions = new ArrayList<SQLException>();
-        if (connectors == null) return caughtExceptions;
-
-        for (Connector con : connectors) {
-            int st = con.state.get();
-            con.state.set(Connector.SHUTDOWN);
-            if (st == Connector.OUTDATED)
-                throw OutdatedException.INSTANCE;
-            if (st != Connector.RESERVED) {
-                try {
-                    con.invalidate();
-                } catch (SQLException ex) {
-                    caughtExceptions.add(ex);
-                }
-            }
+    
+    return caughtExceptions;
+  }
+  
+  static void resizePool(PoolState pool, int newSize) {
+    if (newSize < 1) {
+      throw new IllegalArgumentException(MSG_TOO_SMALL + newSize);
+    }
+    pool.resizingLock.lock();
+    try {
+      Connector[] ocons = pool.connectors;
+      if (ocons == null || ocons[0].state.get() == Connector.SHUTDOWN) {
+        throw new IllegalStateException(MSG_SHUT_DOWN);
+      }
+      if (ocons.length == newSize) {
+        return;
+      }
+      Connector[] ncons = new Connector[newSize];
+      if (ocons.length < newSize) {
+        // grow pool
+        System.arraycopy(ocons, 0, ncons, 0, ocons.length);
+        for (int i = ocons.length; i < ncons.length; i++) {
+          ncons[i] = new Connector(
+              pool.source, pool.config.ttl, pool.config.time);
         }
-        
-        return caughtExceptions;
-    }
-
-    static void resizePool(PoolState pool, int newSize) {
-        if (newSize < 1) {
-            throw new IllegalArgumentException(MSG_TOO_SMALL + newSize);
+        pool.connectors = ncons;
+      } else {
+        // shrink pool
+        System.arraycopy(ocons, 0, ncons, 0, newSize);
+        pool.connectors = ncons;
+        for (int i = newSize; i < ocons.length; i++) {
+          ocons[i].state.set(Connector.OUTDATED);
         }
-        pool.resizingLock.lock();
-        try {
-            Connector[] ocons = pool.connectors;
-            if (ocons == null || ocons[0].state.get() == Connector.SHUTDOWN) {
-                throw new IllegalStateException(MSG_SHUT_DOWN);
-            }
-            if (ocons.length == newSize) return;
-            Connector[] ncons = new Connector[newSize];
-            if (ocons.length < newSize) {
-                // grow pool
-                System.arraycopy(ocons, 0, ncons, 0, ocons.length);
-                for (int i = ocons.length; i < ncons.length; i++) {
-                    ncons[i] = new Connector(
-                            pool.source, pool.config.ttl, pool.config.time);
-                }
-                pool.connectors = ncons;
-            } else {
-                // shrink pool
-                System.arraycopy(ocons, 0, ncons, 0, newSize);
-                pool.connectors = ncons;
-                for (int i = newSize; i < ocons.length; i++) {
-                    ocons[i].state.set(Connector.OUTDATED);
-                }
-            }
-        } finally {
-            pool.resizingLock.unlock();
-        }
+      }
+    } finally {
+      pool.resizingLock.unlock();
     }
-
-    private static int countConnections(Connector[] connectors, int ofState) {
-        assert ofState != Connector.OUTDATED && ofState != Connector.SHUTDOWN:
-            "Cannot count outdated or shut down state.";
-        
-        int openCount = 0;
-        for (Connector cn : connectors) {
-            int state = cn.state.get();
-            if (state == Connector.OUTDATED) throw OutdatedException.INSTANCE;
-            if (state == ofState) {
-                openCount++;
-            }
-        }
-        return openCount;
+  }
+  
+  private static int countConnections(Connector[] connectors, int ofState) {
+    assert ofState != Connector.OUTDATED && ofState != Connector.SHUTDOWN :
+      "Cannot count outdated or shut down state.";
+    
+    int openCount = 0;
+    for (Connector cn : connectors) {
+      int state = cn.state.get();
+      if (state == Connector.OUTDATED) {
+        throw OutdatedException.INSTANCE;
+      }
+      if (state == ofState) {
+        openCount++;
+      }
     }
-
-    static int countAvailableConnections(Connector[] cons) {
-        return countConnections(cons, Connector.AVAILABLE);
+    return openCount;
+  }
+  
+  static int countAvailableConnections(Connector[] cons) {
+    return countConnections(cons, Connector.AVAILABLE);
+  }
+  
+  static int countLeasedConnections(Connector[] cons) {
+    return countConnections(cons, Connector.RESERVED);
+  }
+  
+  static void runHooks(Cons<Hook> hooks, EventType type,
+      ConnectionPoolDataSource source, Connection con, SQLException sqle) {
+    while (hooks != null) {
+      hooks.first.run(type, source, con, sqle);
+      hooks = hooks.rest;
     }
-
-    static int countLeasedConnections(Connector[] cons) {
-        return countConnections(cons, Connector.RESERVED);
-    }
-
-    static void runHooks(Cons<Hook> hooks, EventType type,
-            ConnectionPoolDataSource source, Connection con, SQLException sqle) {
-        while (hooks != null) {
-            hooks.first.run(type, source, con, sqle);
-            hooks = hooks.rest;
-        }
-    }
+  }
 }

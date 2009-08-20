@@ -16,10 +16,11 @@
 package net.nanopool;
 
 /**
- *
+ * 
  * @author vest
  */
 interface TimeSource {
-    long millisecondsToUnit(long millis);
-    long now();
+  long millisecondsToUnit(long millis);
+  
+  long now();
 }

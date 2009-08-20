@@ -20,10 +20,10 @@ import java.sql.SQLException;
 import javax.sql.ConnectionPoolDataSource;
 
 /**
- *
+ * 
  * @author cvh
  */
 public interface Hook {
-    void run(EventType type, ConnectionPoolDataSource source,
-            Connection con, SQLException sqle);
+  void run(EventType type, ConnectionPoolDataSource source, Connection con,
+      SQLException sqle);
 }

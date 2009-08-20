@@ -22,19 +22,20 @@ import javax.sql.DataSource;
 /**
  * A CloseableDataSource may contain physical database connections and other
  * resources that should be properly closed when the DataSource is no longer in
- * use.
- * A closed data source may throw InvalidStateException on all methods, except
- * close.
+ * use. A closed data source may throw InvalidStateException on all methods,
+ * except close.
+ * 
  * @author vest
  */
 public interface CloseableDataSource extends DataSource {
-    /**
-     * Fully close this DataSource.
-     * This method is idempotent, so closing and already closed DataSource is
-     * guaranteed to not do any harm, such as throwing an exception.
-     * @return A List of the SQLExceptions generated while closing the physical
-     * database connections, or an empty list if the data source is already
-     * closed.
-     */
-    public abstract List<SQLException> close();
+  /**
+   * Fully close this DataSource. This method is idempotent, so closing and
+   * already closed DataSource is guaranteed to not do any harm, such as
+   * throwing an exception.
+   * 
+   * @return A List of the SQLExceptions generated while closing the physical
+   *         database connections, or an empty list if the data source is
+   *         already closed.
+   */
+  public abstract List<SQLException> close();
 }

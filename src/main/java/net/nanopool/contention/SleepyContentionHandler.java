@@ -16,28 +16,28 @@
 package net.nanopool.contention;
 
 /**
- * A sleepy implementation of {@link ContentionHandler}.
- * Waiting is implemented by {@link Thread#sleep(long)}'ing the thread for
- * a while.
+ * A sleepy implementation of {@link ContentionHandler}. Waiting is implemented
+ * by {@link Thread#sleep(long)}'ing the thread for a while.
+ * 
  * @author vest
  * @since 1.0
  */
 public class SleepyContentionHandler implements ContentionHandler {
-    private final long sleepTime;
-
-    public SleepyContentionHandler() {
-        this(10);
+  private final long sleepTime;
+  
+  public SleepyContentionHandler() {
+    this(10);
+  }
+  
+  public SleepyContentionHandler(long sleepTime) {
+    this.sleepTime = sleepTime;
+  }
+  
+  public void handleContention(int count) {
+    try {
+      Thread.sleep(sleepTime < 1 ? ((long) count) * 10 : sleepTime);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
     }
-
-    public SleepyContentionHandler(long sleepTime) {
-        this.sleepTime = sleepTime;
-    }
-
-    public void handleContention(int count) {
-        try {
-            Thread.sleep(sleepTime < 1? ((long)count) * 10: sleepTime);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
+  }
 }

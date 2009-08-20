@@ -23,48 +23,51 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 /**
- *
+ * 
  * @author cvh
  */
 public class ConnectivetyFailureTest extends NanoPoolTestBase {
-    private static final String MESSAGE = "Bomb.";
-
-    @Test
-    public void mustHandleThrowingConnector() throws SQLException {
-        pool = npds();
-        try {
-            pool.getConnection();
-            fail("Expected thrown exception.");
-        } catch (SQLException ex) {
-            assertEquals(MESSAGE, ex.getMessage());
-        }
+  private static final String MESSAGE = "Bomb.";
+  
+  @Test
+  public void mustHandleThrowingConnector() throws SQLException {
+    pool = npds();
+    try {
+      pool.getConnection();
+      fail("Expected thrown exception.");
+    } catch (SQLException ex) {
+      assertEquals(MESSAGE, ex.getMessage());
     }
-
-    @Test
-    public void throwingConnectorsMustNotLeakReservationTickets() throws SQLException {
-        int connectAttempts = 1000;
-        pool = npds();
-        for (int i = 0; i < connectAttempts; i++) {
-            try {
-                pool.getConnection();
-                fail("Expected thrown exception.");
-            } catch (SQLException ex) {
-                assertEquals(MESSAGE, ex.getMessage());
-            }
-        }
-        for (int i = 0; i < pool.state.connectors.length; i++) {
-            assertNotSame(Connector.RESERVED, pool.state.connectors[i].state.get());
-        }
+  }
+  
+  @Test
+  public void throwingConnectorsMustNotLeakReservationTickets()
+      throws SQLException {
+    int connectAttempts = 1000;
+    pool = npds();
+    for (int i = 0; i < connectAttempts; i++) {
+      try {
+        pool.getConnection();
+        fail("Expected thrown exception.");
+      } catch (SQLException ex) {
+        assertEquals(MESSAGE, ex.getMessage());
+      }
     }
-
-    @Override
-    protected ConnectionPoolDataSource buildCpds() throws SQLException {
-        ConnectionPoolDataSource cpds = Mockito.mock(ConnectionPoolDataSource.class);
-        try {
-            Mockito.doThrow(new SQLException(MESSAGE)).when(cpds).getPooledConnection();
-        } catch (SQLException ex) {
-            fail("mock setup failure.");
-        }
-        return cpds;
+    for (int i = 0; i < pool.state.connectors.length; i++) {
+      assertNotSame(Connector.RESERVED, pool.state.connectors[i].state.get());
     }
+  }
+  
+  @Override
+  protected ConnectionPoolDataSource buildCpds() throws SQLException {
+    ConnectionPoolDataSource cpds = Mockito
+        .mock(ConnectionPoolDataSource.class);
+    try {
+      Mockito.doThrow(new SQLException(MESSAGE)).when(cpds)
+          .getPooledConnection();
+    } catch (SQLException ex) {
+      fail("mock setup failure.");
+    }
+    return cpds;
+  }
 }

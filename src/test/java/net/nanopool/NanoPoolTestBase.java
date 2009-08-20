@@ -24,77 +24,75 @@ import org.junit.After;
 
 /**
  * Abstract base class for NanoPoolDataSource test cases.
+ * 
  * @author cvh
  */
 public abstract class NanoPoolTestBase {
-    protected NanoPoolDataSource pool;
-
-    protected NanoPoolDataSource npds() throws SQLException {
-        ConnectionPoolDataSource source = buildCpds();
-        Settings settings = buildSettings();
-        return buildNpds(source, settings);
-    }
-
-    protected ConnectionPoolDataSource buildCpds() throws SQLException {
-        MysqlConnectionPoolDataSource source =
-            new MysqlConnectionPoolDataSource();
-        source.setServerName("localhost");
-        source.setPort(3306);
-        source.setDatabaseName("test");
-        source.setUser("root");
-        source.setPassword("");
-        
-        // timeouts:
-        source.setLoginTimeout(5 /*seconds*/);
-        source.setConnectTimeout(5000 /*milliseconds*/);
-        source.setSocketTimeout(5000 /*milliseconds*/);
-
-        return source;
-    }
-
-    protected Settings buildSettings() {
-        return new Settings().setPoolSize(10).setTimeToLive(300000);
-    }
-
-    protected NanoPoolDataSource buildNpds(ConnectionPoolDataSource source,
-            Settings settings) {
-        return new NanoPoolDataSource(source, settings);
-    }
-
-    @After
-    public void closePool() throws SQLException {
-        if (pool != null) {
-            List<SQLException> sqles = pool.close();
-            if (!sqles.isEmpty()) {
-                for (SQLException sqle : sqles) {
-                    sqle.printStackTrace();
-                }
-                throw sqles.get(0);
-            }
+  protected NanoPoolDataSource pool;
+  
+  protected NanoPoolDataSource npds() throws SQLException {
+    ConnectionPoolDataSource source = buildCpds();
+    Settings settings = buildSettings();
+    return buildNpds(source, settings);
+  }
+  
+  protected ConnectionPoolDataSource buildCpds() throws SQLException {
+    MysqlConnectionPoolDataSource source = new MysqlConnectionPoolDataSource();
+    source.setServerName("localhost");
+    source.setPort(3306);
+    source.setDatabaseName("test");
+    source.setUser("root");
+    source.setPassword("");
+    
+    // timeouts:
+    source.setLoginTimeout(5 /* seconds */);
+    source.setConnectTimeout(5000 /* milliseconds */);
+    source.setSocketTimeout(5000 /* milliseconds */);
+    
+    return source;
+  }
+  
+  protected Settings buildSettings() {
+    return new Settings().setPoolSize(10).setTimeToLive(300000);
+  }
+  
+  protected NanoPoolDataSource buildNpds(ConnectionPoolDataSource source,
+      Settings settings) {
+    return new NanoPoolDataSource(source, settings);
+  }
+  
+  @After
+  public void closePool() throws SQLException {
+    if (pool != null) {
+      List<SQLException> sqles = pool.close();
+      if (!sqles.isEmpty()) {
+        for (SQLException sqle : sqles) {
+          sqle.printStackTrace();
         }
+        throw sqles.get(0);
+      }
     }
-
-    static Thread killMeLaterCheck(
-            final AtomicBoolean finishedMarker,
-            final long sleepTime,
-            final Exception exception) {
-        final Thread thisThread = Thread.currentThread();
-        Thread killer = new Thread(new Runnable() {
-            @SuppressWarnings("deprecation")
-            public void run() {
-                try {
-                    Thread.sleep(sleepTime);
-                    if (!finishedMarker.get()) {
-                        exception.setStackTrace(thisThread.getStackTrace());
-                        thisThread.stop(exception);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }, thisThread.getName() + "-killer");
-        killer.setDaemon(true);
-        killer.start();
-        return killer;
-    }
+  }
+  
+  static Thread killMeLaterCheck(final AtomicBoolean finishedMarker,
+      final long sleepTime, final Exception exception) {
+    final Thread thisThread = Thread.currentThread();
+    Thread killer = new Thread(new Runnable() {
+      @SuppressWarnings("deprecation")
+      public void run() {
+        try {
+          Thread.sleep(sleepTime);
+          if (!finishedMarker.get()) {
+            exception.setStackTrace(thisThread.getStackTrace());
+            thisThread.stop(exception);
+          }
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+    }, thisThread.getName() + "-killer");
+    killer.setDaemon(true);
+    killer.start();
+    return killer;
+  }
 }

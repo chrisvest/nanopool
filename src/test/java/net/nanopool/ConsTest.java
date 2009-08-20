@@ -22,81 +22,81 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class ConsTest {
-    private static final Object x = new Object();
-    private static final Object y = new Object();
-    private static final Object z = new Object();
-
-    @Test
-    public void testProperNormalConstruction() {
-        Cons c = new Cons(x, null);
-        assertSame(x, c.first);
-        assertNull(c.rest);
+  private static final Object x = new Object();
+  private static final Object y = new Object();
+  private static final Object z = new Object();
+  
+  @Test
+  public void testProperNormalConstruction() {
+    Cons c = new Cons(x, null);
+    assertSame(x, c.first);
+    assertNull(c.rest);
+  }
+  
+  @Test
+  public void testConsesCannotContainNullElements() {
+    try {
+      new Cons(null, null);
+      fail("A Cons with a null 'first' was allowed to be cnstructed.");
+    } catch (NullPointerException _) {
+      // wo-hoo.
     }
-
-    @Test
-    public void testConsesCannotContainNullElements() {
-        try {
-            new Cons(null, null);
-            fail("A Cons with a null 'first' was allowed to be cnstructed.");
-        } catch(NullPointerException _) {
-            // wo-hoo.
-        }
+  }
+  
+  @Test
+  public void testToListIsInCorrectOrder() {
+    Cons c = new Cons(y, null);
+    c = new Cons(x, c);
+    List l = c.toList();
+    assertSame(x, l.get(0));
+    assertSame(y, l.get(1));
+  }
+  
+  @Test
+  public void testToListIsUnmodifiable() {
+    Cons c = new Cons(y, null);
+    c = new Cons(x, c);
+    List l = c.toList();
+    try {
+      l.add(z);
+      fail("list allowed add()");
+    } catch (RuntimeException _) {
+      // wo-hoo
     }
-
-    @Test
-    public void testToListIsInCorrectOrder() {
-        Cons c = new Cons(y, null);
-        c = new Cons(x, c);
-        List l = c.toList();
-        assertSame(x, l.get(0));
-        assertSame(y, l.get(1));
+    try {
+      l.remove(x);
+      fail("list allowed remove(Object)");
+    } catch (RuntimeException _) {
+      // wo-hoo
     }
-
-    @Test
-    public void testToListIsUnmodifiable() {
-        Cons c = new Cons(y, null);
-        c = new Cons(x, c);
-        List l = c.toList();
-        try {
-            l.add(z);
-            fail("list allowed add()");
-        } catch (RuntimeException _) {
-            // wo-hoo
-        }
-        try {
-            l.remove(x);
-            fail("list allowed remove(Object)");
-        } catch (RuntimeException _) {
-            // wo-hoo
-        }
-        try {
-            l.remove(0);
-            fail("list allowed remove(index)");
-        } catch (RuntimeException _) {
-            // wo-hoo
-        }
-        try {
-            l.clear();
-            fail("list allowed clear()");
-        } catch (RuntimeException _) {
-            // wo-hoo
-        }
-        try {
-            ListIterator li = l.listIterator();
-            li.next();
-            li.remove();
-            fail("list allowed ListIterator.remove()");
-        } catch (RuntimeException _) {
-            // wo-hoo
-        }
+    try {
+      l.remove(0);
+      fail("list allowed remove(index)");
+    } catch (RuntimeException _) {
+      // wo-hoo
     }
-
-    @Test
-    public void testContains() {
-        Cons c = new Cons(y, null);
-        c = new Cons(x, c);
-        assertTrue(c.contains(x));
-        assertTrue(c.contains(y));
-        assertFalse(c.contains(z));
+    try {
+      l.clear();
+      fail("list allowed clear()");
+    } catch (RuntimeException _) {
+      // wo-hoo
     }
+    try {
+      ListIterator li = l.listIterator();
+      li.next();
+      li.remove();
+      fail("list allowed ListIterator.remove()");
+    } catch (RuntimeException _) {
+      // wo-hoo
+    }
+  }
+  
+  @Test
+  public void testContains() {
+    Cons c = new Cons(y, null);
+    c = new Cons(x, c);
+    assertTrue(c.contains(x));
+    assertTrue(c.contains(y));
+    assertFalse(c.contains(z));
+  }
 }

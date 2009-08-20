@@ -24,40 +24,40 @@ import net.nanopool.contention.ThrowingContentionHandler;
 import org.junit.Test;
 
 /**
- *
+ * 
  * @author cvh
  */
 public class ContentionTest extends NanoPoolTestBase {
-    @Override
-    protected Settings buildSettings() {
-        return super.buildSettings().setContentionHandler(
-                new ThrowingContentionHandler());
+  @Override
+  protected Settings buildSettings() {
+    return super.buildSettings().setContentionHandler(
+        new ThrowingContentionHandler());
+  }
+  
+  @Test
+  public void contentionHandlerMustRun() throws SQLException {
+    pool = npds();
+    Connection[] cons = new Connection[pool.state.connectors.length];
+    for (int i = 0; i < cons.length; i++) {
+      cons[i] = pool.getConnection();
     }
-
-    @Test
-    public void contentionHandlerMustRun() throws SQLException {
-        pool = npds();
-        Connection[] cons = new Connection[pool.state.connectors.length];
-        for (int i = 0; i < cons.length; i++) {
-            cons[i] = pool.getConnection();
-        }
-
-        // pool is now empty. Next getConnection must throw.
-
-        final AtomicBoolean finishedMarker = new AtomicBoolean(false);
-        killMeLaterCheck(finishedMarker, 10000,
-                new SQLException("Die you gravy sucking pig-dog."));
-
-        try {
-            pool.getConnection();
-            fail("Expected getConnection to throw.");
-        } catch (NanoPoolRuntimeException npre) {
-            assertEquals(ThrowingContentionHandler.MESSAGE, npre.getMessage());
-        }
-        finishedMarker.set(true);
-
-        for (int i = 0; i < cons.length; i++) {
-            cons[i].close();
-        }
+    
+    // pool is now empty. Next getConnection must throw.
+    
+    final AtomicBoolean finishedMarker = new AtomicBoolean(false);
+    killMeLaterCheck(finishedMarker, 10000, new SQLException(
+        "Die you gravy sucking pig-dog."));
+    
+    try {
+      pool.getConnection();
+      fail("Expected getConnection to throw.");
+    } catch (NanoPoolRuntimeException npre) {
+      assertEquals(ThrowingContentionHandler.MESSAGE, npre.getMessage());
     }
+    finishedMarker.set(true);
+    
+    for (int i = 0; i < cons.length; i++) {
+      cons[i].close();
+    }
+  }
 }

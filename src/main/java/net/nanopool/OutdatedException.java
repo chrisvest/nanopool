@@ -18,18 +18,18 @@ package net.nanopool;
 /**
  * A marker exception used for handling the mid-pool-resize special cases that
  * we have at various places, the JMX interface in particular.
+ * 
  * @author cvh
  */
 class OutdatedException extends NanoPoolRuntimeException {
   private static final long serialVersionUID = 1195363263561817358L;
-    static final OutdatedException INSTANCE =
-            new OutdatedException();
-
-    private OutdatedException() {
-    }
-
-    @Override
-    public Throwable fillInStackTrace() {
-        return this;
-    }
+  static final OutdatedException INSTANCE = new OutdatedException();
+  
+  private OutdatedException() {
+  }
+  
+  @Override
+  public Throwable fillInStackTrace() {
+    return this;
+  }
 }

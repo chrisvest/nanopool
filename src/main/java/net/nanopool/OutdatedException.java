@@ -21,6 +21,7 @@ package net.nanopool;
  * @author cvh
  */
 class OutdatedException extends NanoPoolRuntimeException {
+  private static final long serialVersionUID = 1195363263561817358L;
     static final OutdatedException INSTANCE =
             new OutdatedException();
 

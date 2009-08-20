@@ -32,7 +32,7 @@ public class ConcurrentResizingTest extends NanoPoolTestBase {
     final int threadCount = 5;
     pool = npds();
     final NanoPoolDataSource fpool = pool;
-    final long stopTime = System.currentTimeMillis() + 1000;
+    final long stopTime = System.currentTimeMillis() + 200;
     final AtomicReference<SQLException> sqleRef = new AtomicReference<SQLException>();
     final CountDownLatch stopLatch = new CountDownLatch(threadCount);
     

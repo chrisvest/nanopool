@@ -28,7 +28,7 @@ public class ConsTest {
 
     @Test
     public void testProperNormalConstruction() {
-        Cons<Object> c = new Cons<Object>(x, null);
+        Cons c = new Cons(x, null);
         assertSame(x, c.first);
         assertNull(c.rest);
     }

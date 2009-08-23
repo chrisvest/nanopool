@@ -128,7 +128,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
    */
   public Connection getConnection() throws SQLException {
     try {
-      return FsmMixin.getConnection(state);
+      return FsmMixin.getConnection(this);
     } catch (OutdatedException _) {
       return getConnection();
     }

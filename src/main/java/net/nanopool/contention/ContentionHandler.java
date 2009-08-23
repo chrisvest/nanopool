@@ -17,6 +17,8 @@ package net.nanopool.contention;
 
 import java.sql.SQLException;
 
+import net.nanopool.NanoPoolDataSource;
+
 /**
  * A ContentionHandler decides what to do when we reckon there's contention on
  * the pool. Contention on the pool usually means that, last we checked, all
@@ -42,8 +44,10 @@ public interface ContentionHandler {
    * @param count
    *          The number of times that this ContentionHandler has been called
    *          within the same getConnection.
+   * @param npds
+   *          The NanoPoolDataSource that is experiencing the contention.
    * @throws SQLException
    * @since 1.0
    */
-  void handleContention(int count) throws SQLException;
+  void handleContention(int count, NanoPoolDataSource npds) throws SQLException;
 }

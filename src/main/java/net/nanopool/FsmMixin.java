@@ -30,15 +30,17 @@ final class FsmMixin {
   static final String MSG_SHUT_DOWN = "Connection pool is shut down.";
   static final String MSG_TOO_SMALL = "Cannot resize. New size too small: ";
   
-  static Connection getConnection(final PoolState pool) throws SQLException {
-    runHooks(pool.config.preConnectHooks, EventType.preConnect, pool.source,
+  static Connection getConnection(final NanoPoolDataSource pool)
+      throws SQLException {
+    final PoolState state = pool.state;
+    runHooks(state.config.preConnectHooks, EventType.preConnect, state.source,
         null, null);
-    final Connector[] connectors = pool.connectors;
+    final Connector[] connectors = state.connectors;
     if (connectors == null) {
       throw new IllegalStateException(MSG_SHUT_DOWN);
     }
     final int poolSize = connectors.length;
-    final Config state = pool.config;
+    final Config config = state.config;
     final int start = StrictMath.abs(rand.nextInt()) % poolSize;
     int idx = start;
     int contentionCounter = 0;
@@ -55,18 +57,18 @@ final class FsmMixin {
         // we might have gotten one - reserve it
         if (con.state.compareAndSet(Connector.AVAILABLE, Connector.RESERVED)) {
           try {
-            Connection connection = con.getConnection(state.preReleaseHooks,
-                state.postReleaseHooks, state.connectionInvalidationHooks);
-            runHooks(state.postConnectHooks, EventType.postConnect,
-                pool.source, connection, null);
+            Connection connection = con.getConnection(config.preReleaseHooks,
+                config.postReleaseHooks, config.connectionInvalidationHooks);
+            runHooks(config.postConnectHooks, EventType.postConnect,
+                state.source, connection, null);
             return connection;
           } catch (SQLException sqle) {
             try {
               con.invalidate();
             } finally {
               con.state.set(Connector.AVAILABLE);
-              runHooks(state.postConnectHooks, EventType.postConnect,
-                  pool.source, null, sqle);
+              runHooks(config.postConnectHooks, EventType.postConnect,
+                  state.source, null, sqle);
             }
             throw sqle;
           }
@@ -78,7 +80,7 @@ final class FsmMixin {
         idx = 0;
       }
       if (idx == start) {
-        state.contentionHandler.handleContention(++contentionCounter);
+        config.contentionHandler.handleContention(++contentionCounter, pool);
       }
     }
   }

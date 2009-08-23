@@ -15,6 +15,8 @@
  */
 package net.nanopool.contention;
 
+import net.nanopool.NanoPoolDataSource;
+
 /**
  * A sleepy implementation of {@link ContentionHandler}. Waiting is implemented
  * by {@link Thread#sleep(long)}'ing the thread for a while.
@@ -33,7 +35,7 @@ public class SleepyContentionHandler implements ContentionHandler {
     this.sleepTime = sleepTime;
   }
   
-  public void handleContention(int count) {
+  public void handleContention(int count, NanoPoolDataSource npds) {
     try {
       Thread.sleep(sleepTime < 1 ? ((long) count) * 10 : sleepTime);
     } catch (InterruptedException e) {

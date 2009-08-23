@@ -17,7 +17,7 @@ package net.nanopool.contention;
 
 import java.sql.SQLException;
 
-import net.nanopool.NanoPoolDataSource;
+import net.nanopool.ManagedNanoPool;
 
 /**
  * A ContentionHandler decides what to do when we reckon there's contention on
@@ -49,5 +49,5 @@ public interface ContentionHandler {
    * @throws SQLException
    * @since 1.0
    */
-  void handleContention(int count, NanoPoolDataSource npds) throws SQLException;
+  void handleContention(int count, ManagedNanoPool mnp) throws SQLException;
 }

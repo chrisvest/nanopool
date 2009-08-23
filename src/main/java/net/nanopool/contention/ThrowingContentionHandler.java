@@ -15,8 +15,8 @@
  */
 package net.nanopool.contention;
 
-import java.sql.SQLException;
-import net.nanopool.*;
+import net.nanopool.ManagedNanoPool;
+import net.nanopool.NanoPoolRuntimeException;
 
 /**
  * An implementation of {@link ContentionHandler} that throws a
@@ -29,7 +29,7 @@ import net.nanopool.*;
 public class ThrowingContentionHandler implements ContentionHandler {
   public static final String MESSAGE = "Connection pool contention too high.";
   
-  public void handleContention(int count, NanoPoolDataSource npds) {
+  public void handleContention(int count, ManagedNanoPool mnp) {
     throw new NanoPoolRuntimeException(MESSAGE);
   }
 }

@@ -17,7 +17,7 @@ package net.nanopool.contention;
 
 import java.sql.SQLException;
 
-import net.nanopool.NanoPoolDataSource;
+import net.nanopool.ManagedNanoPool;
 
 /**
  * The default {@link ContentionHandler} implementation. The waiting is
@@ -40,7 +40,7 @@ public final class DefaultContentionHandler implements ContentionHandler {
     this.throwLimit = throwLimit;
   }
   
-  public void handleContention(int count, NanoPoolDataSource npds)
+  public void handleContention(int count, ManagedNanoPool mnp)
       throws SQLException {
     if (0 < throwLimit && throwLimit <= count) {
       throw new SQLException("NanoPoolDataSource too contended. "

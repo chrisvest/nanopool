@@ -1,7 +1,7 @@
 NanoPool
 ========
 
-NanoPool (NP) is a lightweight and highly scalable JDBC2 connection pool.
+[NanoPool][1] is a lightweight and highly scalable JDBC2 connection pool.
 
 By "highly scalable" is meant that NP scales very well (hopefully linearly) to
 hundreds of concurrent threads, and with a very low constant-time overhead.
@@ -14,3 +14,5 @@ License
 -------
 
 Apache 2.0
+
+  [1]: http://karmazilla.github.com/nanopool/

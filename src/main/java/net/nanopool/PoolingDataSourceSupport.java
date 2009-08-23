@@ -19,7 +19,7 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import javax.sql.ConnectionPoolDataSource;
 
-public abstract class PoolingDataSourceSupport extends AbstractDataSource {
+abstract class PoolingDataSourceSupport extends AbstractDataSource {
   final PoolState state;
   
   PoolingDataSourceSupport(ConnectionPoolDataSource source, Settings settings) {

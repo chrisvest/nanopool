@@ -15,16 +15,18 @@
  */
 package net.nanopool;
 
-import net.nanopool.contention.ContentionHandler;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import java.util.concurrent.locks.ReentrantLock;
 import javax.sql.ConnectionPoolDataSource;
+
+import net.nanopool.contention.ContentionHandler;
 
 public final class NanoPoolDataSource extends PoolingDataSourceSupport
     implements ManagedNanoPool {
+  private final NanoPoolManagement poolManagement;
+  
   /**
    * Create a new {@link net.nanopool.NanoPoolDataSource} based on the
    * specified {@link ConnectionPoolDataSource}, and with the specified pool
@@ -96,6 +98,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
   public NanoPoolDataSource(
       ConnectionPoolDataSource source, Settings settings) {
     super(source, settings);
+    poolManagement = new NanoPoolManagement(state);
   }
   
   /**
@@ -185,19 +188,8 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
    * @since 1.0
    */
   public NanoPoolManagementMBean getMXBean() {
-    try {
-      poolManagementLock.lock();
-      if (poolManagement == null) {
-        poolManagement = new NanoPoolManagement(this);
-      }
-    } finally {
-      poolManagementLock.unlock();
-    }
     return poolManagement;
   }
-  
-  private NanoPoolManagement poolManagement;
-  private final ReentrantLock poolManagementLock = new ReentrantLock();
   
   void resizePool(int newSize) {
     FsmMixin.resizePool(state, newSize);

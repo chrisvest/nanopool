@@ -19,24 +19,18 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.List;
-import javax.sql.DataSource;
 
 /**
  * 
  * @author cvh
  */
-public class NanoPoolManagement implements NanoPoolManagementMBean {
+class NanoPoolManagement implements NanoPoolManagementMBean {
   private final PoolState pool;
   private volatile int connectionsLeased;
   private volatile int connectionsCreated;
   
-  public NanoPoolManagement(DataSource np) {
-    if (np == null) {
-      throw new NullPointerException(
-          "DataSource parameter must be non-null and of type "
-              + "net.nanopool.NanoPoolDataSource.");
-    }
-    this.pool = ((NanoPoolDataSource) np).state;
+  NanoPoolManagement(PoolState pool) {
+    this.pool = pool;
   }
   
   public int getCurrentAvailableConnectionsCount() {

@@ -56,7 +56,7 @@
                 Lightweight and fast JDBC connection pool.
             </div>
             <p>
-                NanoPool (NP) is a lightweight and fast JDBC2 connection pool.
+                NanoPool is a lightweight and fast JDBC2 connection pool.
             </p>
             <p>
                 It is designed to scale well to many concurrent threads, and with a low overhead. The current implementation does a sequential search from a random starting point, to find a possibly available connection. Then it does a CAS on a marker of that connection to mark it as reserved and returns that connection if the CAS succeeds. But if the CAS fails, then it means that some other thread got the connection first, and so we continue our sequential search, wrapping around the pool if we got to the end.

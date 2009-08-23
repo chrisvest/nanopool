@@ -53,13 +53,13 @@
         <div class="content">
             <div class="container">
             <div class="description">
-                Lightweight and highly scalable JDBC connection pool.
+                Lightweight and fast JDBC connection pool.
             </div>
             <p>
-                NanoPool (NP) is a lightweight and highly scalable JDBC2 connection pool.
+                NanoPool (NP) is a lightweight and fast JDBC2 connection pool.
             </p>
             <p>
-                By "highly scalable" is meant that NP scales well to many concurrent threads, and with a low overhead. The current implementation does a sequential search from a random starting point, to find a possibly available connection. Then it does a CAS on a marker of that connection to mark it as reserved and returns that connection if the CAS succeeds. But if the CAS fails, then it means that some other thread got the connection first, and so we continue our sequential search, wrapping around the pool if we got to the end.
+                It is designed to scale well to many concurrent threads, and with a low overhead. The current implementation does a sequential search from a random starting point, to find a possibly available connection. Then it does a CAS on a marker of that connection to mark it as reserved and returns that connection if the CAS succeeds. But if the CAS fails, then it means that some other thread got the connection first, and so we continue our sequential search, wrapping around the pool if we got to the end.
             </p>
             <p>
                 This means that thread contention will be on the <strong>size</strong> of the pool (or the JDBC driver, or the database, or..) as oppose to the internal implementation of the connection pool. Of cause, this scalability will still be constrained by the JDBC driver in use, the number of CPUs a system has and, to a lesser degree, by the O(N) time-complexity of the search.
@@ -75,6 +75,15 @@
                 </ul>
                 There's more to NanoPool than that, but those five bullets are probably what I would consider the key selling points.
             </p>
+            <p>
+              NanoPool is designed rather differently from most other connection pools. The implementation is fast and performs well under highly concurrent loads, but it all comes with a number of caveats that may make it unsuitable for certain scenarios. In particular, there are two caveats I would like to mention.
+            </p>
+            <p>
+              First off, NanoPool will, by design saturate the pool and open all connections as soon as possible. Many pools are given an upper and a lower bound for how many connections they should keep around. Most normal pools stay within such bounds such that they weigh the fewest possible open connections against the highest possible throughput. NanoPool does not do this. NanoPool just have a pool size, and it will try to keep all connections open at all times. It is possible to simulate the behavior of normal pools to a degree, by using a ResizingContentionHandler, but this will only allow the pool to grow in the face of contention - it will not shrink. There is no support for automatic pool shrinkage in NanoPool, although it is possible to resize the pool to a smaller size through the JMX interface.
+            </p>
+            <p>
+              The other caveat comes from the fact that NanoPool has no internal threads of its own. This means that the only threads that can do pool maintenance work, such as reestablishing aging connections, are the client threads that call into the pool to either claim or release connections. This may be a problem if you worry a lot about latency and standard deviation in response times. That said, I have not really checked if other pools do any better in this respect, so you should test and check it yourself if this is a concern.
+            </p>
             <h2>
                 Dependencies
             </h2>
@@ -85,12 +94,9 @@
                 Install
             </h2>
             <ol>
-                <li>Install Maven2.
-                </li>
-                <li>Check out the NanoPool source code with git or download a source ball.
-                </li>
-                <li>In the source code directory, run `mvn install` - retry if it fails in the testing phase.
-                </li>
+                <li>Install Maven2.</li>
+                <li>Check out the NanoPool source code with git or download a source ball.</li>
+                <li>In the source code directory, run `mvn install`.</li>
             </ol>
             <h2>
                 Download

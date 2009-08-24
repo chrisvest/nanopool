@@ -27,10 +27,40 @@ import net.nanopool.ManagedNanoPool;
 public class SleepyContentionHandler implements ContentionHandler {
   private final long sleepTime;
   
+  /**
+   * Create a sleepy contention handler that will put the thread to sleep for
+   * 10 milliseconds when the pool gets contended.
+   */
   public SleepyContentionHandler() {
     this(10);
   }
   
+  /**
+   * Create a SleepyContentionHandler that, upon contention, will sleep the
+   * thread for the specified number of milliseconds. This assumes that the
+   * given sleepTime parameter is a positive number, that is, greater than
+   * zero.
+   * <p>
+   * The thread may sleep for a shorter time period if it is interrupted.
+   * If the thread is interrupted while sleeping in this ContentionHandler,
+   * it will be resumed and the interruption status will be preserved so the
+   * thread is still interrupted.
+   * <p>
+   * The SleepyContentionHandler can exhibit an alternative behavior, if the
+   * given sleepTime is less than or equal to zero. In this case, the actual
+   * sleep time will be the contention level multiplied by 10, in milliseconds.
+   * The contention level is the number of times the entire pool has been
+   * searched for an available connection. Operating this way, the
+   * SleepyContentionHandler will give you a progressive back-off from very
+   * high contention situations.
+   * <p>
+   * Progressive back-off can serve as inspiration for other custom
+   * ContentionHandlers, but you usually do not want to use the
+   * SleepyContentionHandler this way as it may severely affect your latency
+   * times. Before you get the idea that you might need this, please make sure
+   * that your pools aren't too small, and that you are using them correctly.
+   * @param sleepTime
+   */
   public SleepyContentionHandler(long sleepTime) {
     this.sleepTime = sleepTime;
   }

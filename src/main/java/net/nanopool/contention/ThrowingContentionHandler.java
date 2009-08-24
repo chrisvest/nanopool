@@ -27,6 +27,10 @@ import net.nanopool.NanoPoolRuntimeException;
  * @since 1.0
  */
 public class ThrowingContentionHandler implements ContentionHandler {
+  /**
+   * The {@link NanoPoolRuntimeException} thrown by this ContentionHandler
+   * will have this message.
+   */
   public static final String MESSAGE = "Connection pool contention too high.";
   
   public void handleContention(int count, ManagedNanoPool mnp) {

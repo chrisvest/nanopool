@@ -16,9 +16,21 @@
 package net.nanopool;
 
 /**
- * 
+ * A ManagedNanoPool is something that can produce an object that implements
+ * the {@link NanoPoolManagementMBean} interface.
+ * <p>
+ * The primary reason for defining this ability in its own interface, is
+ * testability.
  * @author cvh
  */
 public interface ManagedNanoPool {
+  /**
+   * Produce an object that implements the {@link NanoPoolManagementMBean}
+   * interface. There is no guarantee that this method will always return the
+   * same exact instance. It is perfectly within specification for any
+   * implementor to return a new instance on every call. However, implementors
+   * must guarantee the thread-safety of this method.
+   * @return An object that implements {@link NanoPoolManagementMBean}.
+   */
   NanoPoolManagementMBean getMXBean();
 }

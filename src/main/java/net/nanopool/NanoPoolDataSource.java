@@ -186,6 +186,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
    * 
    * @return Always the same instance.
    * @since 1.0
+   * @see ManagedNanoPool#getMXBean()
    */
   public NanoPoolManagementMBean getMXBean() {
     return poolManagement;

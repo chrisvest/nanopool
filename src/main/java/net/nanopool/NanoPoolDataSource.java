@@ -23,6 +23,31 @@ import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.contention.ContentionHandler;
 
+/**
+ * NanoPool is a lightweight and fast JDBC2 connection pool.
+ * <p>
+ * It is designed to scale well to many concurrent threads with a low overhead.
+ * The implementation does a sequential search in an array of  connections from
+ * a random starting point, to find a possibly available connection. Then it
+ * does a CAS on a marker of that connection to mark it as reserved and returns
+ * that connection if the CAS succeeds. But if the CAS fails, then it means
+ * that some other thread got the connection first, and so we continue our
+ * sequential search, wrapping around the pool if we got to the end. While a
+ * sequential search may not sound very fast, it actually usually is. It ends
+ * up that this implementation, given a reasonably sized pool, is faster than
+ * maintaining a complex data structure that may theoretically operate with a
+ * less-than O(N) time complexity.
+ * <p>
+ * NanoPool uses no internal threads for maintenance. This makes it lighter in
+ * resource consumption, and life-cycling easier, but it also has some negative
+ * consequences. For instance, the only threads that can do pool maintenance,
+ * such as renewing aging connections, are the threads that enter the pool to
+ * do either acquire or release connections. This will likely have an effect on
+ * the maximum and standard deviation of latency, compared to other pools.
+ * 
+ * @author vest
+ *
+ */
 public final class NanoPoolDataSource extends PoolingDataSourceSupport
     implements ManagedNanoPool {
   private final NanoPoolManagement poolManagement;
@@ -94,6 +119,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
    *          affecting this new NanoPoolDataSource instance.
    * 
    * @since 1.0
+   * @see Settings
    */
   public NanoPoolDataSource(
       ConnectionPoolDataSource source, Settings settings) {

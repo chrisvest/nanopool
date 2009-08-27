@@ -20,10 +20,6 @@ import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * 
- * @author cvh
- */
 class NanoPoolManagement implements NanoPoolManagementMBean {
   private final PoolState pool;
   private volatile int connectionsLeased;

@@ -16,11 +16,29 @@
 package net.nanopool;
 
 /**
+ * The {@link NanoPoolManagementMBean} is the JMX management interface for the
+ * {@link NanoPoolDataSource}. Objects that implement this interface can be
+ * obtained from the {@link ManagedNanoPool#getMXBean()} method, which the
+ * NanoPoolDataSource implements.
+ * <p>
+ * Implementors of this interface are not expected to be thread-safe. So
+ * although they may be, users of this interface cannot expect them to be. This
+ * is typically not a problem because {@link ManagedNanoPool#getMXBean()} is
+ * guaranteed to be thread-safe, so you just fetch a thread-local instance
+ * every time you need one.
  * 
  * @author cvh
  */
 public interface NanoPoolManagementMBean {
   // attributes
+  /**
+   * Get the number of connections in this pool that are not leased. The
+   * connections are not necessarily open, they are just not reserved by anyone
+   * at the moment. Note that this is an estimate and the actual number may
+   * change while we are counting. Fetching this property can be expected to
+   * have an O(N) time complexity on the size of the pool. The number of
+   * available connections on a pool that has been shut down is zero.
+   */
   int getCurrentAvailableConnectionsCount();
   
   int getCurrentLeasedConnectionsCount();

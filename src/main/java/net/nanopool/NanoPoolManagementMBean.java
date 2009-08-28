@@ -21,11 +21,7 @@ package net.nanopool;
  * obtained from the {@link ManagedNanoPool#getMXBean()} method, which the
  * NanoPoolDataSource implements.
  * <p>
- * Implementors of this interface are not expected to be thread-safe. So
- * although they may be, users of this interface cannot expect them to be. This
- * is typically not a problem because {@link ManagedNanoPool#getMXBean()} is
- * guaranteed to be thread-safe, so you just fetch a thread-local instance
- * every time you need one.
+ * Implementors of this interface are expected to be thread-safe.
  * 
  * @author cvh
  */
@@ -38,11 +34,32 @@ public interface NanoPoolManagementMBean {
    * change while we are counting. Fetching this property can be expected to
    * have an O(N) time complexity on the size of the pool. The number of
    * available connections on a pool that has been shut down is zero.
+   * @return The estimated count of the currently available connections.
    */
   int getCurrentAvailableConnectionsCount();
   
+  /**
+   * Get the number of connections in this pool that are currently leased.
+   * Leased connections are the ones that are in use in the application.
+   * When a leased connection is "closed" in the application code, it will
+   * return to the pool and become available for lease again by other threads,
+   * or indeed the same thread. Fetching this property can be expected to have
+   * and O(N) time complexity on the size of the pool. The number of leased
+   * connections in a pool that has been shut down is
+   * <em>probabilistically</em> zero, that is, this method may return zero as
+   * soon as the shutdown sequence has been initiated - even if the shutdown
+   * has yet to complete and the pool technically still have connections that
+   * are leased out.
+   * @return The estimated count of the currently leased out connections.
+   */
   int getCurrentLeasedConnectionsCount();
   
+  /**
+   * Get the size of the pool. The size is the maximum number of connections
+   * that can be leased out at any time in the pools current configuration.
+   * This property can be expected to operate with an O(1) time complexity.
+   * @return The size of the connection pool.
+   */
   int getPoolSize();
   
   long getConnectionTimeToLive();

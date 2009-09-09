@@ -15,6 +15,8 @@
  */
 package net.nanopool;
 
+import net.nanopool.contention.ContentionHandler;
+
 /**
  * The {@link NanoPoolManagementMBean} is the JMX management interface for the
  * {@link NanoPoolDataSource}. Objects that implement this interface can be
@@ -62,12 +64,38 @@ public interface NanoPoolManagementMBean {
    */
   int getPoolSize();
   
+  /**
+   * Get the maximum permitted age, in milliseconds, that connections are
+   * allowed to live in this pool. This value never changes for a pool.
+   * @return The time-to-live value for this pool, in milliseconds.
+   */
   long getConnectionTimeToLive();
   
+  /**
+   * Get the name of the class that the configured {@link ContentionHandler}
+   * is an instance of.
+   * @see Class#getName()
+   * @return The class-name of the {@link ContentionHandler} configured for
+   * this pool.
+   */
   String getContentionHandlerClassName();
   
+  /**
+   * Get the String representation of the {@link ContentionHandler} that has
+   * been configured for this pool. This is the result of calling
+   * {@code toString()} on the ContentionHandler.
+   * @return The String representation of this pools ContentionHandler.
+   */
   String getContentionHandler();
   
+  /**
+   * Determine whether the pool has been or is shutting down. Note that this
+   * method will return true s soon as the shutdown sequence has been
+   * initiated, and so will return true for pools where the shutdown sequence
+   * has yet to complete.
+   * @return True if the pool can no longer be used doe to having been shut
+   * down.
+   */
   boolean isShutDown();
   
   String getSourceConnectionClassName();

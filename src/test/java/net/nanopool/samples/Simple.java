@@ -26,7 +26,6 @@ import javax.sql.DataSource;
 import net.nanopool.NanoPoolDataSource;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
-import org.junit.Test;
 
 public class Simple {
   public static void main(String[] args) throws SQLException {
@@ -74,10 +73,5 @@ public class Simple {
     }
     
     System.out.println("All done.");
-  }
-  
-  @Test
-  public void testSimple() throws SQLException {
-    main(null);
   }
 }

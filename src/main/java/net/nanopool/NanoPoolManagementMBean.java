@@ -15,6 +15,8 @@
  */
 package net.nanopool;
 
+import javax.sql.ConnectionPoolDataSource;
+
 import net.nanopool.contention.ContentionHandler;
 
 /**
@@ -98,12 +100,36 @@ public interface NanoPoolManagementMBean {
    */
   boolean isShutDown();
   
+  /**
+   * Get the {@link Class#getName()} of the concrete
+   * {@link ConnectionPoolDataSource} implementation that is used as the source
+   * of physical connections in this pool
+   * @return A raw-form class name.
+   */
   String getSourceConnectionClassName();
   
+  /**
+   * Get the string representation of the concrete
+   * {@link ConnectionPoolDataSource} implementation that is used as the source
+   * of physical connections in this pool. This value is obtained by calling
+   * {@code toString} on the ConnectionPoolDataSouce.
+   * @return The result of calling {@code toString} on this pools
+   * ConnectionPoolDataSouce.
+   */
   String getSourceConnection();
   
+  /**
+   * Get the number of physical connections that has been created by this
+   * pool since it was created, or since the last reset.
+   * @return Zero or a positive integer, subject to overflow.
+   */
   int getConnectionsCreated();
   
+  /**
+   * Get the total number of connections that has been leased by this pool
+   * since it was created or since last reset.
+   * @return Zero or a positive integer, subject to overflow.
+   */
   int getConnectionsLeased();
   
   // operations

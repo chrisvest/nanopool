@@ -93,7 +93,7 @@ public interface NanoPoolManagementMBean {
    * method will return true s soon as the shutdown sequence has been
    * initiated, and so will return true for pools where the shutdown sequence
    * has yet to complete.
-   * @return True if the pool can no longer be used doe to having been shut
+   * @return True if the pool can no longer be used due to having been shut
    * down.
    */
   boolean isShutDown();

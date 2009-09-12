@@ -22,8 +22,9 @@ import java.util.List;
 
 class NanoPoolManagement implements NanoPoolManagementMBean {
   private final PoolState pool;
-  private volatile int connectionsLeased;
-  private volatile int connectionsCreated;
+  private final Object counterLock = new Object();
+  private int connectionsLeased;
+  private int connectionsCreated;
   
   NanoPoolManagement(PoolState pool) {
     this.pool = pool;
@@ -116,51 +117,65 @@ class NanoPoolManagement implements NanoPoolManagementMBean {
   }
   
   public int getConnectionsCreated() {
-    int createdCount = 0;
-    Connector[] connectors = pool.connectors;
-    if (connectors == null) {
-      return connectionsCreated;
-    }
-    for (Connector cn : connectors) {
-      if (cn != null) {
-        createdCount += cn.getRealConnectionsCreated();
+    synchronized (counterLock) {
+      int createdCount = 0;
+      Connector[] connectors = pool.connectors;
+      if (connectors == null) {
+        return connectionsCreated;
       }
+      for (Connector cn : connectors) {
+        if (cn != null) {
+          createdCount += cn.getRealConnectionsCreated();
+        }
+      }
+      return connectionsCreated = createdCount;
     }
-    return connectionsCreated = createdCount;
   }
   
   public int getConnectionsLeased() {
-    int leasedCount = 0;
-    Connector[] connectors = pool.connectors;
-    if (connectors == null) {
-      return connectionsLeased;
-    }
-    for (Connector cn : connectors) {
-      if (cn != null) {
-        leasedCount += cn.getConnectionsLeased();
+    synchronized (counterLock) {
+      int leasedCount = 0;
+      Connector[] connectors = pool.connectors;
+      if (connectors == null) {
+        return connectionsLeased;
       }
+      for (Connector cn : connectors) {
+        if (cn != null) {
+          leasedCount += cn.getConnectionsLeased();
+        }
+      }
+      return connectionsLeased = leasedCount;
     }
-    return connectionsLeased = leasedCount;
+  }
+  
+  public double getConnectionsReuseRate() {
+    synchronized (counterLock) {
+      double created = getConnectionsCreated();
+      double leased = getConnectionsLeased();
+      return 1 - created/leased;
+    }
   }
   
   public void resetCounters() {
-    Connector[] connectors = pool.connectors;
-    if (connectors != null) {
-      for (Connector cn : connectors) {
-        if (cn != null) {
-          cn.resetCounters();
+    synchronized (counterLock) {
+      Connector[] connectors = pool.connectors;
+      if (connectors != null) {
+        for (Connector cn : connectors) {
+          if (cn != null) {
+            cn.resetCounters();
+          }
         }
       }
+      connectionsCreated = 0;
+      connectionsLeased = 0;
     }
-    connectionsCreated = 0;
-    connectionsLeased = 0;
   }
   
   public String listConnectionOwningThreadsStackTraces() {
     StringBuilder sb = new StringBuilder();
     Connector[] connectors = pool.connectors;
     if (connectors == null) {
-      return "Pool is shut down.";
+      return "Pool is shut down.\n";
     }
     int i = -1;
     for (Connector cn : connectors) {

@@ -132,6 +132,15 @@ public interface NanoPoolManagementMBean {
    */
   int getConnectionsLeased();
   
+  /**
+   * Get the connection reuse rate. This number specifies, as a decimal number,
+   * the percentage of connection leases that does not create a new physical
+   * connection. This is defined as 1 &minus; created &divide; leased
+   * connections. This value is calculated atomically.
+   * @return A decimal number between zero and one.
+   */
+  double getConnectionsReuseRate();
+  
   // operations
   String shutDown();
   

@@ -95,7 +95,7 @@ final class FsmMixin {
     }
   }
   
-  static List<SQLException> shutdown(Connector[] connectors) {
+  private static List<SQLException> shutdown(Connector[] connectors) {
     List<SQLException> caughtExceptions = new ArrayList<SQLException>();
     if (connectors == null) {
       return caughtExceptions;

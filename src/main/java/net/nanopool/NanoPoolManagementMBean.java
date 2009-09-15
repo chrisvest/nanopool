@@ -147,10 +147,43 @@ public interface NanoPoolManagementMBean {
    */
   String shutDown();
   
+  /**
+   * Reset the connections created and connections leased counters.
+   * Note that the counters may change while the resetting is taking place,
+   * so they are not guaranteed to be zero after this method returns.
+   * <p>
+   * Resetting involves traversal, so the time it takes to perform the reset
+   * is O(n) on the size of the pool.
+   * <p>
+   * This is a blocking method - only one counter reset can take place at a
+   * time.
+   * <p>
+   * This method is <em>not</em> atomic and is <em>not</em> isolated, so other
+   * threads that simultaneously tries to read the counters may experience
+   * them "flicker" - that is, jumping up and down. This is the consequence of
+   * design decisions that prioritizes pool performance over the accuracy of
+   * these counters.
+   */
   void resetCounters();
   
+  /**
+   * Produce a stack-dump of all threads that currently holds a connection.
+   * This is only intended for debugging purpose and the actual format is
+   * unspecified.
+   * <p>
+   * Note that the dump produced may be out-dated by the time this method
+   * returns.
+   * @return Stack-dumps for all threads that currently holds a connection.
+   * Never null, not even if the pool has been shut down.
+   */
   String listConnectionOwningThreadsStackTraces();
   
+  /**
+   * Produce a stack-dump of all threads that currently holds a connection,
+   * and write it to System.err. The format is the same as for
+   * {@link NanoPoolManagementMBean#listConnectionOwningThreadsStackTraces()}
+   * @see NanoPoolManagementMBean#listConnectionOwningThreadsStackTraces()
+   */
   void dumpConnectionOwningThreadsStackTraces();
   
   void resizePool(int newSize);

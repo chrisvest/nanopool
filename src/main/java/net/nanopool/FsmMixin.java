@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import javax.sql.ConnectionPoolDataSource;
 
@@ -26,9 +27,14 @@ import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 
 final class FsmMixin {
-  static final CheapRandom rand = new CheapRandom();
   static final String MSG_SHUT_DOWN = "Connection pool is shut down.";
   static final String MSG_TOO_SMALL = "Cannot resize. New size too small: ";
+  
+  private static final CheapRandom rand = new CheapRandom();
+  private static final
+    AtomicReferenceFieldUpdater<PoolState, Connector[]> connectorsField =
+    AtomicReferenceFieldUpdater.newUpdater(
+        PoolState.class, Connector[].class, "connectors");
   
   static Connection getConnection(final NanoPoolDataSource pool)
       throws SQLException {
@@ -87,8 +93,7 @@ final class FsmMixin {
   
   static List<SQLException> close(PoolState pool) {
     try {
-      Connector[] cons = pool.connectors;
-      pool.connectors = null;
+      Connector[] cons = connectorsField.getAndSet(pool, null);
       return shutdown(cons);
     } catch (OutdatedException _) {
       return close(pool);
@@ -140,13 +145,19 @@ final class FsmMixin {
           ncons[i] = new Connector(
               pool.source, pool.config.ttl, pool.config.time);
         }
-        pool.connectors = ncons;
+        if (!connectorsField.compareAndSet(pool, ocons, ncons)) {
+          // will only fail if the pool has been shut down
+          shutdown(ncons);
+        }
       } else {
         // shrink pool
         System.arraycopy(ocons, 0, ncons, 0, newSize);
-        pool.connectors = ncons;
-        for (int i = newSize; i < ocons.length; i++) {
-          ocons[i].state.set(Connector.OUTDATED);
+        // following CAS will only fail if the pool has been shut down
+        // if-statement prevents unnecessary OutdatedExceptions in shutdown
+        if (connectorsField.compareAndSet(pool, ocons, ncons)) {
+          for (int i = newSize; i < ocons.length; i++) {
+            ocons[i].state.set(Connector.OUTDATED);
+          }
         }
       }
     } finally {

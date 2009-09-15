@@ -142,6 +142,9 @@ public interface NanoPoolManagementMBean {
   double getConnectionsReuseRate();
   
   // operations
+  /**
+   * 
+   */
   String shutDown();
   
   void resetCounters();

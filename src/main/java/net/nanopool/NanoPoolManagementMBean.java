@@ -143,7 +143,11 @@ public interface NanoPoolManagementMBean {
   
   // operations
   /**
-   * 
+   * Shut the pool down. Once this method returns, the pool will have finished
+   * its shutdown procedure. This means that it will no longer be possible for
+   * other threads to get connections from the pool, however, connections that
+   * are already leased will continue to function normally until they are
+   * closed.
    */
   String shutDown();
   

@@ -107,8 +107,7 @@ final class FsmMixin {
     }
     
     for (Connector con : connectors) {
-      int st = con.state.get();
-      con.state.set(Connector.SHUTDOWN);
+      int st = con.state.getAndSet(Connector.SHUTDOWN);
       if (st == Connector.OUTDATED) {
         throw OutdatedException.INSTANCE;
       }

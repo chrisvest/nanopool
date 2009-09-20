@@ -27,8 +27,8 @@ import org.junit.Test;
  * @author cvh
  */
 public class ShutdownTest extends NanoPoolTestBase {
-  @Test
-  public void shutDownPoolsMustRefuseToConnect() throws SQLException {
+  @Test public void
+  shutDownPoolsMustRefuseToConnect() throws SQLException {
     pool = npds();
     Connection con = pool.getConnection();
     assertNotNull(con);
@@ -40,6 +40,22 @@ public class ShutdownTest extends NanoPoolTestBase {
       fail("getConnection did not throw.");
     } catch (IllegalStateException ile) {
       assertEquals(FsmMixin.MSG_SHUT_DOWN, ile.getMessage());
+    }
+  }
+  
+  @Test public void
+  leasedConnectionsMustKeepWorkingAfterPoolShutdown() throws SQLException {
+    pool = npds();
+    Connection con = pool.getConnection();
+    pool.close();
+    try {
+      assertWorking(con);
+    } finally {
+      try {
+        con.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
     }
   }
 }

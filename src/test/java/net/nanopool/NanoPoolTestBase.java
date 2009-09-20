@@ -15,8 +15,14 @@
  */
 package net.nanopool;
 
+import static org.junit.Assert.assertTrue;
+
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.ConnectionPoolDataSource;
@@ -74,6 +80,16 @@ public abstract class NanoPoolTestBase {
     }
   }
   
+  protected void assertWorking(Connection con) throws SQLException {
+    Statement stmt = con.createStatement();
+    try {
+      ResultSet rs = stmt.executeQuery("select now()");
+      assertTrue(rs.next());
+    } finally {
+      stmt.close();
+    }
+  }
+
   static Thread killMeLaterCheck(final AtomicBoolean finishedMarker,
       final long sleepTime, final Exception exception) {
     final Thread thisThread = Thread.currentThread();

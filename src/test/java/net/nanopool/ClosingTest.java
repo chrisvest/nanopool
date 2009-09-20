@@ -15,12 +15,9 @@
  */
 package net.nanopool;
 
-import static org.junit.Assert.*;
-
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+
 import org.junit.Test;
 
 /**
@@ -57,15 +54,5 @@ public class ClosingTest extends NanoPoolTestBase {
   @Override
   protected Settings buildSettings() {
     return super.buildSettings().setPoolSize(1);
-  }
-  
-  private void assertWorking(Connection con) throws SQLException {
-    Statement stmt = con.createStatement();
-    try {
-      ResultSet rs = stmt.executeQuery("select now()");
-      assertTrue(rs.next());
-    } finally {
-      stmt.close();
-    }
   }
 }

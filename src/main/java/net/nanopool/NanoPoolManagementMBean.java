@@ -190,9 +190,52 @@ public interface NanoPoolManagementMBean {
    */
   void dumpConnectionOwningThreadsStackTraces();
   
+  /**
+   * Resize the pool to make it smaller or larger. This operation is atomic
+   * with respect to visibility of the resize to other threads. Resizes are
+   * serialized, guaranteed by a resize lock, so only one can happen at a
+   * time. A resize never impedes threads that are taking connections from,
+   * or releasing connections to, the pool.
+   * @param newSize The new size of the pool. Must be equal to or greater than
+   * one.
+   */
   void resizePool(int newSize);
   
+  /**
+   * Call {@link Thread#interrupt()} on the thread that is currently leasing
+   * the connection by the given id, if any. The connection ids can be fetched
+   * from the
+   * {@link NanoPoolManagementMBean#listConnectionOwningThreadsStackTraces()}
+   * and
+   * {@link NanoPoolManagementMBean#dumpConnectionOwningThreadsStackTraces()}
+   * methods.
+   * <p>
+   * Note that this method should only be used for debugging or in desperate
+   * situations since it is inherently dangerous. Resizing may cause
+   * connections to change ids, and a connection may have changed owner in
+   * between making a thread-dump to find the connection id, and calling this
+   * operation.
+   * @param id The id of the connection whose owning thread should be
+   * interrupted.
+   */
   void interruptConnection(int id);
   
+  /**
+   * Call {@link Thread#stop()} on the thread that is currently leasing the
+   * connection by the given id, if any. The connection ids can be fetched
+   * from the
+   * {@link NanoPoolManagementMBean#listConnectionOwningThreadsStackTraces()}
+   * and
+   * {@link NanoPoolManagementMBean#dumpConnectionOwningThreadsStackTraces()}
+   * methods.
+   * <p>
+   * Note that this method should only be used for debugging or in desperate
+   * situations since it is inherently dangerous. Resizing may cause
+   * connections to change ids, and a connection may have changed owner in
+   * between making a thread-dump to find the connection id, and calling this
+   * operation.
+   * @param id The id of the connection whose owning thread should be
+   * stopped.
+   */
   void killConnection(int id);
 }

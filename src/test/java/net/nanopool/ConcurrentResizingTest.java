@@ -26,9 +26,8 @@ import org.junit.Test;
  * @author cvh
  */
 public class ConcurrentResizingTest extends NanoPoolTestBase {
-  @Test
-  public void mustBePossibleToGetConnectionWhilePoolIsBeingResized()
-      throws SQLException, InterruptedException {
+  @Test public void
+  mustBePossibleToGetConnectionWhilePoolIsBeingResized() throws Exception {
     final int threadCount = 5;
     pool = npds();
     final NanoPoolDataSource fpool = pool;

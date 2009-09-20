@@ -33,14 +33,14 @@ public class CheapRandomTestCase {
   
   private CheapRandom cr;
   
-  @Before
-  public void setUp() {
+  @Before public void
+  setUp() {
     cr = new CheapRandom();
   }
   
   @Ignore("because it is slow - especially when running under Cobertura.")
-  @Test
-  public void ensureReasonableSpreadWithoutBias() {
+  @Test public void
+  ensureReasonableSpreadWithoutBias() {
     final int sampleCount = 100000000;
     final int samplePrecision = 10000;
     

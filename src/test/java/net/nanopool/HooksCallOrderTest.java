@@ -63,8 +63,8 @@ public class HooksCallOrderTest extends NanoPoolTestBase {
         .addPostReleaseHook(new SyncHook("post release", preReleaseCheck, postReleaseCheck));
   }
   
-  @Test
-  public void hooksMustRunInCorrectOrder() throws SQLException {
+  @Test public void
+  hooksMustRunInCorrectOrder() throws SQLException {
     pool = npds();
     assertCorrectHooksSequence(pool);
     assertCorrectHooksSequence(pool);

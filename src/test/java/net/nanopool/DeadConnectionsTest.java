@@ -43,8 +43,8 @@ public class DeadConnectionsTest extends NanoPoolTestBase {
   private final AtomicBoolean throwOnPcClose = new AtomicBoolean();
   private final AtomicLong time = new AtomicLong();
   
-  @Test
-  public void deadConnectionsMustNeverFoilGetConnection() throws SQLException,
+  @Test public void
+  deadConnectionsMustNeverFoilGetConnection() throws SQLException,
       InterruptedException {
     pool = npds();
     Connection con = pool.getConnection();
@@ -58,9 +58,8 @@ public class DeadConnectionsTest extends NanoPoolTestBase {
     con.close();
   }
   
-  @Test
-  public void deadConnectionsMustNeverPropegateSQLExceptionsOnClose()
-      throws SQLException {
+  @Test public void
+  deadConnectionsMustNeverPropegateSQLExceptionsOnClose() throws SQLException {
     pool = npds();
     Connection con = pool.getConnection();
     

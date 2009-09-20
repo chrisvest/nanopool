@@ -26,15 +26,15 @@ public class ConsTest {
   private static final Object y = new Object();
   private static final Object z = new Object();
   
-  @Test
-  public void testProperNormalConstruction() {
+  @Test public void
+  testProperNormalConstruction() {
     Cons c = new Cons(x, null);
     assertSame(x, c.first);
     assertNull(c.rest);
   }
   
-  @Test
-  public void testConsesCannotContainNullElements() {
+  @Test public void
+  testConsesCannotContainNullElements() {
     try {
       new Cons(null, null);
       fail("A Cons with a null 'first' was allowed to be cnstructed.");
@@ -43,8 +43,8 @@ public class ConsTest {
     }
   }
   
-  @Test
-  public void testToListIsInCorrectOrder() {
+  @Test public void
+  testToListIsInCorrectOrder() {
     Cons c = new Cons(y, null);
     c = new Cons(x, c);
     List l = c.toList();
@@ -52,8 +52,8 @@ public class ConsTest {
     assertSame(y, l.get(1));
   }
   
-  @Test
-  public void testToListIsUnmodifiable() {
+  @Test public void
+  testToListIsUnmodifiable() {
     Cons c = new Cons(y, null);
     c = new Cons(x, c);
     List l = c.toList();
@@ -91,8 +91,8 @@ public class ConsTest {
     }
   }
   
-  @Test
-  public void testContains() {
+  @Test public void
+  testContains() {
     Cons c = new Cons(y, null);
     c = new Cons(x, c);
     assertTrue(c.contains(x));

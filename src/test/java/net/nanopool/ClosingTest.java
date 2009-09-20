@@ -25,8 +25,8 @@ import org.junit.Test;
  * @author cvh
  */
 public class ClosingTest extends NanoPoolTestBase {
-  @Test
-  public void doubleClosingConnectionsMustBeNoOp() throws SQLException {
+  @Test public void
+  doubleClosingConnectionsMustBeNoOp() throws SQLException {
     pool = npds();
     Connection con1 = pool.getConnection();
     con1.close();
@@ -38,9 +38,9 @@ public class ClosingTest extends NanoPoolTestBase {
     con2.close();
   }
   
-  @Test
-  public void doubleClosingConnectionsMustNotSideEffectReusedConnectors()
-      throws SQLException {
+  @Test public void
+  doubleClosingConnectionsMustNotSideEffectReusedConnectors()
+      throws Exception {
     pool = npds();
     Connection con1 = pool.getConnection();
     con1.close();

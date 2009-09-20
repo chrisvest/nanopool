@@ -30,8 +30,8 @@ public class DefaultContentionHandlerTest extends NanoPoolTestBase {
     return super.buildSettings().setPoolSize(1);
   }
   
-  @Test
-  public void testDefaultContentionHandler() throws SQLException {
+  @Test public void
+  testDefaultContentionHandler() throws SQLException {
     pool = npds();
     Connection con = pool.getConnection();
     assertNotNull(con);

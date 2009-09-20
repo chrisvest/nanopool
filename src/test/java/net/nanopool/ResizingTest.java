@@ -28,8 +28,8 @@ import org.junit.Test;
  * @author cvh
  */
 public class ResizingTest extends NanoPoolTestBase {
-  @Test
-  public void poolMustWorkAfterGrowing() throws SQLException {
+  @Test public void
+  poolMustWorkAfterGrowing() throws SQLException {
     pool = npds();
     assertWorking(pool);
     pool.resizePool(15);
@@ -37,8 +37,8 @@ public class ResizingTest extends NanoPoolTestBase {
     pool.close();
   }
   
-  @Test
-  public void poolMustWorkAfterShrinking() throws SQLException {
+  @Test public void
+  poolMustWorkAfterShrinking() throws SQLException {
     pool = npds();
     assertWorking(pool);
     pool.resizePool(5);
@@ -46,8 +46,8 @@ public class ResizingTest extends NanoPoolTestBase {
     pool.close();
   }
   
-  @Test(expected = IllegalArgumentException.class)
-  public void cannotResizeToLessThanOne() throws SQLException {
+  @Test(expected = IllegalArgumentException.class) public void
+  cannotResizeToLessThanOne() throws SQLException {
     pool = npds();
     pool.resizePool(0);
   }

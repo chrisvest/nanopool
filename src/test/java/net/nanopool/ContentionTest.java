@@ -34,8 +34,8 @@ public class ContentionTest extends NanoPoolTestBase {
         new ThrowingContentionHandler());
   }
   
-  @Test
-  public void contentionHandlerMustRun() throws SQLException {
+  @Test public void
+  contentionHandlerMustRun() throws SQLException {
     pool = npds();
     Connection[] cons = new Connection[pool.state.connectors.length];
     for (int i = 0; i < cons.length; i++) {

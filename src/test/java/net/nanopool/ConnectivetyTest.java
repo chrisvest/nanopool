@@ -28,8 +28,8 @@ import org.junit.Test;
  * @author cvh
  */
 public class ConnectivetyTest extends NanoPoolTestBase {
-  @Test
-  public void mustNormallyConnect() throws SQLException {
+  @Test public void
+  mustNormallyConnect() throws SQLException {
     pool = npds();
     Connection con = pool.getConnection();
     try {

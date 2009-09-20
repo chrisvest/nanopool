@@ -26,8 +26,8 @@ import org.junit.Test;
  * @author cvh
  */
 public class JMXTest extends NanoPoolTestBase {
-  @Test
-  public void variousCounters() throws SQLException {
+  @Test public void
+  variousCounters() throws SQLException {
     pool = npds();
     NanoPoolManagementMBean mbean = pool.getMXBean();
     
@@ -78,9 +78,8 @@ public class JMXTest extends NanoPoolTestBase {
     assertTrue(mbean.isShutDown());
   }
   
-  @Test
-  public void resettingMustWorkForBothLiveAndShutDownPools()
-      throws SQLException {
+  @Test public void
+  resettingMustWorkForBothLiveAndShutDownPools() throws SQLException {
     pool = npds();
     NanoPoolManagementMBean mbean = pool.getMXBean();
     Connection con = pool.getConnection();
@@ -119,8 +118,8 @@ public class JMXTest extends NanoPoolTestBase {
     assertTrue(mbean.isShutDown());
   }
   
-  @Test
-  public void jmxInterfaceMustWorkAfterPoolShutDown() throws SQLException {
+  @Test public void
+  jmxInterfaceMustWorkAfterPoolShutDown() throws SQLException {
     pool = npds();
     NanoPoolManagementMBean mbean = pool.getMXBean();
     mbean.shutDown();
@@ -160,8 +159,8 @@ public class JMXTest extends NanoPoolTestBase {
     }
   }
   
-  @Test
-  public void operationsMustNotNormallyFail() throws SQLException {
+  @Test public void
+  operationsMustNotNormallyFail() throws SQLException {
     pool = npds();
     NanoPoolManagementMBean mbean = pool.getMXBean();
     assertFalse(mbean.isShutDown());

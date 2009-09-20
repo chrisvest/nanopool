@@ -29,8 +29,8 @@ import org.mockito.Mockito;
 public class ConnectivetyFailureTest extends NanoPoolTestBase {
   private static final String MESSAGE = "Bomb.";
   
-  @Test
-  public void mustHandleThrowingConnector() throws SQLException {
+  @Test public void
+  mustHandleThrowingConnector() throws SQLException {
     pool = npds();
     try {
       pool.getConnection();
@@ -40,9 +40,8 @@ public class ConnectivetyFailureTest extends NanoPoolTestBase {
     }
   }
   
-  @Test
-  public void throwingConnectorsMustNotLeakReservationTickets()
-      throws SQLException {
+  @Test public void
+  throwingConnectorsMustNotLeakReservationTickets() throws SQLException {
     int connectAttempts = 1000;
     pool = npds();
     for (int i = 0; i < connectAttempts; i++) {

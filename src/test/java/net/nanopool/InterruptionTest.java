@@ -27,8 +27,8 @@ import org.junit.Test;
  * @author cvh
  */
 public class InterruptionTest extends NanoPoolTestBase {
-  @Test
-  public void mustPreserveInterruptionState() throws SQLException {
+  @Test public void
+  mustPreserveInterruptionState() throws SQLException {
     Thread.currentThread().interrupt();
     pool = npds();
     Connection con = pool.getConnection();

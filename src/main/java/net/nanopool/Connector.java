@@ -137,7 +137,7 @@ final class Connector {
     try {
       PooledConnection pc = connection;
       connection = null;
-      pc.close(); // TODO really a good idea if we're shutting down the pool?
+      pc.close();
     } catch (SQLException e) {
       sqle = e;
       // we don't re-throw SQLExceptions from closing the physical

@@ -55,6 +55,7 @@ final class FsmMixin {
       int st = con.state.get();
       while (st != Connector.RESERVED) {
         if (st == Connector.OUTDATED) {
+          // TODO: this will cause the pre-connect hooks to be re-run.
           throw OutdatedException.INSTANCE;
         }
         if (st == Connector.SHUTDOWN) {

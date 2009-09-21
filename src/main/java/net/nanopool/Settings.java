@@ -36,6 +36,9 @@ public class Settings {
     this.config.set(cfg);
   }
   
+  /**
+   * Create a new Settings objected, starting out with default values.
+   */
   public Settings() {
     this(new Config(10, 300000, new DefaultContentionHandler(), null, null,
         null, null, null, MilliTime.INSTANCE));
@@ -49,10 +52,19 @@ public class Settings {
    * Simpler properties.
    */
 
+  /**
+   * Get the pool size defined by this Settings object.
+   */
   public int getPoolSize() {
     return config.get().poolSize;
   }
   
+  /**
+   * Set the pool size for this Settings object. This number specifies how many
+   * connections the pool should try to keep ready for use at all times.
+   * @param poolSize The pool size, a number greater than or equal to one.
+   * @return This Settings object.
+   */
   public Settings setPoolSize(int poolSize) {
     if (poolSize < 1) {
       throw new IllegalArgumentException("Pool size must be at least "
@@ -68,10 +80,20 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Get the time-to-live defined by this Settings object.
+   */
   public long getTimeToLive() {
     return config.get().ttl;
   }
-  
+
+  /**
+   * Set the time-to-live for this Settings object. This number specifies how
+   * old, in milliseconds, connections in this pool are allowed to get before
+   * they are closed and recreated.
+   * @param ttl The time-to-live, a number greater than or equal to zero.
+   * @return This Settings object.
+   */
   public Settings setTimeToLive(long ttl) {
     if (ttl < 0) {
       throw new IllegalArgumentException("Time to live must be at "
@@ -87,10 +109,21 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Get the {@link ContentionHandler} specified by this Settings object.
+   */
   public ContentionHandler getContentionHandler() {
     return config.get().contentionHandler;
   }
-  
+
+  /**
+   * Set the {@link ContentionHandler} instance for this Settings object. This
+   * object is used as a call-back for when the pool experiences high
+   * contention - that is, the demand for connections exceeds the number of
+   * connections in the pool.
+   * @param contentionHandler The {@link ContentionHandler} to be used.
+   * @return This Settings object.
+   */
   public Settings setContentionHandler(ContentionHandler contentionHandler) {
     if (contentionHandler == null) {
       throw new IllegalArgumentException("Contention handler cannot be null.");
@@ -143,10 +176,20 @@ public class Settings {
     return recurRemove(obj, from);
   }
   
+  /**
+   * Get a list of the pre-connect {@link Hook} instances associated with this
+   * Settings object.
+   */
   public List<Hook> getPreConnectHooks() {
     return config.get().preConnectHooks.toList();
   }
   
+  /**
+   * Add the given pre-connect {@link Hook} instance to this Settings object.
+   * The pre-connect hooks are run once before any connection lease attempt.
+   * @param hook The hook to be added.
+   * @return This Settings object.
+   */
   public Settings addPreConnectHook(Hook hook) {
     Config s, n;
     do {
@@ -158,6 +201,12 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Remove the given pre-connect {@link Hook} instance from this Settings
+   * object.
+   * @param hook The hook to be removed.
+   * @return This Settings object.
+   */
   public Settings removePreConnectHook(Hook hook) {
     Config s, n;
     do {
@@ -169,10 +218,22 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Get a list of post-connect hooks associated with this Settings object.
+   */
   public List<Hook> getPostConnectHooks() {
     return config.get().postConnectHooks.toList();
   }
   
+  /**
+   * Add the given post-connect {@link Hook} instance to this Settings object.
+   * The post-connect hooks are run once after a connection lease attempt. As
+   * parameters, they either get the connection object itself if the lease was
+   * successful, or any SQLException that might have prevented the lease from
+   * succeeding.
+   * @param hook
+   * @return
+   */
   public Settings addPostConnectHook(Hook hook) {
     Config s, n;
     do {

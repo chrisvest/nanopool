@@ -16,11 +16,21 @@
 package net.nanopool;
 
 import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.sql.ConnectionPoolDataSource;
+
+import net.nanopool.contention.ContentionHandler;
 import net.nanopool.contention.ThrowingContentionHandler;
+import net.nanopool.hooks.EventType;
+import net.nanopool.hooks.Hook;
+
 import org.junit.Test;
 
 /**

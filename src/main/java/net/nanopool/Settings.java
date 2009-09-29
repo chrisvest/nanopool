@@ -232,7 +232,7 @@ public class Settings {
    * successful, or any SQLException that might have prevented the lease from
    * succeeding.
    * @param hook
-   * @return
+   * @return This Settings object.
    */
   public Settings addPostConnectHook(Hook hook) {
     Config s, n;
@@ -245,6 +245,12 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Remove the given post-connect {@link Hook} instance from this Settings
+   * object.
+   * @param hook The hook to be removed.
+   * @return This Settings object.
+   */
   public Settings removePostConnectHook(Hook hook) {
     Config s, n;
     do {
@@ -256,10 +262,24 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Get a list of pre-release hooks associated with this Settings object.
+   */
   public List<Hook> getPreReleaseHooks() {
     return config.get().preReleaseHooks.toList();
   }
   
+  /**
+   * Add the given pre-release {@link Hook} instance to this Settings object.
+   * The pre-release hooks are run once for a connection being closed, right
+   * before it is returned to the pool. As parameters, they get the connection
+   * object itself. This happens before any connection age checks, so the
+   * connection object will be potentially valid. The connection can still be
+   * closed on the server end or otherwise be considered unusable by the JDBC
+   * driver.
+   * @param hook
+   * @return This Settings object.
+   */
   public Settings addPreReleaseHook(Hook hook) {
     Config s, n;
     do {
@@ -271,6 +291,12 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Remove the given pre-release {@link Hook} instance from this Settings
+   * object.
+   * @param hook The hook to be removed.
+   * @return This Settings object.
+   */
   public Settings removePreReleaseHook(Hook hook) {
     Config s, n;
     do {
@@ -282,10 +308,26 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Get a list of post-release hooks associated with this Settings object.
+   */
   public List<Hook> getPostReleaseHooks() {
     return config.get().postReleaseHooks.toList();
   }
   
+  /**
+   * Add the given post-release {@link Hook} instance to this Settings object.
+   * The post-release hooks are run once for a connection being closed, right
+   * after it is returned to the pool. As parameters, they may get the
+   * connection object itself. This happens after any connection age checks,
+   * and the connection parameter will be null if the connection was closed due
+   * to old age. If the connection parameter is not null, then the connection
+   * can still be closed on the server end or otherwise be considered unusable
+   * by the JDBC driver. If that is the case, then you have probably configured
+   * an unreasonably long time-to-live for your connection pool.
+   * @param hook
+   * @return This Settings object.
+   */
   public Settings addPostReleaseHook(Hook hook) {
     Config s, n;
     do {
@@ -297,6 +339,12 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Remove the given post-release {@link Hook} instance from this Settings
+   * object.
+   * @param hook The hook to be removed.
+   * @return This Settings object.
+   */
   public Settings removePostReleaseHook(Hook hook) {
     Config s, n;
     do {
@@ -308,10 +356,25 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Get a list of connection-invalidation hooks associated with this Settings
+   * object.
+   */
   public List<Hook> getConnectionInvalidationHooks() {
     return config.get().connectionInvalidationHooks.toList();
   }
   
+  /**
+   * Add the given connection-invalidation {@link Hook} instance to this
+   * Settings object. The connection-invalidation hooks are run once for a
+   * connection being invalidated. That is, every time a physical connection is
+   * closed. The most common reasons for connection invalidation is old age,
+   * and the pool being shut down. But connection-invalidation can also happen
+   * if NanoPool tries to recover from unexpected failures when trying to
+   * use a connection.
+   * @param hook
+   * @return This Settings object.
+   */
   public Settings addConnectionInvalidationHook(Hook hook) {
     Config s, n;
     do {
@@ -323,6 +386,12 @@ public class Settings {
     return this;
   }
   
+  /**
+   * Remove the given connection-invalidation {@link Hook} instance from this
+   * Settings object.
+   * @param hook The hook to be removed.
+   * @return This Settings object.
+   */
   public Settings removeConnectionInvalidationHook(Hook hook) {
     Config s, n;
     do {

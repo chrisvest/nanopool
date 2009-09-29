@@ -97,6 +97,7 @@ final class FsmMixin {
       }
       if (idx == start) {
         config.contentionHandler.handleContention(++contentionCounter, pool);
+        // check if the pool has been resized.
         if (connectors != state.connectors) {
           throw OutdatedException.INSTANCE;
         }

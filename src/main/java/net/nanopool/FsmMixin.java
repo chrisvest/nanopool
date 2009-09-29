@@ -62,7 +62,7 @@ final class FsmMixin {
     final int start = StrictMath.abs(rand.nextInt()) % poolSize;
     int idx = start;
     int contentionCounter = 0;
-    while (true) {
+    for (;;) {
       Connector con = connectors[idx];
       int st = con.state.get();
       while (st != Connector.RESERVED) {

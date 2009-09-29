@@ -83,7 +83,7 @@ final class FsmMixin {
             try {
               con.invalidate();
             } finally {
-              // TODO Connector might've become OUTDATED or SHUTDOWN in meantime
+              // TODO Connector might've been OUTDATED or SHUTDOWN in meantime
               con.state.set(Connector.AVAILABLE);
               runHooks(config.postConnectHooks, EventType.postConnect,
                   state.source, null, sqle);

@@ -15,6 +15,8 @@
  */
 package net.nanopool;
 
+import static net.nanopool.Connector.*;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -65,15 +67,15 @@ final class FsmMixin {
     for (;;) {
       Connector con = connectors[idx];
       int st = con.state.get();
-      while (st != Connector.RESERVED) {
-        if (st == Connector.OUTDATED) {
+      while (st != RESERVED) {
+        if (st == OUTDATED) {
           throw OutdatedException.INSTANCE;
         }
-        if (st == Connector.SHUTDOWN) {
+        if (st == SHUTDOWN) {
           throw new IllegalStateException(MSG_SHUT_DOWN);
         }
         // we might have gotten one - reserve it
-        if (con.state.compareAndSet(Connector.AVAILABLE, Connector.RESERVED)) {
+        if (con.state.compareAndSet(AVAILABLE, RESERVED)) {
           try {
             Connection connection = con.getConnection(config);
             runHooks(config.postConnectHooks, EventType.postConnect,
@@ -84,7 +86,7 @@ final class FsmMixin {
               con.invalidate();
             } finally {
               // TODO Connector might've been OUTDATED or SHUTDOWN in meantime
-              con.state.set(Connector.AVAILABLE);
+              con.state.set(AVAILABLE);
               runHooks(config.postConnectHooks, EventType.postConnect,
                   state.source, null, sqle);
             }
@@ -122,11 +124,11 @@ final class FsmMixin {
     }
     
     for (Connector con : connectors) {
-      int st = con.state.getAndSet(Connector.SHUTDOWN);
-      if (st == Connector.OUTDATED) {
+      int st = con.state.getAndSet(SHUTDOWN);
+      if (st == OUTDATED) {
         throw OutdatedException.INSTANCE;
       }
-      if (st != Connector.RESERVED) {
+      if (st != RESERVED) {
         try {
           con.invalidate();
         } catch (SQLException ex) {
@@ -145,7 +147,7 @@ final class FsmMixin {
     pool.resizingLock.lock();
     try {
       Connector[] ocons = pool.connectors;
-      if (ocons == null || ocons[0].state.get() == Connector.SHUTDOWN) {
+      if (ocons == null || ocons[0].state.get() == SHUTDOWN) {
         throw new IllegalStateException(MSG_SHUT_DOWN);
       }
       if (ocons.length == newSize) {
@@ -170,7 +172,7 @@ final class FsmMixin {
         // if-statement prevents unnecessary OutdatedExceptions in shutdown
         if (connectorsField.compareAndSet(pool, ocons, ncons)) {
           for (int i = newSize; i < ocons.length; i++) {
-            ocons[i].state.set(Connector.OUTDATED);
+            ocons[i].state.set(OUTDATED);
           }
         }
       }
@@ -180,13 +182,13 @@ final class FsmMixin {
   }
   
   private static int countConnections(Connector[] connectors, int ofState) {
-    assert ofState != Connector.OUTDATED && ofState != Connector.SHUTDOWN :
+    assert ofState != OUTDATED && ofState != SHUTDOWN :
       "Cannot count outdated or shut down state.";
     
     int openCount = 0;
     for (Connector cn : connectors) {
       int state = cn.state.get();
-      if (state == Connector.OUTDATED) {
+      if (state == OUTDATED) {
         throw OutdatedException.INSTANCE;
       }
       if (state == ofState) {
@@ -197,11 +199,11 @@ final class FsmMixin {
   }
   
   static int countAvailableConnections(Connector[] cons) {
-    return countConnections(cons, Connector.AVAILABLE);
+    return countConnections(cons, AVAILABLE);
   }
   
   static int countLeasedConnections(Connector[] cons) {
-    return countConnections(cons, Connector.RESERVED);
+    return countConnections(cons, RESERVED);
   }
   
   static void runHooks(Cons<Hook> hooks, EventType type,

@@ -16,7 +16,6 @@
 package net.nanopool;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import net.nanopool.contention.ContentionHandler;
 import net.nanopool.contention.DefaultContentionHandler;
 import net.nanopool.hooks.Hook;
@@ -30,10 +29,11 @@ import net.nanopool.hooks.Hook;
  * @since 1.0
  */
 public class Settings {
-  private final AtomicReference<Config> config = new AtomicReference<Config>();
+  //guarded by this
+  private Config config;
   
   Settings(Config cfg) {
-    this.config.set(cfg);
+    config = cfg;
   }
   
   /**
@@ -44,8 +44,8 @@ public class Settings {
         null, null, null, MilliTime.INSTANCE));
   }
   
-  Config getConfig() {
-    return config.get();
+  synchronized Config getConfig() {
+    return config;
   }
   
   /*
@@ -55,8 +55,8 @@ public class Settings {
   /**
    * Get the pool size defined by this Settings object.
    */
-  public int getPoolSize() {
-    return config.get().poolSize;
+  public synchronized int getPoolSize() {
+    return config.poolSize;
   }
   
   /**
@@ -65,26 +65,23 @@ public class Settings {
    * @param poolSize The pool size, a number greater than or equal to one.
    * @return This Settings object.
    */
-  public Settings setPoolSize(int poolSize) {
+  public synchronized Settings setPoolSize(int poolSize) {
     if (poolSize < 1) {
       throw new IllegalArgumentException("Pool size must be at least "
           + "one. " + poolSize + " is too low.");
     }
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
-          s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+    config = new Config(poolSize, config.ttl, config.contentionHandler,
+        config.preConnectHooks, config.postConnectHooks,
+        config.preReleaseHooks, config.postReleaseHooks,
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
   /**
    * Get the time-to-live defined by this Settings object.
    */
-  public long getTimeToLive() {
-    return config.get().ttl;
+  public synchronized long getTimeToLive() {
+    return config.ttl;
   }
 
   /**
@@ -94,26 +91,23 @@ public class Settings {
    * @param ttl The time-to-live, a number greater than or equal to zero.
    * @return This Settings object.
    */
-  public Settings setTimeToLive(long ttl) {
+  public synchronized Settings setTimeToLive(long ttl) {
     if (ttl < 0) {
       throw new IllegalArgumentException("Time to live must be at "
           + "least zero. " + ttl + " is too low.");
     }
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, ttl, s.contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
-          s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+    config = new Config(config.poolSize, ttl, config.contentionHandler,
+        config.preConnectHooks, config.postConnectHooks,
+        config.preReleaseHooks, config.postReleaseHooks,
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
   /**
    * Get the {@link ContentionHandler} specified by this Settings object.
    */
-  public ContentionHandler getContentionHandler() {
-    return config.get().contentionHandler;
+  public synchronized ContentionHandler getContentionHandler() {
+    return config.contentionHandler;
   }
 
   /**
@@ -124,35 +118,29 @@ public class Settings {
    * @param contentionHandler The {@link ContentionHandler} to be used.
    * @return This Settings object.
    */
-  public Settings setContentionHandler(ContentionHandler contentionHandler) {
+  public synchronized Settings setContentionHandler(ContentionHandler contentionHandler) {
     if (contentionHandler == null) {
       throw new IllegalArgumentException("Contention handler cannot be null.");
     }
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
-          s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+      config = new Config(config.poolSize, config.ttl, contentionHandler,
+          config.preConnectHooks, config.postConnectHooks,
+          config.preReleaseHooks, config.postReleaseHooks,
+          config.connectionInvalidationHooks, config.time);
     return this;
   }
   
-  TimeSource getTimeSource() {
-    return config.get().time;
+  synchronized TimeSource getTimeSource() {
+    return config.time;
   }
   
-  Settings setTimeSource(TimeSource time) {
+  synchronized Settings setTimeSource(TimeSource time) {
     if (time == null) {
       throw new IllegalArgumentException("Time Source should not be null.");
     }
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
-          s.connectionInvalidationHooks, time);
-    } while (!config.compareAndSet(s, n));
+    config = new Config(config.poolSize, config.ttl,
+        config.contentionHandler, config.preConnectHooks,
+        config.postConnectHooks, config.preReleaseHooks,
+        config.postReleaseHooks, config.connectionInvalidationHooks, time);
     return this;
   }
   
@@ -180,8 +168,8 @@ public class Settings {
    * Get a list of the pre-connect {@link Hook} instances associated with this
    * Settings object.
    */
-  public List<Hook> getPreConnectHooks() {
-    return config.get().preConnectHooks.toList();
+  public synchronized List<Hook> getPreConnectHooks() {
+    return config.preConnectHooks.toList();
   }
   
   /**
@@ -190,14 +178,11 @@ public class Settings {
    * @param hook The hook to be added.
    * @return This Settings object.
    */
-  public Settings addPreConnectHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, new Cons<Hook>(
-          hook, s.preConnectHooks), s.postConnectHooks, s.preReleaseHooks,
-          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings addPreConnectHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        new Cons<Hook>(hook, config.preConnectHooks), config.postConnectHooks,
+        config.preReleaseHooks, config.postReleaseHooks,
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
@@ -207,22 +192,19 @@ public class Settings {
    * @param hook The hook to be removed.
    * @return This Settings object.
    */
-  public Settings removePreConnectHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, remove(hook,
-          s.preConnectHooks), s.postConnectHooks, s.preReleaseHooks,
-          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings removePreConnectHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        remove(hook, config.preConnectHooks), config.postConnectHooks,
+        config.preReleaseHooks, config.postReleaseHooks,
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
   /**
    * Get a list of post-connect hooks associated with this Settings object.
    */
-  public List<Hook> getPostConnectHooks() {
-    return config.get().postConnectHooks.toList();
+  public synchronized List<Hook> getPostConnectHooks() {
+    return config.postConnectHooks.toList();
   }
   
   /**
@@ -234,14 +216,11 @@ public class Settings {
    * @param hook
    * @return This Settings object.
    */
-  public Settings addPostConnectHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          new Cons<Hook>(hook, s.postConnectHooks), s.preReleaseHooks,
-          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings addPostConnectHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        config.preConnectHooks, new Cons<Hook>(hook, config.postConnectHooks),
+        config.preReleaseHooks, config.postReleaseHooks,
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
@@ -251,22 +230,19 @@ public class Settings {
    * @param hook The hook to be removed.
    * @return This Settings object.
    */
-  public Settings removePostConnectHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          remove(hook, s.postConnectHooks), s.preReleaseHooks,
-          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings removePostConnectHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        config.preConnectHooks, remove(hook, config.postConnectHooks),
+        config.preReleaseHooks, config.postReleaseHooks,
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
   /**
    * Get a list of pre-release hooks associated with this Settings object.
    */
-  public List<Hook> getPreReleaseHooks() {
-    return config.get().preReleaseHooks.toList();
+  public synchronized List<Hook> getPreReleaseHooks() {
+    return config.preReleaseHooks.toList();
   }
   
   /**
@@ -280,14 +256,11 @@ public class Settings {
    * @param hook
    * @return This Settings object.
    */
-  public Settings addPreReleaseHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, new Cons<Hook>(hook, s.preReleaseHooks),
-          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings addPreReleaseHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        config.preConnectHooks, config.postConnectHooks,
+        new Cons<Hook>(hook, config.preReleaseHooks), config.postReleaseHooks,
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
@@ -297,22 +270,19 @@ public class Settings {
    * @param hook The hook to be removed.
    * @return This Settings object.
    */
-  public Settings removePreReleaseHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, remove(hook, s.preReleaseHooks),
-          s.postReleaseHooks, s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings removePreReleaseHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        config.preConnectHooks, config.postConnectHooks,
+        remove(hook, config.preReleaseHooks), config.postReleaseHooks,
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
   /**
    * Get a list of post-release hooks associated with this Settings object.
    */
-  public List<Hook> getPostReleaseHooks() {
-    return config.get().postReleaseHooks.toList();
+  public synchronized List<Hook> getPostReleaseHooks() {
+    return config.postReleaseHooks.toList();
   }
   
   /**
@@ -328,14 +298,11 @@ public class Settings {
    * @param hook
    * @return This Settings object.
    */
-  public Settings addPostReleaseHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, s.preReleaseHooks, new Cons<Hook>(hook,
-              s.postReleaseHooks), s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings addPostReleaseHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        config.preConnectHooks, config.postConnectHooks,
+        config.preReleaseHooks, new Cons<Hook>(hook, config.postReleaseHooks),
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
@@ -345,14 +312,11 @@ public class Settings {
    * @param hook The hook to be removed.
    * @return This Settings object.
    */
-  public Settings removePostReleaseHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, s.preReleaseHooks, remove(hook,
-              s.postReleaseHooks), s.connectionInvalidationHooks, s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings removePostReleaseHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        config.preConnectHooks, config.postConnectHooks,
+        config.preReleaseHooks, remove(hook, config.postReleaseHooks),
+        config.connectionInvalidationHooks, config.time);
     return this;
   }
   
@@ -360,8 +324,8 @@ public class Settings {
    * Get a list of connection-invalidation hooks associated with this Settings
    * object.
    */
-  public List<Hook> getConnectionInvalidationHooks() {
-    return config.get().connectionInvalidationHooks.toList();
+  public synchronized List<Hook> getConnectionInvalidationHooks() {
+    return config.connectionInvalidationHooks.toList();
   }
   
   /**
@@ -375,14 +339,11 @@ public class Settings {
    * @param hook
    * @return This Settings object.
    */
-  public Settings addConnectionInvalidationHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks,
-          new Cons<Hook>(hook, s.connectionInvalidationHooks), s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings addConnectionInvalidationHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        config.preConnectHooks, config.postConnectHooks,
+        config.preReleaseHooks, config.postReleaseHooks,
+        new Cons<Hook>(hook, config.connectionInvalidationHooks), config.time);
     return this;
   }
   
@@ -392,14 +353,11 @@ public class Settings {
    * @param hook The hook to be removed.
    * @return This Settings object.
    */
-  public Settings removeConnectionInvalidationHook(Hook hook) {
-    Config s, n;
-    do {
-      s = config.get();
-      n = new Config(s.poolSize, s.ttl, s.contentionHandler, s.preConnectHooks,
-          s.postConnectHooks, s.preReleaseHooks, s.postReleaseHooks, remove(
-              hook, s.connectionInvalidationHooks), s.time);
-    } while (!config.compareAndSet(s, n));
+  public synchronized Settings removeConnectionInvalidationHook(Hook hook) {
+    config = new Config(config.poolSize, config.ttl, config.contentionHandler,
+        config.preConnectHooks, config.postConnectHooks,
+        config.preReleaseHooks, config.postReleaseHooks,
+        remove(hook, config.connectionInvalidationHooks), config.time);
     return this;
   }
 }

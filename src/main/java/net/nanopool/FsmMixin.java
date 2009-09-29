@@ -41,6 +41,18 @@ final class FsmMixin {
     final PoolState state = pool.state;
     runHooks(state.config.preConnectHooks, EventType.preConnect, state.source,
         null, null);
+    for (;;) {
+      try {
+        return getConnectionOrResize(pool);
+      } catch (OutdatedException _) {
+        continue;
+      }
+    }
+  }
+  
+  private static Connection getConnectionOrResize(final NanoPoolDataSource pool)
+      throws SQLException {
+    final PoolState state = pool.state;
     final Connector[] connectors = state.connectors;
     if (connectors == null) {
       throw new IllegalStateException(MSG_SHUT_DOWN);
@@ -55,7 +67,6 @@ final class FsmMixin {
       int st = con.state.get();
       while (st != Connector.RESERVED) {
         if (st == Connector.OUTDATED) {
-          // TODO: this will cause the pre-connect hooks to be re-run.
           throw OutdatedException.INSTANCE;
         }
         if (st == Connector.SHUTDOWN) {
@@ -64,6 +75,7 @@ final class FsmMixin {
         // we might have gotten one - reserve it
         if (con.state.compareAndSet(Connector.AVAILABLE, Connector.RESERVED)) {
           try {
+            // TODO fewer parameters here:
             Connection connection = con.getConnection(config.preReleaseHooks,
                 config.postReleaseHooks, config.connectionInvalidationHooks);
             runHooks(config.postConnectHooks, EventType.postConnect,
@@ -88,6 +100,9 @@ final class FsmMixin {
       }
       if (idx == start) {
         config.contentionHandler.handleContention(++contentionCounter, pool);
+        if (connectors != state.connectors) {
+          throw OutdatedException.INSTANCE;
+        }
       }
     }
   }

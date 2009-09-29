@@ -20,11 +20,12 @@ public class PreConnectHooksTest extends NanoPoolTestBase {
   private Hook preConnectHook;
   private AtomicInteger counter;
   private CountDownLatch startLatch;
+  private int poolSize;
   
   @Override
   protected Settings buildSettings() {
     return super.buildSettings()
-      .setPoolSize(1)
+      .setPoolSize(poolSize)
       .setContentionHandler(contentionHandler)
       .addPreConnectHook(preConnectHook);
   }
@@ -38,18 +39,36 @@ public class PreConnectHooksTest extends NanoPoolTestBase {
   }
 
   @Test public void
-  resizingMustNotCausePreConnectHooksToRunTwice() throws SQLException, InterruptedException {
+  resizingDownMustNotCausePreConnectHooksToRunTwice() throws Exception {
+    verifyPreConnectHookRuns(2, 1, 1);
+  }
+
+  private void verifyPreConnectHookRuns(int startSize, int endSize,
+      int preConnectHookRuns) throws Exception {
+    poolSize = startSize;
     pool = npds();
-    Connection con = pool.getConnection();
+    Connection[] cons = new Connection[startSize];
+    Thread thread = ThreadThat.getAndCloseOneConnection(pool);
     try {
-      Thread thread = ThreadThat.getAndCloseOneConnection(pool);
+      for (int i = 0; i < startSize; i++) {
+        cons[i] = pool.getConnection();
+      }
+      counter.set(0);
       thread.start();
-      pool.resizePool(2);
-      startLatch.countDown();
-      thread.join(1000);
-      assertThat(counter.get(), is(1));
+      thread.join(25);
+      pool.resizePool(endSize);
     } finally {
-      con.close();
+      for (Connection con : cons) {
+        con.close();
+      }
     }
+    startLatch.countDown();
+    thread.join(1000);
+    assertThat(counter.get(), is(preConnectHookRuns));
+  }
+  
+  @Test public void
+  resizingUpMustNotCausePreConnectHooksToRunTwice() throws Exception {
+    verifyPreConnectHookRuns(1, 2, 1);
   }
 }

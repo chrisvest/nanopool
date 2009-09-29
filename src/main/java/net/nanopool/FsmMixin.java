@@ -92,8 +92,7 @@ final class FsmMixin {
         }
         st = con.state.get();
       }
-      ++idx;
-      if (idx == poolSize) {
+      if (++idx == poolSize) {
         idx = 0;
       }
       if (idx == start) {

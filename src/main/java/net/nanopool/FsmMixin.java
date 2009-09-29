@@ -75,9 +75,7 @@ final class FsmMixin {
         // we might have gotten one - reserve it
         if (con.state.compareAndSet(Connector.AVAILABLE, Connector.RESERVED)) {
           try {
-            // TODO fewer parameters here:
-            Connection connection = con.getConnection(config.preReleaseHooks,
-                config.postReleaseHooks, config.connectionInvalidationHooks);
+            Connection connection = con.getConnection(config);
             runHooks(config.postConnectHooks, EventType.postConnect,
                 state.source, connection, null);
             return connection;

@@ -71,9 +71,7 @@ final class Connector {
     this.time = time;
   }
   
-  Connection getConnection(
-      Cons<Hook> preReleaseHooks, Cons<Hook> postReleaseHooks,
-      Cons<Hook> connectionInvalidationHooks) throws SQLException {
+  Connection getConnection(Config config) throws SQLException {
     if (deadTime < time.now())
       invalidate();
     if (connection == null) {
@@ -87,9 +85,9 @@ final class Connector {
       + leaseCount.get();
     currentLease = connection.getConnection();
     this.owner = Thread.currentThread();
-    this.preReleaseHooks = preReleaseHooks;
-    this.postReleaseHooks = postReleaseHooks;
-    this.connectionInvalidationHooks = connectionInvalidationHooks;
+    this.preReleaseHooks = config.preReleaseHooks;
+    this.postReleaseHooks = config.postReleaseHooks;
+    this.connectionInvalidationHooks = config.connectionInvalidationHooks;
     connectionsLeased.incrementAndGet();
     return currentLease;
   }

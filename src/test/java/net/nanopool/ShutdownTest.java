@@ -39,7 +39,7 @@ public class ShutdownTest extends NanoPoolTestBase {
       pool.getConnection();
       fail("getConnection did not throw.");
     } catch (IllegalStateException ile) {
-      assertEquals(FsmMixin.MSG_SHUT_DOWN, ile.getMessage());
+      assertEquals(Fsm.MSG_SHUT_DOWN, ile.getMessage());
     }
   }
   

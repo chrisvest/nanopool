@@ -28,7 +28,7 @@ import javax.sql.ConnectionPoolDataSource;
 import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 
-final class FsmMixin {
+final class Fsm {
   static final String MSG_SHUT_DOWN = "Connection pool is shut down.";
   static final String MSG_TOO_SMALL = "Cannot resize. New size too small: ";
   

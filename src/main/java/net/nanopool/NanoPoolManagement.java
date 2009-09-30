@@ -35,7 +35,7 @@ class NanoPoolManagement implements NanoPoolManagementMBean {
       return 0;
     }
     try {
-      return FsmMixin.countAvailableConnections(pool.connectors);
+      return Fsm.countAvailableConnections(pool.connectors);
     } catch (OutdatedException _) {
       return getCurrentAvailableConnectionsCount();
     }
@@ -46,7 +46,7 @@ class NanoPoolManagement implements NanoPoolManagementMBean {
       return 0;
     }
     try {
-      return FsmMixin.countLeasedConnections(pool.connectors);
+      return Fsm.countLeasedConnections(pool.connectors);
     } catch (OutdatedException _) {
       return getCurrentAvailableConnectionsCount();
     }
@@ -91,7 +91,7 @@ class NanoPoolManagement implements NanoPoolManagementMBean {
     getConnectionsCreated();
     getConnectionsLeased();
     // then shut down
-    List<SQLException> faults = FsmMixin.close(pool);
+    List<SQLException> faults = Fsm.close(pool);
     if (faults.size() > 0) {
       StringWriter sos = new StringWriter();
       PrintWriter pout = new PrintWriter(sos);
@@ -206,17 +206,17 @@ class NanoPoolManagement implements NanoPoolManagementMBean {
   }
   
   public void resizePool(int newSize) {
-    FsmMixin.resizePool(pool, newSize);
+    Fsm.resizePool(pool, newSize);
   }
   
   public void interruptConnection(int id) {
     Connector[] cons = pool.connectors;
     if (cons == null) {
-      throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
+      throw new IllegalStateException(Fsm.MSG_SHUT_DOWN);
     }
     Connector cn = cons[id];
     if (cn.state.get() == Connector.SHUTDOWN) {
-      throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
+      throw new IllegalStateException(Fsm.MSG_SHUT_DOWN);
     }
     Thread owner = cn.getOwner();
     if (owner != null) {
@@ -228,11 +228,11 @@ class NanoPoolManagement implements NanoPoolManagementMBean {
   public void killConnection(int id) {
     Connector[] cons = pool.connectors;
     if (cons == null) {
-      throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
+      throw new IllegalStateException(Fsm.MSG_SHUT_DOWN);
     }
     Connector cn = cons[id];
     if (cn.state.get() == Connector.SHUTDOWN) {
-      throw new IllegalStateException(FsmMixin.MSG_SHUT_DOWN);
+      throw new IllegalStateException(Fsm.MSG_SHUT_DOWN);
     }
     Thread owner = cn.getOwner();
     if (owner != null) {

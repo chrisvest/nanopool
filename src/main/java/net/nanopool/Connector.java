@@ -93,7 +93,7 @@ final class Connector {
   }
   
   void returnToPool() throws SQLException {
-    FsmMixin.runHooks(
+    Fsm.runHooks(
         preReleaseHooks, EventType.preRelease, source, currentLease, null);
     try {
       if (deadTime < time.now())
@@ -122,7 +122,7 @@ final class Connector {
       Connection tmpLease = currentLease;
       currentLease = null;
       owner = null;
-      FsmMixin.runHooks(
+      Fsm.runHooks(
           postReleaseHooks, EventType.postRelease, source, tmpLease, null);
     }
   }
@@ -142,7 +142,7 @@ final class Connector {
       // connections because the pool-user never touches them, can't
       // do jack about their exceptions and really does not care anyway.
     } finally {
-      FsmMixin.runHooks(
+      Fsm.runHooks(
           connectionInvalidationHooks, EventType.invalidation, source, null,
           sqle);
     }

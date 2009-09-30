@@ -153,7 +153,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
    * @since 1.0
    */
   public Connection getConnection() throws SQLException {
-    return FsmMixin.getConnection(this);
+    return Fsm.getConnection(this);
   }
   
   /**
@@ -179,7 +179,7 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
    * @since 1.0
    */
   public List<SQLException> close() {
-    return FsmMixin.close(state);
+    return Fsm.close(state);
   }
   
   /**
@@ -215,6 +215,6 @@ public final class NanoPoolDataSource extends PoolingDataSourceSupport
   }
   
   void resizePool(int newSize) {
-    FsmMixin.resizePool(state, newSize);
+    Fsm.resizePool(state, newSize);
   }
 }

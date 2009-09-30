@@ -15,12 +15,6 @@
  */
 package net.nanopool;
 
-/**
- * A {@link TimeSource} implementation based on
- * {@link System#currentTimeMillis()}.
- * 
- * @author cvh
- */
 class MilliTime implements TimeSource {
   public static final MilliTime INSTANCE = new MilliTime();
   

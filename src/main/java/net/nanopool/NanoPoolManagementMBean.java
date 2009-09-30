@@ -148,6 +148,7 @@ public interface NanoPoolManagementMBean {
    * other threads to get connections from the pool, however, connections that
    * are already leased will continue to function normally until they are
    * closed.
+   * @return An affirmative message or an error message.
    */
   String shutDown();
   

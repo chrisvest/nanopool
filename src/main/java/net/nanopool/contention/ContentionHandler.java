@@ -44,8 +44,9 @@ public interface ContentionHandler {
    * @param count
    *          The number of times that this ContentionHandler has been called
    *          within the same getConnection.
-   * @param npds
-   *          The NanoPoolDataSource that is experiencing the contention.
+   * @param mnp
+   *          The ManagedNanoPool implementation for the pool that is
+   *          experiencing the contention.
    * @throws SQLException
    * @since 1.0
    */

@@ -21,7 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.ConnectionPoolDataSource;
 
 /**
- * 
+ * This hook decrements an {@link AtomicInteger} by one every time it is
+ * called.
  * @author cvh
  */
 public class CountDownHook implements Hook {

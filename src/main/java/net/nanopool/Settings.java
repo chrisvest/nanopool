@@ -170,7 +170,8 @@ public class Settings {
   /**
    * Get a list of the pre-connect {@link Hook} instances associated with this
    * Settings object.
-   * @return The possibly empty list of pre-connect hooks, never null.
+   * @return The possibly empty list of pre-connect hooks, never null nor are
+   * the elements null.
    */
   public synchronized List<Hook> getPreConnectHooks() {
     return config.preConnectHooks.toList();
@@ -181,6 +182,7 @@ public class Settings {
    * The pre-connect hooks are run once before any connection lease attempt.
    * @param hook The hook to be added.
    * @return This Settings object.
+   * @throws NullPointerException if the hook parameter is null.
    */
   public synchronized Settings addPreConnectHook(Hook hook) {
     config = new Config(config.poolSize, config.ttl, config.contentionHandler,
@@ -206,7 +208,8 @@ public class Settings {
   
   /**
    * Get a list of post-connect hooks associated with this Settings object.
-   * @return The possible empty list of post-connect hooks, never null.
+   * @return The possible empty list of post-connect hooks, never null nor are
+   * the elements null.
    */
   public synchronized List<Hook> getPostConnectHooks() {
     return config.postConnectHooks.toList();
@@ -220,6 +223,7 @@ public class Settings {
    * succeeding.
    * @param hook
    * @return This Settings object.
+   * @throws NullPointerException if the hook parameter is null.
    */
   public synchronized Settings addPostConnectHook(Hook hook) {
     config = new Config(config.poolSize, config.ttl, config.contentionHandler,
@@ -245,7 +249,8 @@ public class Settings {
   
   /**
    * Get a list of pre-release hooks associated with this Settings object.
-   * @return The possibly empty list of pre-release hooks, never null.
+   * @return The possibly empty list of pre-release hooks, never null nor are
+   * the elements null.
    */
   public synchronized List<Hook> getPreReleaseHooks() {
     return config.preReleaseHooks.toList();
@@ -261,6 +266,7 @@ public class Settings {
    * driver.
    * @param hook
    * @return This Settings object.
+   * @throws NullPointerException if the hook parameter is null.
    */
   public synchronized Settings addPreReleaseHook(Hook hook) {
     config = new Config(config.poolSize, config.ttl, config.contentionHandler,
@@ -286,7 +292,8 @@ public class Settings {
   
   /**
    * Get a list of post-release hooks associated with this Settings object.
-   * @return The possibly empty list of post-release hooks, never null.
+   * @return The possibly empty list of post-release hooks, never null nor are
+   * the elements null.
    */
   public synchronized List<Hook> getPostReleaseHooks() {
     return config.postReleaseHooks.toList();
@@ -304,6 +311,7 @@ public class Settings {
    * an unreasonably long time-to-live for your connection pool.
    * @param hook
    * @return This Settings object.
+   * @throws NullPointerException if the hook parameter is null.
    */
   public synchronized Settings addPostReleaseHook(Hook hook) {
     config = new Config(config.poolSize, config.ttl, config.contentionHandler,
@@ -331,7 +339,7 @@ public class Settings {
    * Get a list of connection-invalidation hooks associated with this Settings
    * object.
    * @return The possibly empty list of connection-invalidation hooks, never
-   * null.
+   * null nor are the elements null.
    */
   public synchronized List<Hook> getConnectionInvalidationHooks() {
     return config.connectionInvalidationHooks.toList();
@@ -347,6 +355,7 @@ public class Settings {
    * use a connection.
    * @param hook
    * @return This Settings object.
+   * @throws NullPointerException if the hook parameter is null.
    */
   public synchronized Settings addConnectionInvalidationHook(Hook hook) {
     config = new Config(config.poolSize, config.ttl, config.contentionHandler,

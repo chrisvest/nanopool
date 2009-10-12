@@ -21,16 +21,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.ConnectionPoolDataSource;
 
 /**
- * 
+ * This hook increments and {@link AtomicInteger} by one every time it is run.
+ * This class is symmetric with the {@link CountDownHook}, and the two
+ * together can be used to create 'current' counters by counting up and down
+ * on pre- and post-conditions.
  * @author cvh
  */
 public class CountUpHook implements Hook {
+  /**
+   * The AtomicInteger that is used for counting. You can reset and modify the
+   * count with this.
+   */
   public final AtomicInteger counter;
   
+  /**
+   * Create a new CountUpHook that uses the specified AtomicInteger for
+   * counting.
+   * @param counter
+   */
   public CountUpHook(AtomicInteger counter) {
+    if (counter == null) {
+      throw new NullPointerException("counter cannot be null.");
+    }
     this.counter = counter;
   }
   
+  /**
+   * Create a new CountUpHook with an initial count of zero.
+   */
+  public CountUpHook() {
+    this(new AtomicInteger());
+  }
+
   public void run(EventType type, ConnectionPoolDataSource source,
       Connection con, SQLException sqle) {
     counter.incrementAndGet();

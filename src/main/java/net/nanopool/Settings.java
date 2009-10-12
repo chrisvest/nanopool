@@ -54,6 +54,7 @@ public class Settings {
 
   /**
    * Get the pool size defined by this Settings object.
+   * @return A positive integer.
    */
   public synchronized int getPoolSize() {
     return config.poolSize;
@@ -79,6 +80,7 @@ public class Settings {
   
   /**
    * Get the time-to-live defined by this Settings object.
+   * @return A long greater than or equal to zero.
    */
   public synchronized long getTimeToLive() {
     return config.ttl;
@@ -105,6 +107,7 @@ public class Settings {
   
   /**
    * Get the {@link ContentionHandler} specified by this Settings object.
+   * @return A ContentionHandler instance, never null.
    */
   public synchronized ContentionHandler getContentionHandler() {
     return config.contentionHandler;
@@ -167,6 +170,7 @@ public class Settings {
   /**
    * Get a list of the pre-connect {@link Hook} instances associated with this
    * Settings object.
+   * @return The possibly empty list of pre-connect hooks, never null.
    */
   public synchronized List<Hook> getPreConnectHooks() {
     return config.preConnectHooks.toList();
@@ -202,6 +206,7 @@ public class Settings {
   
   /**
    * Get a list of post-connect hooks associated with this Settings object.
+   * @return The possible empty list of post-connect hooks, never null.
    */
   public synchronized List<Hook> getPostConnectHooks() {
     return config.postConnectHooks.toList();
@@ -240,6 +245,7 @@ public class Settings {
   
   /**
    * Get a list of pre-release hooks associated with this Settings object.
+   * @return The possibly empty list of pre-release hooks, never null.
    */
   public synchronized List<Hook> getPreReleaseHooks() {
     return config.preReleaseHooks.toList();
@@ -280,6 +286,7 @@ public class Settings {
   
   /**
    * Get a list of post-release hooks associated with this Settings object.
+   * @return The possibly empty list of post-release hooks, never null.
    */
   public synchronized List<Hook> getPostReleaseHooks() {
     return config.postReleaseHooks.toList();
@@ -323,6 +330,8 @@ public class Settings {
   /**
    * Get a list of connection-invalidation hooks associated with this Settings
    * object.
+   * @return The possibly empty list of connection-invalidation hooks, never
+   * null.
    */
   public synchronized List<Hook> getConnectionInvalidationHooks() {
     return config.connectionInvalidationHooks.toList();

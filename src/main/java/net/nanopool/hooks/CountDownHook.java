@@ -26,12 +26,31 @@ import javax.sql.ConnectionPoolDataSource;
  * @author cvh
  */
 public class CountDownHook implements Hook {
+  /**
+   * The AtomicInteger that is used for counting. You can reset and modify the
+   * count with this.
+   */
   public final AtomicInteger counter;
   
+  /**
+   * Create a new CountDownHook that uses the specified AtomicInteger for
+   * counting.
+   * @param counter
+   */
   public CountDownHook(AtomicInteger counter) {
+    if (counter == null) {
+      throw new NullPointerException("counter cannot be null.");
+    }
     this.counter = counter;
   }
   
+  /**
+   * Create a new CountDownHook with an initial count of zero.
+   */
+  public CountDownHook() {
+    this(new AtomicInteger());
+  }
+
   public void run(EventType type, ConnectionPoolDataSource source,
       Connection con, SQLException sqle) {
     counter.decrementAndGet();

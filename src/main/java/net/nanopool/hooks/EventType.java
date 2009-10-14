@@ -40,9 +40,21 @@ public enum EventType {
    */
   preRelease,
   /**
-   * 
+   * The post-release event happens after a connection lease has returned to
+   * the pool. Be mindful of race conditions here, because the connection might
+   * have been re-leased at this point, or the physical connection might have
+   * been closed.
+   * @see net.nanopool.Settings#addPostReleaseHook(Hook)
    */
-  postRelease, invalidation;
+  postRelease,
+  /**
+   * The invalidation event happens after a physical connection has been closed
+   * but before any post-release event. If an SQLException is thrown by the
+   * JDBC driver while closing the physical connection, then that exception
+   * will be passed to the hooks as a parameter.
+   * @see net.nanopool.Settings#addConnectionInvalidationHook(Hook)
+   */
+  invalidation;
   
   @Override
   public String toString() {

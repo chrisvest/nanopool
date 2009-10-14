@@ -308,7 +308,10 @@ public class Settings {
    * to old age. If the connection parameter is not null, then the connection
    * can still be closed on the server end or otherwise be considered unusable
    * by the JDBC driver. If that is the case, then you have probably configured
-   * an unreasonably long time-to-live for your connection pool.
+   * an unreasonably long time-to-live for your connection pool. Since these
+   * hooks run <em>after</em> the connection might have return to the pool, you
+   * should also consider the possibility that the connection might have been
+   * re-leased before or during the execution of the post-release hooks.
    * @param hook
    * @return This Settings object.
    * @throws NullPointerException if the hook parameter is null.

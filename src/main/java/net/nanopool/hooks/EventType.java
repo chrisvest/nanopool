@@ -16,11 +16,33 @@
 package net.nanopool.hooks;
 
 /**
- * 
+ * An enum for the different types of events that can cause a hook to run.
  * @author cvh
  */
 public enum EventType {
-  preConnect, postConnect, preRelease, postRelease, invalidation;
+  /**
+   * The pre-connect event happens before a connection is leased.
+   * @see net.nanopool.Settings#addPreConnectHook(Hook)
+   */
+  preConnect,
+  /**
+   * The post-connect event happens after a connection has been leased or the
+   * lease attempt has decidedly failed with an SQLException, but before that
+   * connection is returned, or the exception thrown, to the caller of
+   * {@link net.nanopool.NanoPoolDataSource#getConnection()}.
+   * @see net.nanopool.Settings#addPostConnectHook(Hook)
+   */
+  postConnect,
+  /**
+   * The pre-release event happens before a leased connection returns to the
+   * pool.
+   * @see net.nanopool.Settings#addPreReleaseHook(Hook)
+   */
+  preRelease,
+  /**
+   * 
+   */
+  postRelease, invalidation;
   
   @Override
   public String toString() {

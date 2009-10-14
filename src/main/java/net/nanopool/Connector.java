@@ -119,6 +119,7 @@ final class Connector {
             "Unexpected state when returning to pool: " + st);
       }
     } finally {
+      // TODO data race! we might have been re-leased at this point!
       Connection tmpLease = currentLease;
       currentLease = null;
       owner = null;

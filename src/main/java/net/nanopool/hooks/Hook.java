@@ -19,8 +19,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.ConnectionPoolDataSource;
 
+import net.nanopool.Settings;
+
 /**
- * 
+ * A Hook is a type of call-back that is invoked when certain events occur
+ * within the connection pool. See the {@link EventType} for the types of
+ * events that invoke hooks, and the {@link Settings} for how to register hooks
+ * with a pool.
+ * <p>
+ * Hooks are mostly useful for debugging purpose, and for generating
+ * performance data and counters.
  * @author cvh
  */
 public interface Hook {

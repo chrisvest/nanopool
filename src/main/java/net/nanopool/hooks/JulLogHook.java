@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.sql.ConnectionPoolDataSource;
 
 /**
  * 
@@ -52,11 +51,10 @@ public class JulLogHook implements Hook {
     logLevel = level;
   }
   
-  public void run(EventType type, ConnectionPoolDataSource source,
-      Connection con, SQLException sqle) {
+  public void run(EventType type, Connection con, SQLException sqle) {
     if (!logger.isLoggable(logLevel))
       return;
-    String msg = type.toString() + ": " + source + "/" + con;
+    String msg = type.toString() + ": " + con;
     logger.log(logLevel, msg, sqle);
   }
 }

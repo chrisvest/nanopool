@@ -33,7 +33,7 @@ public class CountUpHookTest {
   
   @Test public void
   mustAlwaysCountDownWhenRun() {
-    new CountUpHook(counter).run(null, null, null, null);
+    new CountUpHook(counter).run(null, null, null);
     assertThat(counter.get(), is(1));
   }
 }

@@ -17,7 +17,6 @@ package net.nanopool.hooks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.Settings;
 
@@ -32,6 +31,5 @@ import net.nanopool.Settings;
  * @author cvh
  */
 public interface Hook {
-  void run(EventType type, ConnectionPoolDataSource source, Connection con,
-      SQLException sqle);
+  void run(EventType type, Connection con, SQLException sqle);
 }

@@ -18,7 +18,6 @@ package net.nanopool.hooks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.sql.ConnectionPoolDataSource;
 
 /**
  * This hook increments and {@link AtomicInteger} by one every time it is run.
@@ -53,8 +52,7 @@ public class CountUpHook implements Hook {
     this(new AtomicInteger());
   }
 
-  public void run(EventType type, ConnectionPoolDataSource source,
-      Connection con, SQLException sqle) {
+  public void run(EventType type, Connection con, SQLException sqle) {
     counter.incrementAndGet();
   }
 }

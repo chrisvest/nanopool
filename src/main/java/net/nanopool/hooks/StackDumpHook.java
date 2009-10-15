@@ -18,7 +18,6 @@ package net.nanopool.hooks;
 import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.ConnectionPoolDataSource;
 
 /**
  * 
@@ -35,8 +34,7 @@ public class StackDumpHook implements Hook {
     this.out = out;
   }
   
-  public void run(EventType type, ConnectionPoolDataSource source,
-      Connection con, SQLException sqle) {
+  public void run(EventType type, Connection con, SQLException sqle) {
     new Throwable().printStackTrace(out);
   }
 }

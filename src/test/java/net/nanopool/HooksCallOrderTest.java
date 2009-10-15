@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.sql.ConnectionPoolDataSource;
 import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
 import org.junit.Test;
@@ -47,8 +46,8 @@ public class HooksCallOrderTest extends NanoPoolTestBase {
       this.after = after;
     }
     
-    public void run(EventType type, ConnectionPoolDataSource source,
-        Connection con, SQLException sqle) {
+    public void run(EventType type, Connection con,
+        SQLException sqle) {
       assertEquals(name + " hook out of sync.",
           before.get(), after.incrementAndGet());
     }

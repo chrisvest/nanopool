@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-import javax.sql.ConnectionPoolDataSource;
 
 import net.nanopool.hooks.EventType;
 import net.nanopool.hooks.Hook;
@@ -41,8 +40,7 @@ final class Fsm {
   static Connection getConnection(final NanoPoolDataSource pool)
       throws SQLException {
     final PoolState state = pool.state;
-    runHooks(state.config.preConnectHooks, EventType.preConnect, state.source,
-        null, null);
+    runHooks(state.config.preConnectHooks, EventType.preConnect, null, null);
     for (;;) {
       try {
         return getConnectionOrResize(pool);
@@ -79,7 +77,7 @@ final class Fsm {
           try {
             Connection connection = con.getConnection(config);
             runHooks(config.postConnectHooks, EventType.postConnect,
-                state.source, connection, null);
+                connection, null);
             return connection;
           } catch (SQLException sqle) {
             try {
@@ -87,8 +85,8 @@ final class Fsm {
             } finally {
               // TODO Connector might've been OUTDATED or SHUTDOWN in meantime
               con.state.set(AVAILABLE);
-              runHooks(config.postConnectHooks, EventType.postConnect,
-                  state.source, null, sqle);
+              runHooks(
+                  config.postConnectHooks, EventType.postConnect, null, sqle);
             }
             throw sqle;
           }
@@ -206,10 +204,10 @@ final class Fsm {
     return countConnections(cons, RESERVED);
   }
   
-  static void runHooks(Cons<Hook> hooks, EventType type,
-      ConnectionPoolDataSource source, Connection con, SQLException sqle) {
+  static void runHooks(Cons<Hook> hooks, EventType type, Connection con,
+      SQLException sqle) {
     while (hooks != null) {
-      hooks.first.run(type, source, con, sqle);
+      hooks.first.run(type, con, sqle);
       hooks = hooks.rest;
     }
   }

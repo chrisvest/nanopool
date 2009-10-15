@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
-import javax.sql.ConnectionPoolDataSource;
 
 /**
  * 
@@ -47,8 +46,7 @@ public class TimingHook implements Hook {
     writeLock = rwlock.writeLock();
   }
   
-  public final void run(EventType type, ConnectionPoolDataSource source,
-      Connection con, SQLException sqle) {
+  public final void run(EventType type, Connection con, SQLException sqle) {
     if (currentStartTime.get() == null && type == startType) {
       currentStartTime.set(System.nanoTime());
     } else if (type == endType) {

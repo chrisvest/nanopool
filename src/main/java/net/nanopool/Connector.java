@@ -93,8 +93,7 @@ final class Connector {
   }
   
   void returnToPool() throws SQLException {
-    Fsm.runHooks(
-        preReleaseHooks, EventType.preRelease, source, currentLease, null);
+    Fsm.runHooks(preReleaseHooks, EventType.preRelease, currentLease, null);
     try {
       if (deadTime < time.now())
         invalidate();
@@ -123,8 +122,7 @@ final class Connector {
       Connection tmpLease = currentLease;
       currentLease = null;
       owner = null;
-      Fsm.runHooks(
-          postReleaseHooks, EventType.postRelease, source, tmpLease, null);
+      Fsm.runHooks(postReleaseHooks, EventType.postRelease, tmpLease, null);
     }
   }
   
@@ -144,8 +142,7 @@ final class Connector {
       // do jack about their exceptions and really does not care anyway.
     } finally {
       Fsm.runHooks(
-          connectionInvalidationHooks, EventType.invalidation, source, null,
-          sqle);
+          connectionInvalidationHooks, EventType.invalidation, null, sqle);
     }
   }
   

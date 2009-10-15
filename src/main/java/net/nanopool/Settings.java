@@ -217,10 +217,11 @@ public class Settings {
   
   /**
    * Add the given post-connect {@link Hook} instance to this Settings object.
-   * The post-connect hooks are run once after a connection lease attempt. As
-   * parameters, they either get the connection object itself if the lease was
-   * successful, or any SQLException that might have prevented the lease from
-   * succeeding.
+   * <p>
+   * The post-connect hooks are run once after a connection lease attempt.
+   * As parameters, they either get the connection object itself if the lease
+   * was successful, or any SQLException that might have prevented the lease
+   * from succeeding.
    * @param hook
    * @return This Settings object.
    * @throws NullPointerException if the hook parameter is null.
@@ -258,9 +259,12 @@ public class Settings {
   
   /**
    * Add the given pre-release {@link Hook} instance to this Settings object.
+   * <p>
    * The pre-release hooks are run once for a connection being closed, right
    * before it is returned to the pool. As parameters, they get the connection
-   * object itself. This happens before any connection age checks, so the
+   * object itself.
+   * <p>
+   * This happens before any connection age checks, so the
    * connection object will be potentially valid. The connection can still be
    * closed on the server end or otherwise be considered unusable by the JDBC
    * driver.
@@ -301,17 +305,22 @@ public class Settings {
   
   /**
    * Add the given post-release {@link Hook} instance to this Settings object.
+   * <p>
    * The post-release hooks are run once for a connection being closed, right
    * after it is returned to the pool. As parameters, they may get the
-   * connection object itself. This happens after any connection age checks,
-   * and the connection parameter will be null if the connection was closed due
-   * to old age. If the connection parameter is not null, then the connection
-   * can still be closed on the server end or otherwise be considered unusable
-   * by the JDBC driver. If that is the case, then you have probably configured
-   * an unreasonably long time-to-live for your connection pool. Since these
-   * hooks run <em>after</em> the connection might have return to the pool, you
-   * should also consider the possibility that the connection might have been
-   * re-leased before or during the execution of the post-release hooks.
+   * connection object itself.
+   * <p>
+   * This happens after any connection age checks, and the connection parameter
+   * will be null if the connection was closed due to old age. If the
+   * connection parameter is not null, then the connection can still be closed
+   * on the server end or otherwise be considered unusable by the JDBC driver.
+   * If that is the case, then you have probably configured an unreasonably
+   * long time-to-live for your connection pool.
+   * <p>
+   * Since these hooks run <em>after</em> the connection might have return to
+   * the pool, you should also consider the possibility that the connection
+   * might have been re-leased before or during the execution of the
+   * post-release hooks.
    * @param hook
    * @return This Settings object.
    * @throws NullPointerException if the hook parameter is null.
@@ -350,12 +359,17 @@ public class Settings {
   
   /**
    * Add the given connection-invalidation {@link Hook} instance to this
-   * Settings object. The connection-invalidation hooks are run once for a
-   * connection being invalidated. That is, every time a physical connection is
-   * closed. The most common reasons for connection invalidation is old age,
-   * and the pool being shut down. But connection-invalidation can also happen
-   * if NanoPool tries to recover from unexpected failures when trying to
-   * use a connection.
+   * Settings object.
+   * <p>
+   * The connection-invalidation hooks are run once for a connection being
+   * invalidated. That is, every time a physical connection is closed. As
+   * parameters they get any SQLException instance that might have been thrown
+   * in the attempt to close the physical connection.
+   * <p>
+   * The most common reasons for connection invalidation is old age, and the
+   * pool being shut down. But connection-invalidation can also happen if
+   * NanoPool tries to recover from unexpected failures when trying to use a
+   * connection.
    * @param hook
    * @return This Settings object.
    * @throws NullPointerException if the hook parameter is null.

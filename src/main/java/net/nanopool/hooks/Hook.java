@@ -29,7 +29,27 @@ import net.nanopool.Settings;
  * Hooks are mostly useful for debugging purpose, and for generating
  * performance data and counters.
  * @author cvh
+ * @see EventType
+ * @see Settings
  */
 public interface Hook {
+  /**
+   * This method is called on a hook when an event it is registered for occurs.
+   * <p>
+   * This method may throw a RuntimeException to abort a flow inside the pool -
+   * this is safe to do without putting the pool in an inconsistent state.
+   * <p>
+   * <strong>Note on dead-locks:</strong> You are likely to hold locks inside
+   * the JDBC driver when hooks run - this is mostly true for the -release
+   * hooks, but you should not make assumptions. Therefore, be careful not
+   * to create any dead-locks between locks in your own code and locks in the
+   * JDBC driver.
+   * @param type The type of event that has occurred. Never null.
+   * @param con The connection, if any, that this event occurred in relation
+   * to. May be null.
+   * @param sqle Any SQLException that might have been thrown. This
+   * SQLException instance may be logged, but should not be re-thrown - please
+   * assume that it is otherwise properly handled. May be null.
+   */
   void run(EventType type, Connection con, SQLException sqle);
 }

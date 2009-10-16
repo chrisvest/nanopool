@@ -93,6 +93,7 @@ final class Connector {
   }
   
   void returnToPool() throws SQLException {
+    // TODO catch RuntimeException from the pre-release hooks
     Fsm.runHooks(preReleaseHooks, EventType.preRelease, currentLease, null);
     try {
       if (deadTime < time.now())

@@ -22,7 +22,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 /**
- * 
+ * The timing hook records the sum of elapsed time between two event types.
+ * <p>
+ * The internal state of the TimingHook is protected by a read/write-lock, so
+ * take note that this is a possible point of contention.
+ * <p>
+ * The TimingHook is designed with extensibility in mind, so it can be safely
+ * extended to override the time-logging functionality.
  * @author cvh
  */
 public class TimingHook implements Hook {
@@ -33,8 +39,20 @@ public class TimingHook implements Hook {
   private final EventType endType;
   
   private long totalTimeMs = 0;
-  private int totalConnects = 0;
+  private int totalCounts = 0;
   
+  /**
+   * Create a TimingHook that records the elapsed time in milliseconds,
+   * between the two specified types of events.
+   * <p>
+   * The start event type and the end event type are allowed to be the same
+   * event type. If they indeed are the same type, then the timer start on the
+   * first instance of the event, and stop on the second, start again on the
+   * third and so on.
+   * @param timerStartType The event type that starts the time recording.
+   * @param timerEndType The event type that stops the timer and records
+   * the elapsed time.
+   */
   public TimingHook(EventType timerStartType, EventType timerEndType) {
     this.startType = timerStartType;
     this.endType = timerEndType;
@@ -56,7 +74,7 @@ public class TimingHook implements Hook {
       currentStartTime.set(null);
       writeLock.lock();
       try {
-        totalConnects++;
+        totalCounts++;
         recordTimeMillis(spanMs);
       } finally {
         writeLock.unlock();
@@ -64,13 +82,18 @@ public class TimingHook implements Hook {
     }
   }
   
+  /**
+   * Calculate the average of the timings, in milliseconds.
+   * @return The average time in milliseconds recorded by this TimingHook,
+   * as a double.
+   */
   public final double avgMs() {
     double ms = 0;
     double connects = 0;
     readLock.lock();
     try {
       ms = totalTimeMs;
-      connects = totalConnects;
+      connects = totalCounts;
     } finally {
       readLock.unlock();
     }
@@ -86,10 +109,10 @@ public class TimingHook implements Hook {
     }
   }
   
-  public final int totalConnects() {
+  public final int totalCounts() {
     readLock.lock();
     try {
-      return totalConnects;
+      return totalCounts;
     } finally {
       readLock.unlock();
     }
@@ -98,7 +121,7 @@ public class TimingHook implements Hook {
   public final void reset() {
     writeLock.lock();
     try {
-      totalConnects = 0;
+      totalCounts = 0;
       totalTimeMs = 0;
     } finally {
       writeLock.unlock();

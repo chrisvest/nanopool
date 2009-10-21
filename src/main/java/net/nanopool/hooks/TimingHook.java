@@ -83,7 +83,8 @@ public class TimingHook implements Hook {
   }
   
   /**
-   * Calculate the average of the timings, in milliseconds.
+   * Calculate the average of the timings, in milliseconds. This will take a
+   * read-lock.
    * @return The average time in milliseconds recorded by this TimingHook,
    * as a double.
    */
@@ -100,6 +101,11 @@ public class TimingHook implements Hook {
     return ms / connects;
   }
   
+  /**
+   * Return the sum of all recorded timings, in milliseconds. This will take a
+   * read-lock.
+   * @return The total amount of time recorded.
+   */
   public final long totalMs() {
     readLock.lock();
     try {
@@ -109,6 +115,11 @@ public class TimingHook implements Hook {
     }
   }
   
+  /**
+   * Return the number of timings recorded. That is, how many times the
+   * TimerHook has seen the end event. This will take a read-lock.
+   * @return The total number of timings recorded.
+   */
   public final int totalCounts() {
     readLock.lock();
     try {
@@ -118,6 +129,10 @@ public class TimingHook implements Hook {
     }
   }
   
+  /**
+   * Reset both the timer and the timings counter. This will not disrupt
+   * timings that are currently 'in-flight.' This will take a write-lock.
+   */
   public final void reset() {
     writeLock.lock();
     try {
@@ -128,6 +143,11 @@ public class TimingHook implements Hook {
     }
   }
   
+  /**
+   * Record the given time-span and add it to the total. Appropriate locks
+   * are held at this point, to ensure the invariants of the TimingHook.
+   * @param spanMs
+   */
   protected void recordTimeMillis(long spanMs) {
     totalTimeMs += spanMs;
   }

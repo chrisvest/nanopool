@@ -95,6 +95,9 @@ final class Connector {
   void returnToPool() throws SQLException {
     // TODO catch RuntimeException from the pre-release hooks
     Fsm.runHooks(preReleaseHooks, EventType.preRelease, currentLease, null);
+    Connection tmpLease = currentLease;
+    currentLease = null;
+    owner = null;
     try {
       if (deadTime < time.now())
         invalidate();
@@ -119,10 +122,6 @@ final class Connector {
             "Unexpected state when returning to pool: " + st);
       }
     } finally {
-      // TODO data race! we might have been re-leased at this point!
-      Connection tmpLease = currentLease;
-      currentLease = null;
-      owner = null;
       Fsm.runHooks(postReleaseHooks, EventType.postRelease, tmpLease, null);
     }
   }

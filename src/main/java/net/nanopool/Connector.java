@@ -93,8 +93,14 @@ final class Connector {
   }
   
   void returnToPool() throws SQLException {
-    // TODO catch RuntimeException from the pre-release hooks
-    Fsm.runHooks(preReleaseHooks, EventType.preRelease, currentLease, null);
+    try {
+      Fsm.runHooks(preReleaseHooks, EventType.preRelease, currentLease, null);
+    } finally {
+      returnToPoolAfterPreReleaseHooks();
+    }
+  }
+  
+  void returnToPoolAfterPreReleaseHooks() throws SQLException {
     Connection tmpLease = currentLease;
     currentLease = null;
     owner = null;

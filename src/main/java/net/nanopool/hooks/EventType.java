@@ -35,7 +35,9 @@ public enum EventType {
   postConnect,
   /**
    * The pre-release event happens before a leased connection returns to the
-   * pool.
+   * pool. Note that throwing from a pre-release hook does not abrupt or abort
+   * any flow inside of NanoPool - it is a safe thing to do from the
+   * perspective of NanoPool itself.
    * @see net.nanopool.Settings#addPreReleaseHook(Hook)
    */
   preRelease,

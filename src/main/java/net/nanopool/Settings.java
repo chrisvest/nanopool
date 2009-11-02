@@ -268,6 +268,9 @@ public class Settings {
    * connection object will be potentially valid. The connection can still be
    * closed on the server end or otherwise be considered unusable by the JDBC
    * driver.
+   * <p>
+   * Throwing from a pre-release hook does not abrupt any flow or corrupt any
+   * state - it is explicitly a safe thing to do.
    * @param hook
    * @return This Settings object.
    * @throws NullPointerException if the hook parameter is null.

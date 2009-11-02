@@ -83,8 +83,7 @@ final class Fsm {
             try {
               con.invalidate();
             } finally {
-              // TODO Connector might've been OUTDATED or SHUTDOWN in meantime
-              con.state.set(AVAILABLE);
+              con.state.compareAndSet(RESERVED, AVAILABLE);
               runHooks(
                   config.postConnectHooks, EventType.postConnect, null, sqle);
             }

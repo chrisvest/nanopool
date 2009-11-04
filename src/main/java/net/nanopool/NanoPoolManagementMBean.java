@@ -239,4 +239,7 @@ public interface NanoPoolManagementMBean {
    * stopped.
    */
   void killConnection(int id);
+
+  // TODO document getOriginalPoolSize
+  int getOriginalPoolSize();
 }

@@ -15,10 +15,12 @@
  */
 package net.nanopool;
 
-import java.sql.Connection;
 import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+
 import org.junit.Test;
 
 /**
@@ -26,6 +28,8 @@ import org.junit.Test;
  * @author cvh
  */
 public class JMXTest extends NanoPoolTestBase {
+  private static final int POOL_SIZE = 1;
+
   @Test public void
   variousCounters() throws SQLException {
     pool = npds();
@@ -181,8 +185,16 @@ public class JMXTest extends NanoPoolTestBase {
     con.close(); // must not throw
   }
   
+  @Test public void
+  getOriginalPoolSizeMustNotChangeAfterResize() throws SQLException {
+    pool = npds();
+    NanoPoolManagementMBean mbean = pool.getMXBean();
+    mbean.resizePool(POOL_SIZE + 1);
+    assertThat(mbean.getOriginalPoolSize(), is(POOL_SIZE));
+  }
+  
   @Override
   protected Settings buildSettings() {
-    return super.buildSettings().setPoolSize(1);
+    return super.buildSettings().setPoolSize(POOL_SIZE);
   }
 }

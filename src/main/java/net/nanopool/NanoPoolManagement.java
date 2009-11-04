@@ -57,6 +57,10 @@ class NanoPoolManagement implements NanoPoolManagementMBean {
     return cons == null ? 0 : cons.length;
   }
   
+  public int getOriginalPoolSize() {
+    return pool.config.poolSize;
+  }
+  
   public long getConnectionTimeToLive() {
     return pool.config.ttl;
   }

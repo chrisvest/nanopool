@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package net.nanopool;
+package net.nanopool.contention;
 
 import static org.junit.Assert.*;
 
@@ -21,6 +21,10 @@ import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import net.nanopool.NanoPoolTestBase;
+import net.nanopool.Settings;
+
 import org.junit.Test;
 
 public class DefaultContentionHandlerTest extends NanoPoolTestBase {

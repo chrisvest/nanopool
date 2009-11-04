@@ -1,7 +1,9 @@
-package net.nanopool;
+package net.nanopool.contention;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
+import net.nanopool.ManagedNanoPool;
+import net.nanopool.NanoPoolManagementMBean;
 import net.nanopool.contention.ResizingContentionHandler;
 
 import org.junit.Before;

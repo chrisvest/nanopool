@@ -240,6 +240,12 @@ public interface NanoPoolManagementMBean {
    */
   void killConnection(int id);
 
-  // TODO document getOriginalPoolSize
+  /**
+   * While the {@link NanoPoolManagementMBean#getPoolSize()} method always
+   * returns the current size of the pool, this method only returns the size
+   * that the pool was originally configured with and therefore does not change
+   * if the pool is resized.
+   * @return The pool size that this pool was originally configured with.
+   */
   int getOriginalPoolSize();
 }

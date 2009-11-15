@@ -22,7 +22,7 @@ public class ActiveResizingContentionHandler implements ContentionHandler {
   public void handleContention(int count, ManagedNanoPool mnp)
       throws SQLException {
     if (trigger <= count) {
-      agent.enqueue(mnp.getMXBean(), maxSize);
+      agent.eventuallyResize(mnp.getMXBean(), maxSize);
     }
   }
 }

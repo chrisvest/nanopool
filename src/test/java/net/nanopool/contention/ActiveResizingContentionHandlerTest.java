@@ -32,19 +32,19 @@ public class ActiveResizingContentionHandlerTest {
   @Test public void
   mustNotEnqueueResizeWhenContentionLevelIsLessThanTrigger() throws SQLException {
     handler.handleContention(triggeringContentionLevel - 1, mnp);
-    verify(agent, never()).enqueue(mbean, maxSize);
+    verify(agent, never()).eventuallyResize(mbean, maxSize);
   }
   
   @Test public void
   mustEnqueueResizeWhenContentionIsAtTrigger() throws SQLException {
     handler.handleContention(triggeringContentionLevel, mnp);
-    verify(agent).enqueue(mbean, maxSize);
+    verify(agent).eventuallyResize(mbean, maxSize);
   }
   
   @Test public void
   mustEnqueueResizeWhenContentionIsGreaterThanTrigger() throws SQLException {
     handler.handleContention(triggeringContentionLevel + 1, mnp);
-    verify(agent).enqueue(mbean, maxSize);
+    verify(agent).eventuallyResize(mbean, maxSize);
   }
 }
 

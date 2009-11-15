@@ -93,6 +93,13 @@ public class ResizingContentionHandler implements ContentionHandler {
       return;
     }
     NanoPoolManagementMBean mbean = mnp.getMXBean();
+    if (!resizePool(mbean, factor, increment, max)) {
+      Thread.yield();
+    }
+  }
+
+  static boolean resizePool(
+      NanoPoolManagementMBean mbean, double factor, int increment, int max) {
     int oldSize = mbean.getPoolSize();
     int newSize = (int) (oldSize * factor + increment);
     if (newSize == oldSize) {
@@ -101,8 +108,8 @@ public class ResizingContentionHandler implements ContentionHandler {
     newSize = Math.min(newSize, max);
     if (oldSize < newSize) {
       mbean.resizePool(newSize);
-    } else {
-      Thread.yield();
+      return true;
     }
+    return false;
   }
 }

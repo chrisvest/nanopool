@@ -22,7 +22,8 @@ public class ActiveResizingAgent {
     this.executor = executor;
   }
 
-  public void eventuallyResize(NanoPoolManagementMBean mbean, int maxSize) {
+  public void eventuallyResize(
+      NanoPoolManagementMBean mbean, double factor, int inc, int maxSize) {
     if (lastEnqueueAttemptCache != mbean && cache(mbean)) {
       lastEnqueueAttemptCache = mbean;
       executor.execute(resizeTask(mbean, maxSize));

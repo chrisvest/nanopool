@@ -13,6 +13,8 @@ import org.junit.Test;
 
 public class ActiveResizingContentionHandlerTest {
   int triggeringContentionLevel = 2;
+  double factor = 2.0;
+  int increment = 1;
   int maxSize = 100;
   ContentionHandler handler;
   ActiveResizingAgent agent;
@@ -26,25 +28,25 @@ public class ActiveResizingContentionHandlerTest {
     when(mnp.getMXBean()).thenReturn(mbean);
     agent = mock(ActiveResizingAgent.class);
     handler = new ActiveResizingContentionHandler(
-        agent, triggeringContentionLevel, maxSize);
+        agent, triggeringContentionLevel, factor, increment, maxSize);
   }
   
   @Test public void
   mustNotEnqueueResizeWhenContentionLevelIsLessThanTrigger() throws SQLException {
     handler.handleContention(triggeringContentionLevel - 1, mnp);
-    verify(agent, never()).eventuallyResize(mbean, maxSize);
+    verify(agent, never()).eventuallyResize(mbean, factor, increment, maxSize);
   }
   
   @Test public void
   mustEnqueueResizeWhenContentionIsAtTrigger() throws SQLException {
     handler.handleContention(triggeringContentionLevel, mnp);
-    verify(agent).eventuallyResize(mbean, maxSize);
+    verify(agent).eventuallyResize(mbean, factor, increment, maxSize);
   }
   
   @Test public void
   mustEnqueueResizeWhenContentionIsGreaterThanTrigger() throws SQLException {
     handler.handleContention(triggeringContentionLevel + 1, mnp);
-    verify(agent).eventuallyResize(mbean, maxSize);
+    verify(agent).eventuallyResize(mbean, factor, increment, maxSize);
   }
 }
 

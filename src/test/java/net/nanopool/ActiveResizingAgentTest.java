@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ActiveResizingAgentTest {
+  double factor = 1.0;
+  int increment = 1;
   int maxSize = 10;
   ActiveResizingAgent agent;
   TimeSource time;
@@ -37,7 +39,7 @@ public class ActiveResizingAgentTest {
 
   private void givenEnqueues(NanoPoolManagementMBean... mbeans) {
     for (NanoPoolManagementMBean mbean : mbeans) {
-      agent.eventuallyResize(mbean, maxSize);
+      agent.eventuallyResize(mbean, factor, increment, maxSize);
     }
   }
   

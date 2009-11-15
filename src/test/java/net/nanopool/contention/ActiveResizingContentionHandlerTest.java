@@ -2,28 +2,44 @@ package net.nanopool.contention;
 
 import static org.mockito.Mockito.*;
 
+import java.sql.SQLException;
+
+import net.nanopool.ManagedNanoPool;
+
 import org.junit.Before;
 import org.junit.Test;
 
 public class ActiveResizingContentionHandlerTest {
-  ActiveResizingContentionHandler handler;
-  ActiveResizingContentionHandler.Actor actor;
+  int triggeringContentionLevel = 2;
+  ContentionHandler handler;
+  ActiveResizingAgent agent;
+  ManagedNanoPool mnp;
   
   @Before public void
   setUp() {
-    actor = mock(ActiveResizingContentionHandler.Actor.class);
-    handler = new ActiveResizingContentionHandler(actor);
+    agent = mock(ActiveResizingAgent.class);
+    handler = new ActiveResizingContentionHandler(
+        agent, triggeringContentionLevel);
   }
   
   @Test public void
-  startMethodMustDelegateToActor() {
-    handler.start();
-    verify(actor).start();
+  mustNotEnqueueResizeWhenContentionLevelIsLessThanTrigger() throws SQLException {
+    handler.handleContention(triggeringContentionLevel - 1, mnp);
+    verify(agent, never()).enqueue(any(PoolResize.class));
   }
   
   @Test public void
-  stopMethodMustDelegateToActorShutdown() {
-    handler.stop();
-    verify(actor).shutdown();
+  mustEnqueueResizeWhenContentionIsAtTrigger() throws SQLException {
+    handler.handleContention(triggeringContentionLevel, mnp);
+    verify(agent).enqueue(any(PoolResize.class));
+  }
+  
+  @Test public void
+  mustEnqueueResizeWhenContentionIsGreaterThanTrigger() throws SQLException {
+    handler.handleContention(triggeringContentionLevel + 1, mnp);
+    verify(agent).enqueue(any(PoolResize.class));
   }
 }
+
+
+

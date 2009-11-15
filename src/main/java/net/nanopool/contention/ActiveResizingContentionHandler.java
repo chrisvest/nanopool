@@ -1,28 +1,26 @@
 package net.nanopool.contention;
 
-public class ActiveResizingContentionHandler {
+import java.sql.SQLException;
 
-  static class Actor extends Thread {
+import net.nanopool.ManagedNanoPool;
 
-    public void shutdown() {
-      // TODO Auto-generated method stub
-      
+// TODO javadoc ActiveResizingContentionHander
+public class ActiveResizingContentionHandler implements ContentionHandler {
+  private final ActiveResizingAgent agent;
+  private final int trigger;
+
+  // TODO javadoc
+  public ActiveResizingContentionHandler(
+      ActiveResizingAgent agent, int triggeringContentionLevel) {
+    this.agent = agent;
+    this.trigger = triggeringContentionLevel;
+  }
+
+  public void handleContention(int count, ManagedNanoPool mnp)
+      throws SQLException {
+    if (trigger <= count) {
+      agent.enqueue(new PoolResize());
     }
-    
   }
 
-  private final Actor actor;
-
-  ActiveResizingContentionHandler(Actor actor) {
-    this.actor = actor;
-  }
-
-  public void start() {
-    actor.start();
-  }
-
-  public void stop() {
-    actor.shutdown();
-  }
-  
 }

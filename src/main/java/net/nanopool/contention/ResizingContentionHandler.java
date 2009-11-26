@@ -49,7 +49,7 @@ public class ResizingContentionHandler implements ContentionHandler {
    *          multiplying the current pool size by the factor, to form a new
    *          pool size. This value cannot be negative, and must furthermore
    *          be greater than 0 if the factor is 1.0.
-   * @param max
+   * @param maxSize
    *          This number specifies the upper limit of the pool growth. That
    *          is, the pool will never be resized to a value larger than this.
    *          If the size of the pool is already equal to or larger than this
@@ -62,7 +62,16 @@ public class ResizingContentionHandler implements ContentionHandler {
    *          value.
    */
   public ResizingContentionHandler(
-      int triggeringContentionLevel, double factor, int increment, int max) {
+      int triggeringContentionLevel, double factor, int increment, int maxSize) {
+    checkValuesAreLegal(triggeringContentionLevel, factor, increment, maxSize);
+    this.triggeringContentionLevel = triggeringContentionLevel;
+    this.factor = factor;
+    this.increment = increment;
+    this.max = maxSize;
+  }
+
+  static void checkValuesAreLegal(int triggeringContentionLevel,
+      double factor, int increment, int maxSize) {
     if (triggeringContentionLevel < 1) {
       throw new IllegalArgumentException(
           "triggeringContentionLevel cannot be less than one.");
@@ -78,13 +87,9 @@ public class ResizingContentionHandler implements ContentionHandler {
       throw new IllegalArgumentException(
           "increment must be greater than zero.");
     }
-    if (max < 1) {
-      throw new IllegalArgumentException("max cannot be less than one.");
+    if (maxSize < 1) {
+      throw new IllegalArgumentException("maxSize cannot be less than one.");
     }
-    this.triggeringContentionLevel = triggeringContentionLevel;
-    this.factor = factor;
-    this.increment = increment;
-    this.max = max;
   }
 
   public void handleContention(int count, ManagedNanoPool mnp) {
@@ -93,6 +98,13 @@ public class ResizingContentionHandler implements ContentionHandler {
       return;
     }
     NanoPoolManagementMBean mbean = mnp.getMXBean();
+    if (!resizePool(mbean, factor, increment, max)) {
+      Thread.yield();
+    }
+  }
+
+  static boolean resizePool(
+      NanoPoolManagementMBean mbean, double factor, int increment, int max) {
     int oldSize = mbean.getPoolSize();
     int newSize = (int) (oldSize * factor + increment);
     if (newSize == oldSize) {
@@ -101,8 +113,8 @@ public class ResizingContentionHandler implements ContentionHandler {
     newSize = Math.min(newSize, max);
     if (oldSize < newSize) {
       mbean.resizePool(newSize);
-    } else {
-      Thread.yield();
+      return true;
     }
+    return false;
   }
 }

@@ -35,9 +35,10 @@ public class ConnectivetyTest extends NanoPoolTestBase {
     try {
       Statement stmt = con.createStatement();
       try {
-        ResultSet rs = stmt.executeQuery("select 1");
+        ResultSet rs = stmt.executeQuery(
+            "select CURRENT_TIMESTAMP from sysibm.sysdummy1");
         assertTrue(rs.next());
-        assertEquals(1, rs.getInt(1));
+        assertNotNull(rs.getTimestamp(1));
       } finally {
         stmt.close();
       }

@@ -26,6 +26,8 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.ConnectionPoolDataSource;
+
+import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.junit.After;
 
 /**
@@ -43,17 +45,10 @@ public abstract class NanoPoolTestBase {
   }
   
   protected ConnectionPoolDataSource buildCpds() throws SQLException {
-    MysqlConnectionPoolDataSource source = new MysqlConnectionPoolDataSource();
-    source.setServerName("localhost");
-    source.setPort(3306);
+    EmbeddedConnectionPoolDataSource source =
+      new EmbeddedConnectionPoolDataSource();
+    source.setCreateDatabase("create");
     source.setDatabaseName("test");
-    source.setUser("root");
-    source.setPassword("");
-    
-    // timeouts:
-    source.setLoginTimeout(5 /* seconds */);
-    source.setConnectTimeout(5000 /* milliseconds */);
-    source.setSocketTimeout(5000 /* milliseconds */);
     
     return source;
   }
@@ -83,7 +78,8 @@ public abstract class NanoPoolTestBase {
   protected void assertWorking(Connection con) throws SQLException {
     Statement stmt = con.createStatement();
     try {
-      ResultSet rs = stmt.executeQuery("select now()");
+      ResultSet rs = stmt.executeQuery(
+          "select CURRENT_TIMESTAMP from sysibm.sysdummy1");
       assertTrue(rs.next());
     } finally {
       stmt.close();

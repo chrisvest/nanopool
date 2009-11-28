@@ -28,7 +28,7 @@ public class ConsTest {
   
   @Test public void
   testProperNormalConstruction() {
-    Cons c = new Cons(x, null);
+    Cons<?> c = new Cons<Object>(x, null);
     assertSame(x, c.first);
     assertNull(c.rest);
   }
@@ -36,7 +36,7 @@ public class ConsTest {
   @Test public void
   testConsesCannotContainNullElements() {
     try {
-      new Cons(null, null);
+      new Cons<Object>(null, null);
       fail("A Cons with a null 'first' was allowed to be cnstructed.");
     } catch (NullPointerException _) {
       // wo-hoo.
@@ -45,18 +45,18 @@ public class ConsTest {
   
   @Test public void
   testToListIsInCorrectOrder() {
-    Cons c = new Cons(y, null);
-    c = new Cons(x, c);
-    List l = c.toList();
+    Cons<Object> c = new Cons<Object>(y, null);
+    c = new Cons<Object>(x, c);
+    List<Object> l = c.toList();
     assertSame(x, l.get(0));
     assertSame(y, l.get(1));
   }
   
   @Test public void
   testToListIsUnmodifiable() {
-    Cons c = new Cons(y, null);
-    c = new Cons(x, c);
-    List l = c.toList();
+    Cons<Object> c = new Cons<Object>(y, null);
+    c = new Cons<Object>(x, c);
+    List<Object> l = c.toList();
     try {
       l.add(z);
       fail("list allowed add()");
@@ -82,7 +82,7 @@ public class ConsTest {
       // wo-hoo
     }
     try {
-      ListIterator li = l.listIterator();
+      ListIterator<Object> li = l.listIterator();
       li.next();
       li.remove();
       fail("list allowed ListIterator.remove()");
@@ -93,8 +93,8 @@ public class ConsTest {
   
   @Test public void
   testContains() {
-    Cons c = new Cons(y, null);
-    c = new Cons(x, c);
+    Cons<Object> c = new Cons<Object>(y, null);
+    c = new Cons<Object>(x, c);
     assertTrue(c.contains(x));
     assertTrue(c.contains(y));
     assertFalse(c.contains(z));

@@ -17,8 +17,6 @@ package net.nanopool;
 
 import static org.junit.Assert.assertTrue;
 
-import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;

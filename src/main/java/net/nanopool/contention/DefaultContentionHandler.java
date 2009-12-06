@@ -33,13 +33,13 @@ public final class DefaultContentionHandler implements ContentionHandler {
   
   /**
    * Create a DefaultContentionHandler that will print contention warnings,
-   * and throw SQLExceptions if the contention level goes over 1000.
+   * and throw SQLExceptions if the contention level goes over 100.
    * <p>
    * Contention level is how many times over the entire pool has been searched
    * for an available connection.
    */
   public DefaultContentionHandler() {
-    this(true, 1000);
+    this(true, 100);
   }
   
   /**

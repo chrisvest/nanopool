@@ -3,13 +3,14 @@ package net.nanopool.contention;
 import net.nanopool.ActiveResizingAgent;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class ActiveResizingContentionHandlerConstructionTest {
   int trigger = 1;
   double factor = 1.0;
   int increment = 1;
   int maxSize = 1;
-  ActiveResizingAgent agent = new ActiveResizingAgent(null, null);
+  ActiveResizingAgent agent = Mockito.mock(ActiveResizingAgent.class);
 
   private static void ctor(ActiveResizingAgent agent, int trigger, double factor,
       int increment, int maxSize) {

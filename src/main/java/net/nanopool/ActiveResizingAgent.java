@@ -20,7 +20,7 @@ public class ActiveResizingAgent {
    */
   private NanoPoolManagementMBean lastEnqueueAttemptCache;
 
-  public ActiveResizingAgent(Executor executor, TimeSource time) {
+  ActiveResizingAgent(Executor executor, TimeSource time) {
     this.executor = executor;
   }
 

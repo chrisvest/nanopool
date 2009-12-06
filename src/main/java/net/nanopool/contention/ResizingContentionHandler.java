@@ -70,7 +70,8 @@ public class ResizingContentionHandler implements ContentionHandler {
     this.max = maxSize;
   }
 
-  static void checkValuesAreLegal(int triggeringContentionLevel,
+  // TODO javadoc checkValuesAreLegal
+  public static void checkValuesAreLegal(int triggeringContentionLevel,
       double factor, int increment, int maxSize) {
     if (triggeringContentionLevel < 1) {
       throw new IllegalArgumentException(
@@ -103,7 +104,8 @@ public class ResizingContentionHandler implements ContentionHandler {
     }
   }
 
-  static boolean resizePool(
+  // TODO javadoc resizePool
+  public static boolean resizePool(
       NanoPoolManagementMBean mbean, double factor, int increment, int max) {
     int oldSize = mbean.getPoolSize();
     int newSize = (int) (oldSize * factor + increment);

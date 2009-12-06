@@ -4,6 +4,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 
+import net.nanopool.contention.ResizingContentionHandler;
+
 
 public class ActiveResizingAgent {
   
@@ -26,7 +28,7 @@ public class ActiveResizingAgent {
       NanoPoolManagementMBean mbean, double factor, int inc, int maxSize) {
     if (lastEnqueueAttemptCache != mbean && cache(mbean)) {
       lastEnqueueAttemptCache = mbean;
-      executor.execute(resizeTask(mbean, maxSize));
+      executor.execute(resizeTask(mbean, factor, inc, maxSize));
     }
   }
 
@@ -34,9 +36,12 @@ public class ActiveResizingAgent {
     return mbeanCache.putIfAbsent(mbean, System.currentTimeMillis()) == null;
   }
 
-  private Runnable resizeTask(NanoPoolManagementMBean mbean, int maxSize) {
+  private Runnable resizeTask(
+      final NanoPoolManagementMBean mbean,
+      final double factor, final int inc, final int maxSize) {
     return new Runnable() {
       public void run() {
+        ResizingContentionHandler.resizePool(mbean, factor, inc, maxSize);
       }
     };
   }

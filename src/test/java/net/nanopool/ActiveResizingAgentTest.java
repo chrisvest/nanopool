@@ -1,6 +1,5 @@
 package net.nanopool;
 
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.concurrent.Executor;
@@ -9,9 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ActiveResizingAgentTest {
-  double factor = 1.0;
-  int increment = 1;
-  int maxSize = 10;
+  class ImmediateExecutor implements Executor {
+    public void execute(Runnable command) {
+      command.run();
+    }
+  }
+
   ActiveResizingAgent agent;
   TimeSource time;
   NanoPoolManagementMBean mbean;
@@ -21,28 +23,59 @@ public class ActiveResizingAgentTest {
   setUp() {
     time = mock(TimeSource.class);
     mbean = mock(NanoPoolManagementMBean.class);
-    executor = mock(Executor.class);
+    executor = new ImmediateExecutor();
     agent = new ActiveResizingAgent(executor, time);
   }
   
   @Test public void
-  mustNotHaveSameMBeanInQueueMultipleTimes() {
-    givenEnqueues(mbean, mbean);
-    verify(executor, times(1)).execute(any(Runnable.class));
-  }
-  
-  @Test public void
-  mustNotEnqueueSameMBeanEvenIfInterleavedWithOthers() {
-    givenEnqueues(mbean, mock(NanoPoolManagementMBean.class), mbean);
-    verify(executor, times(2)).execute(any(Runnable.class));
+  mustEnlargeLinearlyWhenFactorIsOne() {
+    assertResize(1.0, 1, 2, 1, 2);
   }
 
-  private void givenEnqueues(NanoPoolManagementMBean... mbeans) {
-    for (NanoPoolManagementMBean mbean : mbeans) {
-      agent.eventuallyResize(mbean, factor, increment, maxSize);
+  private void assertResize(double factor, int inc, int max, int from, int to) {
+    when(mbean.getPoolSize()).thenReturn(from);
+    agent.eventuallyResize(mbean, factor, inc, max);
+    if (from != to) {
+      verify(mbean).resizePool(to);
+    } else {
+      verify(mbean, never()).resizePool(to);
     }
   }
   
-//  @Test public void
+  @Test public void
+  mustEnlargeExponentiallyWhenFactorIsGreaterThanOne() {
+    assertResize(2.0, 0, 10, 2, 4);
+  }
+  
+  @Test public void
+  mustNotGrowBeyondMax() {
+    assertResize(2.0, 0, 2, 2, 2);
+  }
+  
+  @Test public void
+  mustNotShrinkPoolIfLargerThanMax() {
+    assertResize(2.0, 2, 2, 4, 4);
+  }
+  
+  @Test public void
+  mustNotResizeIfCurrentSizeIsEqualToMax() {
+    assertResize(1.0, 1, 2, 2, 2);
+  }
+  
+  @Test public void
+  mustEnlargeAtLeastByOneIfIncrementIsZero() {
+    assertResize(1.1, 0, 10, 1, 2);
+  }
   
 }
+
+
+
+
+
+
+
+
+
+
+

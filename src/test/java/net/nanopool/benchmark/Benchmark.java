@@ -83,6 +83,12 @@ public class Benchmark {
       poolFactory = new PoolFactories.BoneCpPoolFactory();
       runTestSet();
     }
+    
+    if (pools.contains(",c3p0,")) {
+      System.out.println("### Testing C3P0");
+      poolFactory = new PoolFactories.C3p0PoolFactory();
+      runTestSet();
+    }
   }
   
   private static void runTestSet() throws InterruptedException {

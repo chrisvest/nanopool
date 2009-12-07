@@ -15,6 +15,7 @@
  */
 package net.nanopool.benchmark;
 
+import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,17 +24,19 @@ import java.util.List;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
-import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
-
-import com.jolbox.bonecp.BoneCPConfig;
-import com.jolbox.bonecp.BoneCPDataSource;
-
-import biz.source_code.miniConnectionPoolManager.MiniConnectionPoolManager;
-
 import net.nanopool.AbstractDataSource;
 import net.nanopool.NanoPoolDataSource;
 import net.nanopool.Settings;
 import net.nanopool.contention.DefaultContentionHandler;
+
+import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
+
+import biz.source_code.miniConnectionPoolManager.MiniConnectionPoolManager;
+
+import com.jolbox.bonecp.BoneCPConfig;
+import com.jolbox.bonecp.BoneCPDataSource;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.DataSources;
 
 public class PoolFactories {
   
@@ -131,6 +134,32 @@ public class PoolFactories {
     public void closePool(DataSource pool) {
       BoneCPDataSource ds = (BoneCPDataSource) pool;
       ds.close();
+    }
+  }
+  
+  static final class C3p0PoolFactory implements PoolFactory {
+    public DataSource buildPool(ConnectionConfiguration config, int size,
+        long ttl) {
+      ComboPooledDataSource cpds = new ComboPooledDataSource();
+      try {
+        cpds.setDriverClass(config.getDriverClass());
+      } catch (PropertyVetoException e) {
+        throw new IllegalStateException("Could not load driver", e);
+      }            
+      cpds.setJdbcUrl(config.getUrl());
+      cpds.setUser(config.getUsername());
+      cpds.setPassword(config.getPassword());
+      cpds.setMaxPoolSize(size);
+      cpds.setMaxIdleTime((int) ttl);
+      return cpds;
+    }
+
+    public void closePool(DataSource pool) {
+      try {
+        DataSources.destroy(pool);
+      } catch (SQLException e) {
+        throw new IllegalStateException("Can not close this pool", e);
+      }
     }
   }
   

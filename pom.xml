@@ -132,6 +132,12 @@
       <version>0.5.3.5-rc1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>c3p0</groupId>
+      <artifactId>c3p0</artifactId>
+      <version>0.9.1.2</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   
   <reporting>

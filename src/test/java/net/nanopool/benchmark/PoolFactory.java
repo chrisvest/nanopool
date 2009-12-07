@@ -15,7 +15,6 @@
  */
 package net.nanopool.benchmark;
 
-import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
 /**
@@ -23,7 +22,7 @@ import javax.sql.DataSource;
  * @author vest
  */
 public interface PoolFactory {
-  public DataSource buildPool(ConnectionPoolDataSource cpds, int size, long ttl);
+  public DataSource buildPool(ConnectionConfiguration config, int size, long ttl);
   
   public void closePool(DataSource pool);
 }

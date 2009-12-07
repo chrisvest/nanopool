@@ -23,7 +23,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import org.junit.Test;
 
@@ -78,6 +77,12 @@ public class Benchmark {
       poolFactory = new PoolFactories.McpmPoolFactory();
       runTestSet();
     }
+    
+    if (pools.contains(",bone,")) {
+      System.out.println("### Testing BoneCP");
+      poolFactory = new PoolFactories.BoneCpPoolFactory();
+      runTestSet();
+    }
   }
   
   private static void runTestSet() throws InterruptedException {
@@ -101,8 +106,9 @@ public class Benchmark {
     System.out.println("--------------------------------");
   }
   
-  private static ConnectionPoolDataSource newCpds() {
+  private static ConnectionConfiguration newCpds() {
     String db = System.getProperty("db", "derby");
+    ConnectionConfiguration config = new ConnectionConfiguration();
     if ("mysql".equals(db)) {
       MysqlConnectionPoolDataSource cpds = new MysqlConnectionPoolDataSource();
       cpds.setUser("root");
@@ -110,21 +116,29 @@ public class Benchmark {
       cpds.setDatabaseName("test");
       cpds.setPort(3306);
       cpds.setServerName("localhost");
-      return cpds;
+      config.setCpds(cpds);
+      config.setPassword("");
+      config.setUrl("jdbc:mysql://localhost:3306/");
+      config.setUsername("test");
+      config.setDriverClass("com.mysql.jdbc.Driver");
+      return config;
     }
     if ("derby".equals(db)) {
       EmbeddedConnectionPoolDataSource cpds =
         new EmbeddedConnectionPoolDataSource();
       cpds.setCreateDatabase("create");
       cpds.setDatabaseName("test");
-      return cpds;
+      config.setCpds(cpds);
+      config.setUrl("jdbc:derby:test;create=true");
+      config.setDriverClass("org.apache.derby.jdbc.EmbeddedDriver");
+      return config;
     }
     throw new RuntimeException("Unknown database: " + db);
   }
   
   private static DataSource buildPool(
-      ConnectionPoolDataSource cpds, int size) {
-    return poolFactory.buildPool(cpds, size, TTL);
+      ConnectionConfiguration config, int size) {
+    return poolFactory.buildPool(config, size, TTL);
   }
   
   private static void shutdown(DataSource pool) {
@@ -134,11 +148,11 @@ public class Benchmark {
   private static void benchmark(int threads, int poolSize, int runTime)
       throws InterruptedException {
     Thread.sleep(250); // give CPU some breathing room
-    ConnectionPoolDataSource cpds = newCpds();
+    ConnectionConfiguration config = newCpds();
     ExecutorService executor = Executors.newFixedThreadPool(threads);
     CountDownLatch startSignal = new CountDownLatch(1);
     CountDownLatch endSignal = new CountDownLatch(threads);
-    DataSource pool = buildPool(cpds, poolSize);
+    DataSource pool = buildPool(config, poolSize);
     
     if (PRE_WARM_POOLS) {
       Connection[] cons = new Connection[poolSize];

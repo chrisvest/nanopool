@@ -25,6 +25,9 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
 
+import com.jolbox.bonecp.BoneCPConfig;
+import com.jolbox.bonecp.BoneCPDataSource;
+
 import biz.source_code.miniConnectionPoolManager.MiniConnectionPoolManager;
 
 import net.nanopool.AbstractDataSource;
@@ -35,8 +38,9 @@ import net.nanopool.contention.DefaultContentionHandler;
 public class PoolFactories {
   
   static final class NanoPoolFactory implements PoolFactory {
-    public DataSource buildPool(ConnectionPoolDataSource cpds, int size,
+    public DataSource buildPool(ConnectionConfiguration config, int size,
         long ttl) {
+      ConnectionPoolDataSource cpds = config.getCpds();
       return new NanoPoolDataSource(cpds, buildSettings(size, ttl));
     }
     
@@ -58,8 +62,9 @@ public class PoolFactories {
   }
   
   static final class DbcpPoolFactory implements PoolFactory {
-    public DataSource buildPool(ConnectionPoolDataSource cpds, int size,
+    public DataSource buildPool(ConnectionConfiguration config, int size,
         long ttl) {
+      ConnectionPoolDataSource cpds = config.getCpds();
       SharedPoolDataSource spds = new SharedPoolDataSource();
       spds.setConnectionPoolDataSource(cpds);
       spds.setMaxActive(size);
@@ -77,8 +82,9 @@ public class PoolFactories {
   }
   
   static final class McpmPoolFactory implements PoolFactory {
-    public DataSource buildPool(ConnectionPoolDataSource cpds, int size,
+    public DataSource buildPool(ConnectionConfiguration config, int size,
         long ttl) {
+      ConnectionPoolDataSource cpds = config.getCpds();
       final MiniConnectionPoolManager mcpm = new MiniConnectionPoolManager(
           cpds, size);
       return new AbstractDataSource() {
@@ -104,6 +110,27 @@ public class PoolFactories {
       for (SQLException sqle : sqles) {
         sqle.printStackTrace();
       }
+    }
+  }
+  
+  static final class BoneCpPoolFactory implements PoolFactory {
+    public DataSource buildPool(ConnectionConfiguration config, int size,
+        long ttl) {
+      BoneCPConfig boneConf = new BoneCPConfig();
+      boneConf.setJdbcUrl(config.getUrl());
+      boneConf.setUsername(config.getUsername());
+      boneConf.setPassword(config.getPassword());
+      boneConf.setPartitionCount(size);
+      boneConf.setMaxConnectionsPerPartition(size);
+      boneConf.setIdleMaxAge(ttl);
+      BoneCPDataSource ds = new BoneCPDataSource(boneConf);
+      ds.setDriverClass(config.getDriverClass());
+      return ds;
+    }
+
+    public void closePool(DataSource pool) {
+      BoneCPDataSource ds = (BoneCPDataSource) pool;
+      ds.close();
     }
   }
   

@@ -24,7 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
-import org.junit.Test;
 
 public class Benchmark {
   private static final String DEFAULT_POOLS = "np,dbcp,mcpm";
@@ -42,11 +41,6 @@ public class Benchmark {
   private static final int CON_SCALE =
     Integer.parseInt(System.getProperty("con-scale", "2"));
   private static PoolFactory poolFactory;
-  
-  @Test
-  public void executeBenchmark() throws InterruptedException {
-    main(null);
-  }
   
   public static void main(String[] args) throws InterruptedException {
     String pools = "," + System.getProperty("pools", DEFAULT_POOLS) + ",";
@@ -89,6 +83,8 @@ public class Benchmark {
       poolFactory = new PoolFactories.C3p0PoolFactory();
       runTestSet();
     }
+    
+    System.exit(0); // because the exec-maven-plugin ain't no quitter!
   }
   
   private static void runTestSet() throws InterruptedException {

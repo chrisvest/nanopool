@@ -22,15 +22,12 @@ import net.nanopool.ManagedNanoPool;
 /**
  * A ContentionHandler decides what to do when we reckon there's contention on
  * the pool. Contention on the pool usually means that, last we checked, all
- * connections was in use, so this particular can not get a connection right
- * away. This means that we have wait a little while before we try again, and
- * waiting is exactly what ContentionHandler implementations do. This interface
- * is provided because the pool-using applications might want to do logging or
- * other stuff, while they wait. The {@link net.nanopool.NanoPoolDataSource}
- * instances get their ContentionHandlers through their constructors when they
- * are created.
- * 
- * @author vest
+ * connections was in use, so this particular thread can not get a connection
+ * right away. This means that we have wait a little while before we try again,
+ * and waiting is exactly what ContentionHandler implementations do. This
+ * interface is provided because the pool-using applications might want to do
+ * logging or other stuff, while they wait.
+ * @author cvh
  * @since 1.0
  */
 public interface ContentionHandler {
@@ -40,6 +37,10 @@ public interface ContentionHandler {
    * throw a form of {@link RuntimeException} or {@link SQLException} if you'd
    * rather give up on getting a connection for this particular thread - just
    * be sure to catch it in your own code!
+   * <p>
+   * A {@link ManagedNanoPool} instance is also provided for those
+   * implementations that want to do more advanced stuff, such as resizing the
+   * pool.
    * 
    * @param count
    *          The number of times that this ContentionHandler has been called

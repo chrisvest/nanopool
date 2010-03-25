@@ -45,7 +45,7 @@ import net.nanopool.contention.ContentionHandler;
  * do either acquire or release connections. This will likely have an effect on
  * the maximum and standard deviation of latency, compared to other pools.
  * 
- * @author vest
+ * @author cvh
  *
  */
 public final class NanoPoolDataSource extends PoolingDataSourceSupport

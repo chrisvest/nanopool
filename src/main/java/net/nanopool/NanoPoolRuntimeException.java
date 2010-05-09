@@ -15,9 +15,14 @@
  */
 package net.nanopool;
 
+import net.nanopool.contention.ThrowingContentionHandler;
+
 /**
  * Thrown under the same premises as any other {@link RuntimeException}. That
  * is, whenever something unanticipated went wrong.
+ * <p>
+ * It is probably a bug, somewhere, if this exception is thrown by anything
+ * other than the {@link ThrowingContentionHandler}.
  * 
  * @author vest
  * @since 1.0

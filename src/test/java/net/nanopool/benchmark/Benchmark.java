@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
 public class Benchmark {
-  private static final String DEFAULT_POOLS = "np,dbcp,mcpm";
+  private static final String DEFAULT_POOLS = "np,bone,dbcp,";
   private static final int CORES = Runtime.getRuntime().availableProcessors();
   private static final boolean PRE_WARM_POOLS =
     Boolean.parseBoolean(System.getProperty("pre-warm", "true"));

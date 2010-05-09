@@ -86,6 +86,8 @@ public class ActiveResizingAgentTest {
     assertResize(1.1, 0, 10, 1, 2);
   }
   
+  // TODO must periodically check if pool should be shrunk
+  // TODO must eventually shrink a pool that has grown too large
 }
 
 

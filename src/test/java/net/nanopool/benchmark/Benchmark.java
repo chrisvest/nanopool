@@ -19,6 +19,8 @@ import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
 public class Benchmark {
-  private static final String DEFAULT_POOLS = "np,bone,dbcp,";
+  private static final String DEFAULT_POOLS = "npds,bone,dbcp";
   private static final int CORES = Runtime.getRuntime().availableProcessors();
   private static final boolean PRE_WARM_POOLS =
     Boolean.parseBoolean(System.getProperty("pre-warm", "true"));
@@ -43,8 +45,6 @@ public class Benchmark {
   private static PoolFactory poolFactory;
   
   public static void main(String[] args) throws InterruptedException {
-    String pools = "," + System.getProperty("pools", DEFAULT_POOLS) + ",";
-    
     System.out.println("--------------------------------");
     System.out.println("  thr = thread");
     System.out.println("  con = connection");
@@ -54,33 +54,22 @@ public class Benchmark {
     System.out.println("  s   = a second");
     System.out.println("--------------------------------");
     
-    if (pools.contains(",np,") || pools.contains(",npds,")) {
-      System.out.println("### Testing NanoPool");
-      poolFactory = new PoolFactories.NanoPoolFactory();
-      runTestSet();
-    }
+    Map<String, PoolFactory> poolFactories = new HashMap<String, PoolFactory>();
+    poolFactories.put("npds", new PoolFactories.NanoPoolFactory());
+    poolFactories.put("dbcp", new PoolFactories.DbcpPoolFactory());
+    poolFactories.put("mcpm", new PoolFactories.McpmPoolFactory());
+    poolFactories.put("bone", new PoolFactories.BoneCpPoolFactory());
+    poolFactories.put("c3p0", new PoolFactories.C3p0PoolFactory());
     
-    if (pools.contains(",dbcp,")) {
-      System.out.println("### Testing Commons DBCP");
-      poolFactory = new PoolFactories.DbcpPoolFactory();
-      runTestSet();
-    }
+    String[] pools = System.getProperty("pools", DEFAULT_POOLS).split(",");
     
-    if (pools.contains(",mcpm,")) {
-      System.out.println("### Testing MiniConnectionPoolManager");
-      poolFactory = new PoolFactories.McpmPoolFactory();
-      runTestSet();
-    }
-    
-    if (pools.contains(",bone,")) {
-      System.out.println("### Testing BoneCP");
-      poolFactory = new PoolFactories.BoneCpPoolFactory();
-      runTestSet();
-    }
-    
-    if (pools.contains(",c3p0,")) {
-      System.out.println("### Testing C3P0");
-      poolFactory = new PoolFactories.C3p0PoolFactory();
+    for (String pool : pools) {
+      poolFactory = poolFactories.get(pool);
+      if (poolFactory == null) {
+        System.out.printf("Don't know what kind of pool '%s' is. Skipping.\n",
+            pool);
+        continue;
+      }
       runTestSet();
     }
     

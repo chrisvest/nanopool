@@ -2,14 +2,14 @@ package net.nanopool;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 
 import net.nanopool.contention.ResizingContentionHandler;
 
 
 public class ActiveResizingAgent {
   
-  private final Executor executor;
+  private final ScheduledExecutorService executor;
   private final ConcurrentMap<NanoPoolManagementMBean, Long> mbeanCache =
     new ConcurrentHashMap<NanoPoolManagementMBean, Long>();
   
@@ -20,7 +20,7 @@ public class ActiveResizingAgent {
    */
   private NanoPoolManagementMBean lastEnqueueAttemptCache;
 
-  ActiveResizingAgent(Executor executor, TimeSource time) {
+  ActiveResizingAgent(ScheduledExecutorService executor, TimeSource time) {
     this.executor = executor;
   }
 

@@ -3,7 +3,7 @@ package net.nanopool;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,13 +15,13 @@ public class ActiveResizingAgentQueueingTest {
   ActiveResizingAgent agent;
   TimeSource time;
   NanoPoolManagementMBean mbean;
-  Executor executor;
+  ScheduledExecutorService executor;
   
   @Before public void
   setUp() {
     time = mock(TimeSource.class);
     mbean = mock(NanoPoolManagementMBean.class);
-    executor = mock(Executor.class);
+    executor = mock(ScheduledExecutorService.class);
     agent = new ActiveResizingAgent(executor, time);
   }
   

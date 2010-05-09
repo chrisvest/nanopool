@@ -1,32 +1,51 @@
 package net.nanopool;
 
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 public class ActiveResizingAgentTest {
-  class ImmediateExecutor implements Executor {
-    public void execute(Runnable command) {
-      command.run();
+
+  public class RunOrCallNow implements Answer {
+    public Object answer(InvocationOnMock invocation) throws Throwable {
+      Object[] arguments = invocation.getArguments();
+      for (Object possibleTaskObject : arguments) {
+        if (possibleTaskObject instanceof Runnable) {
+          ((Runnable) possibleTaskObject).run();
+        } else if (possibleTaskObject instanceof Callable) {
+          ((Callable) possibleTaskObject).call();
+        }
+      }
+      return null;
     }
   }
 
   ActiveResizingAgent agent;
   TimeSource time;
   NanoPoolManagementMBean mbean;
-  Executor executor;
+  ScheduledExecutorService executor;
   
   @Before public void
   setUp() {
     time = mock(TimeSource.class);
     mbean = mock(NanoPoolManagementMBean.class);
-    executor = new ImmediateExecutor();
+    executor = newImmediateExecutor();
     agent = new ActiveResizingAgent(executor, time);
   }
   
+  private ScheduledExecutorService newImmediateExecutor() {
+    ScheduledExecutorService executor = mock(ScheduledExecutorService.class);
+    doAnswer(new RunOrCallNow()).when(executor).execute(any(Runnable.class));
+    return executor;
+  }
+
   @Test public void
   mustEnlargeLinearlyWhenFactorIsOne() {
     assertResize(1.0, 1, 2, 1, 2);

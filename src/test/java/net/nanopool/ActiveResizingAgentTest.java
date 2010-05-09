@@ -13,6 +13,7 @@ import org.mockito.stubbing.Answer;
 
 public class ActiveResizingAgentTest {
 
+  @SuppressWarnings("unchecked")
   public class RunOrCallNow implements Answer {
     public Object answer(InvocationOnMock invocation) throws Throwable {
       Object[] arguments = invocation.getArguments();

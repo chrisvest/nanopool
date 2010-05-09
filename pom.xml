@@ -121,7 +121,14 @@
     <dependency>
       <groupId>com.jolbox</groupId>
       <artifactId>bonecp</artifactId>
-      <version>0.5.3.5-rc1</version>
+      <version>0.6.5</version>
+<!--      <version>0.5.3.5-rc1</version>-->
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>1.5.10</version>
       <scope>test</scope>
     </dependency>
     <dependency>

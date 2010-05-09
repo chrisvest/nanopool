@@ -70,6 +70,7 @@ public class Benchmark {
             pool);
         continue;
       }
+      System.out.println("Benchmarking pool: " + pool);
       runTestSet();
     }
     

@@ -51,7 +51,7 @@ final class Fsm {
   }
   
   private static Connection getConnectionOrResize(final NanoPoolDataSource pool)
-      throws SQLException {
+      throws SQLException, OutdatedException {
     final PoolState state = pool.state;
     final Connector[] connectors = state.connectors;
     if (connectors == null) {
@@ -114,7 +114,8 @@ final class Fsm {
     }
   }
   
-  private static List<SQLException> shutdown(Connector[] connectors) {
+  private static List<SQLException> shutdown(Connector[] connectors)
+      throws OutdatedException {
     List<SQLException> caughtExceptions = new ArrayList<SQLException>();
     if (connectors == null) {
       return caughtExceptions;
@@ -158,10 +159,8 @@ final class Fsm {
           ncons[i] = new Connector(
               pool.source, pool.config.ttl, pool.config.time);
         }
-        if (!connectorsField.compareAndSet(pool, ocons, ncons)) {
-          // will only fail if the pool has been shut down
-          shutdown(ncons);
-        }
+        // this will only fail if the pool has been shut down:
+        connectorsField.compareAndSet(pool, ocons, ncons);
       } else {
         // shrink pool
         System.arraycopy(ocons, 0, ncons, 0, newSize);
@@ -178,7 +177,8 @@ final class Fsm {
     }
   }
   
-  private static int countConnections(Connector[] connectors, int ofState) {
+  private static int countConnections(Connector[] connectors, int ofState)
+      throws OutdatedException {
     assert ofState != OUTDATED && ofState != SHUTDOWN :
       "Cannot count outdated or shut down state.";
     
@@ -195,11 +195,12 @@ final class Fsm {
     return openCount;
   }
   
-  static int countAvailableConnections(Connector[] cons) {
+  static int countAvailableConnections(Connector[] cons)
+      throws OutdatedException {
     return countConnections(cons, AVAILABLE);
   }
   
-  static int countLeasedConnections(Connector[] cons) {
+  static int countLeasedConnections(Connector[] cons) throws OutdatedException {
     return countConnections(cons, RESERVED);
   }
   

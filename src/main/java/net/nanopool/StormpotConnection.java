@@ -84,7 +84,7 @@ implements Poolable, Connection, ConnectionEventListener {
   }
 
   public void close() throws SQLException {
-    connection.close();
+    release();
   }
 
   public boolean isClosed() throws SQLException {

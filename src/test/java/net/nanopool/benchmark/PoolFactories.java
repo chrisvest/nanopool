@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import net.nanopool.AbstractDataSource;
 import net.nanopool.NanoPoolDataSource;
 import net.nanopool.Settings;
+import net.nanopool.StormpotPooledDataSource;
 import net.nanopool.contention.DefaultContentionHandler;
 
 import org.apache.commons.dbcp.datasources.SharedPoolDataSource;
@@ -39,7 +40,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
 
 public class PoolFactories {
-  
+
   static final class NanoPoolFactory implements PoolFactory {
     public DataSource buildPool(ConnectionConfiguration config, int size,
         long ttl) {
@@ -163,4 +164,14 @@ public class PoolFactories {
     }
   }
   
+  static final class StormpotPoolFactory implements PoolFactory {
+    public DataSource buildPool(ConnectionConfiguration config, int size,
+        long ttl) {
+      return new StormpotPooledDataSource(config.getCpds(), size, ttl);
+    }
+
+    public void closePool(DataSource pool) {
+      ((StormpotPooledDataSource) pool).close();
+    }
+  }
 }

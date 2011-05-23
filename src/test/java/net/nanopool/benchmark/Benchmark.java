@@ -60,6 +60,7 @@ public class Benchmark {
     poolFactories.put("mcpm", new PoolFactories.McpmPoolFactory());
     poolFactories.put("bone", new PoolFactories.BoneCpPoolFactory());
     poolFactories.put("c3p0", new PoolFactories.C3p0PoolFactory());
+    poolFactories.put("spot", new PoolFactories.StormpotPoolFactory());
     
     String[] pools = System.getProperty("pools", DEFAULT_POOLS).split(",");
     

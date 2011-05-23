@@ -124,8 +124,6 @@ public class PoolFactories {
       boneConf.setJdbcUrl(config.getUrl());
       boneConf.setUsername(config.getUsername());
       boneConf.setPassword(config.getPassword());
-      boneConf.setPartitionCount(size);
-      boneConf.setMaxConnectionsPerPartition(1);
       boneConf.setIdleMaxAge(ttl);
       BoneCPDataSource ds = new BoneCPDataSource(boneConf);
       ds.setDriverClass(config.getDriverClass());

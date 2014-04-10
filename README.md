@@ -1,3 +1,10 @@
+Project Status
+--------------
+
+This project has been discontinued, and I will no longer be maintaining it.
+Take a look at [HikariCP][2] or [Stormpot][3] instead.
+
+
 NanoPool
 ========
 
@@ -15,4 +22,6 @@ License
 
 Apache 2.0
 
-  [1]: http://karmazilla.github.com/nanopool/
+  [1]: http://karmazilla.github.io/nanopool/
+  [2]: https://github.com/brettwooldridge/HikariCP
+  [3]: https://github.com/chrisvest/stormpot
